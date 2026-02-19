@@ -1563,11 +1563,49 @@
                 <p>${task.description}</p>
                 ${optionsHtml}
                 <div class="task-actions">
-                    ${userRole === 'student' ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">Responder</button>` : ''}
+                    ${userRole === 'student'
+                        ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">Responder</button>`
+                        : `<button class="btn btn-danger" onclick="deleteTask('${taskId}', ${JSON.stringify(task.recipients || [])})">Excluir Tarefa</button>`}
                 </div>
             `;
             
             return taskElement;
+        }
+
+        function deleteTask(taskId, recipients = []) {
+            if (!confirm('Tem certeza que deseja excluir esta tarefa?')) return;
+
+            db.collection('tasks').doc(taskId).delete()
+                .then(() => {
+                    const deleteCopiesPromises = (recipients || []).map(email => {
+                        return db.collection('users')
+                            .where('email', '==', email)
+                            .get()
+                            .then(qs => {
+                                const deletes = [];
+                                qs.forEach(userDoc => {
+                                    deletes.push(
+                                        db.collection('users')
+                                            .doc(userDoc.id)
+                                            .collection('tasks')
+                                            .doc(taskId)
+                                            .delete()
+                                    );
+                                });
+                                return Promise.all(deletes);
+                            });
+                    });
+
+                    return Promise.all(deleteCopiesPromises);
+                })
+                .then(() => {
+                    alert('Tarefa excluída com sucesso!');
+                    loadTasks();
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir tarefa:', error);
+                    alert('Erro ao excluir tarefa. Tente novamente.');
+                });
         }
         
         function openResponseModal(taskId, type) {
@@ -1726,7 +1764,7 @@
                 
                 querySnapshot.forEach(doc => {
                     const tip = doc.data();
-                    const tipElement = createTipElement(tip);
+                    const tipElement = createTipElement(tip, doc.id);
                     container.appendChild(tipElement);
                 });
             }).catch(error => {
@@ -1734,7 +1772,7 @@
             });
         }
         
-        function createTipElement(tip) {
+        function createTipElement(tip, tipId) {
             const tipElement = document.createElement('div');
             tipElement.className = 'tip-item';
             
@@ -1749,10 +1787,47 @@
                     <h3>${tip.title}</h3>
                     <p>${tip.content}</p>
                     <p class="task-meta">Postado por: ${tip.createdByName} em ${formatDate(tip.createdAt)}</p>
+                    ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
                 </div>
             `;
             
             return tipElement;
+        }
+
+        function deleteTip(tipId, recipients = []) {
+            if (!confirm('Tem certeza que deseja excluir esta dica?')) return;
+
+            db.collection('tips').doc(tipId).delete()
+                .then(() => {
+                    const deleteCopiesPromises = (recipients || []).map(email => {
+                        return db.collection('users')
+                            .where('email', '==', email)
+                            .get()
+                            .then(qs => {
+                                const deletes = [];
+                                qs.forEach(userDoc => {
+                                    deletes.push(
+                                        db.collection('users')
+                                            .doc(userDoc.id)
+                                            .collection('tips')
+                                            .doc(tipId)
+                                            .delete()
+                                    );
+                                });
+                                return Promise.all(deletes);
+                            });
+                    });
+
+                    return Promise.all(deleteCopiesPromises);
+                })
+                .then(() => {
+                    alert('Dica excluída com sucesso!');
+                    loadTips();
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir dica:', error);
+                    alert('Erro ao excluir dica. Tente novamente.');
+                });
         }
         
         function loadQuestions() {
