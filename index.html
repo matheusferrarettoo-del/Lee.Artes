@@ -476,13 +476,30 @@
         .student-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 14px 0;
             border-bottom: 1px solid #eee;
         }
 
         .student-item:last-child {
             border-bottom: none;
+        }
+
+        .student-data {
+            flex: 1;
+        }
+
+        .student-data strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .student-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 3px;
         }
         .question-form {
             background: white;
@@ -598,7 +615,7 @@
                     <ul>
                         <li><a href="#" class="nav-link active" data-tab="tasks">Tarefas</a></li>
                         <li><a href="#" class="nav-link" data-tab="tips">Dicas</a></li>
-                        <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Usuários</a></li>
+                        <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
                     </ul>
                 </nav>
                 <div class="user-info">
@@ -821,26 +838,64 @@
                 </div>
             </div>
         </div>
-           <!-- Aba de Usuários -->
+           <!-- Aba de Cadastro de Aluno -->
         <div id="users-tab" class="tab-container">
             <div class="card">
-                <div class="card-header">Registrar Novo Aluno</div>
+                <div class="card-header">Cadastro Completo de Aluno</div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="new-student-email">Email do Aluno</label>
+                        <label for="new-student-name">Nome completo</label>
+                        <input type="text" id="new-student-name" class="form-control" placeholder="Nome do aluno">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-email">Email do aluno</label>
                         <input type="email" id="new-student-email" class="form-control" placeholder="aluno@email.com">
                     </div>
                     <div class="form-group">
-                        <label for="new-student-password">Senha</label>
+                        <label for="new-student-password">Senha inicial</label>
                         <input type="password" id="new-student-password" class="form-control" placeholder="Senha inicial">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-level">Nível</label>
+                        <select id="new-student-level" class="form-control">
+                            <option value="">Selecione o nível</option>
+                            <option value="Iniciante">Iniciante</option>
+                            <option value="Intermediário">Intermediário</option>
+                            <option value="Avançado">Avançado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-subject">Matéria</label>
+                        <select id="new-student-subject" class="form-control">
+                            <option value="">Selecione a matéria</option>
+                            <option value="Inglês">Inglês</option>
+                            <option value="Artes">Artes</option>
+                            <option value="Inglês e Artes">Inglês e Artes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-phone">Telefone</label>
+                        <input type="text" id="new-student-phone" class="form-control" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-birthdate">Data de nascimento</label>
+                        <input type="date" id="new-student-birthdate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-guardian">Responsável</label>
+                        <input type="text" id="new-student-guardian" class="form-control" placeholder="Nome do responsável">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-student-notes">Observações</label>
+                        <textarea id="new-student-notes" class="form-control" placeholder="Informações adicionais do aluno"></textarea>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button id="register-student-btn" class="btn btn-accent">Registrar</button>
+                    <button id="register-student-btn" class="btn btn-accent">Cadastrar Aluno</button>
                 </div>
             </div>
             <div class="card" style="margin-top:25px;">
-                <div class="card-header">Alunos Registrados</div>
+                <div class="card-header">Alunos Cadastrados</div>
                 <div class="card-body" id="students-list">
                     <p>Carregando alunos...</p>
                 </div>
@@ -923,8 +978,10 @@
                     if (userRole === 'teacher') {
                         document.getElementById('nav-users').classList.remove('hidden');
                         loadStudents();
+                        setActiveTab('users');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
+                        setActiveTab('tasks');
                     }
 
                     // Mostrar o painel correto conforme o tipo de usuário
@@ -1029,30 +1086,29 @@
                     studentsList = [];
                     const taskRecipientsContainer = document.getElementById('task-recipients');
                     const tipRecipientsContainer = document.getElementById('tip-recipients');
-                     const studentsListContainer = document.getElementById('students-list');
+                    const studentsListContainer = document.getElementById('students-list');
 
                     if (taskRecipientsContainer) taskRecipientsContainer.innerHTML = '';
                     if (tipRecipientsContainer) tipRecipientsContainer.innerHTML = '';
                     if (studentsListContainer) studentsListContainer.innerHTML = '';
-                    
+
                     if (querySnapshot.empty) {
-   if (taskRecipientsContainer) taskRecipientsContainer.innerHTML = '<p>Nenhum aluno cadastrado ainda.</p>';
+                        if (taskRecipientsContainer) taskRecipientsContainer.innerHTML = '<p>Nenhum aluno cadastrado ainda.</p>';
                         if (tipRecipientsContainer) tipRecipientsContainer.innerHTML = '<p>Nenhum aluno cadastrado ainda.</p>';
                         if (studentsListContainer) studentsListContainer.innerHTML = '<p>Nenhum aluno cadastrado ainda.</p>';
                         return;
                     }
-                    
+
                     querySnapshot.forEach(doc => {
                         const student = doc.data();
                         studentsList.push(student.email);
-                        
 
                         if (taskRecipientsContainer) {
                             const taskRecipientItem = document.createElement('div');
                             taskRecipientItem.className = 'recipient-item';
                             taskRecipientItem.innerHTML = `
                                 <input type="checkbox" id="task-${doc.id}" value="${student.email}">
-                                <label for="task-${doc.id}">${student.email}</label>
+                                <label for="task-${doc.id}">${student.name || student.email} (${student.email})</label>
                             `;
                             taskRecipientsContainer.appendChild(taskRecipientItem);
                         }
@@ -1062,7 +1118,7 @@
                             tipRecipientItem.className = 'recipient-item';
                             tipRecipientItem.innerHTML = `
                                 <input type="checkbox" id="tip-${doc.id}" value="${student.email}">
-                                <label for="tip-${doc.id}">${student.email}</label>
+                                <label for="tip-${doc.id}">${student.name || student.email} (${student.email})</label>
                             `;
                             tipRecipientsContainer.appendChild(tipRecipientItem);
                         }
@@ -1071,9 +1127,16 @@
                             const studentItem = document.createElement('div');
                             studentItem.className = 'student-item';
                             studentItem.innerHTML = `
-                                <span>${student.email}</span>
+                                <div class="student-data">
+                                    <strong>${student.name || 'Sem nome cadastrado'}</strong>
+                                    <div class="student-meta">Email: ${student.email}</div>
+                                    <div class="student-meta">Nível: ${student.level || 'Não informado'} | Matéria: ${student.subject || 'Não informada'}</div>
+                                    <div class="student-meta">Telefone: ${student.phone || 'Não informado'} | Nascimento: ${student.birthdate || 'Não informado'}</div>
+                                    <div class="student-meta">Responsável: ${student.guardian || 'Não informado'}</div>
+                                    <div class="student-meta">Observações: ${student.notes || 'Nenhuma'}</div>
+                                </div>
                                 <div>
-                                    <button class="btn btn-outline" onclick="editStudent('${doc.id}', '${student.email}')">Editar</button>
+                                    <button class="btn btn-outline" onclick="editStudent('${doc.id}', '${student.email}')">Editar Email</button>
                                     <button class="btn btn-danger" style="margin-left:5px" onclick="deleteStudent('${doc.id}')">Excluir</button>
                                 </div>
                             `;
@@ -1087,11 +1150,18 @@
         }
 
         function registerStudent() {
-            const email = document.getElementById('new-student-email').value;
+            const name = document.getElementById('new-student-name').value.trim();
+            const email = document.getElementById('new-student-email').value.trim();
             const password = document.getElementById('new-student-password').value;
+            const level = document.getElementById('new-student-level').value;
+            const subject = document.getElementById('new-student-subject').value;
+            const phone = document.getElementById('new-student-phone').value.trim();
+            const birthdate = document.getElementById('new-student-birthdate').value;
+            const guardian = document.getElementById('new-student-guardian').value.trim();
+            const notes = document.getElementById('new-student-notes').value.trim();
 
-            if (!email || !password) {
-                alert('Preencha email e senha');
+            if (!name || !email || !password || !level || !subject) {
+                alert('Preencha os campos obrigatórios: nome, email, senha, nível e matéria.');
                 return;
             }
 
@@ -1099,20 +1169,35 @@
             secondaryApp.auth().createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     return db.collection('users').doc(userCredential.user.uid).set({
-                        email: email,
+                        name,
+                        email,
                         role: 'student',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        level,
+                        subject,
+                        phone,
+                        birthdate,
+                        guardian,
+                        notes,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdBy: currentUser.uid
                     });
                 })
                 .then(() => {
-                    alert('Aluno registrado com sucesso!');
+                    alert('Aluno cadastrado com sucesso!');
+                    document.getElementById('new-student-name').value = '';
                     document.getElementById('new-student-email').value = '';
                     document.getElementById('new-student-password').value = '';
+                    document.getElementById('new-student-level').value = '';
+                    document.getElementById('new-student-subject').value = '';
+                    document.getElementById('new-student-phone').value = '';
+                    document.getElementById('new-student-birthdate').value = '';
+                    document.getElementById('new-student-guardian').value = '';
+                    document.getElementById('new-student-notes').value = '';
                     loadStudents();
                 })
                 .catch(error => {
-                    console.error('Erro ao registrar aluno:', error);
-                    alert('Erro ao registrar aluno.');
+                    console.error('Erro ao cadastrar aluno:', error);
+                    alert('Erro ao cadastrar aluno.');
                 })
                 .finally(() => {
                     secondaryApp.auth().signOut();
@@ -1208,6 +1293,17 @@
                 });
         }
         
+        // Controla aba ativa
+        function setActiveTab(tabId) {
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.dataset.tab === tabId);
+            });
+
+            tabContainers.forEach(tab => tab.classList.remove('active'));
+            const selectedTab = document.getElementById(`${tabId}-tab`);
+            if (selectedTab) selectedTab.classList.add('active');
+        }
+
         // Função para mostrar alertas
         function showAlert(message, type) {
             loginAlert.textContent = message;
