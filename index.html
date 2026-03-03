@@ -319,10 +319,93 @@
             margin-top: 18px;
         }
 
+        .tasks-layout {
+            margin-top: 8px;
+        }
+
+        .tasks-title {
+            color: #3f1f64;
+            font-size: 36px;
+            margin-bottom: 14px;
+        }
+
+        .tasks-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #ead9ff;
+            box-shadow: 0 6px 16px rgba(106, 27, 154, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-card-label {
+            font-weight: 700;
+            color: #50326e;
+        }
+
+        .summary-card-value {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .tasks-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .tasks-search {
+            flex: 1;
+            min-width: 230px;
+            border-radius: 14px;
+            border: 1px solid #ddcaef;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 16px;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e8d9f7;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 18px rgba(83, 35, 133, 0.08);
+        }
+
         .preserved-text {
             white-space: pre-wrap;
             word-break: break-word;
         }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .task-status {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .task-status.pending { background: #34c38f; }
+        .task-status.completed { background: #7c4dff; }
+        .task-status.overdue { background: #f06292; }
         
         .tip-item {
             padding: 20px;
@@ -1097,16 +1180,36 @@
                         </div>
                     </div>
                     
-                    <h2 style="margin:30px 0 15px; color: var(--primary);">Tarefas Criadas</h2>
-                    <div id="tasks-list">
-                        <!-- Tarefas serão carregadas aqui -->
+                    <div class="tasks-layout">
+                        <h2 class="tasks-title">Suas Tarefas</h2>
+                        <div class="tasks-summary" id="teacher-task-summary">
+                            <div class="summary-card"><span class="summary-card-label">Total</span><span class="summary-card-value" id="teacher-total-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Concluídas</span><span class="summary-card-value" id="teacher-completed-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Pendentes</span><span class="summary-card-value" id="teacher-pending-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Atrasadas</span><span class="summary-card-value" id="teacher-overdue-count">0</span></div>
+                        </div>
+                        <div class="tasks-controls">
+                            <input id="teacher-task-search" class="tasks-search" type="search" placeholder="Buscar tarefa">
+                        </div>
+                        <div id="tasks-list">
+                            <!-- Tarefas serão carregadas aqui -->
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Painel do Aluno -->
                 <div id="student-tasks" class="hidden">
-                    <div class="card">
-                        <div class="card-header">Suas Tarefas</div>
+                    <div class="tasks-layout">
+                        <h2 class="tasks-title">Suas Tarefas</h2>
+                        <div class="tasks-summary" id="student-task-summary">
+                            <div class="summary-card"><span class="summary-card-label">Total</span><span class="summary-card-value" id="student-total-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Concluídas</span><span class="summary-card-value" id="student-completed-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Pendentes</span><span class="summary-card-value" id="student-pending-count">0</span></div>
+                            <div class="summary-card"><span class="summary-card-label">Atrasadas</span><span class="summary-card-value" id="student-overdue-count">0</span></div>
+                        </div>
+                        <div class="tasks-controls">
+                            <input id="student-task-search" class="tasks-search" type="search" placeholder="Buscar tarefa">
+                        </div>
                         <div id="student-tasks-list">
                             <!-- Tarefas do aluno serão carregadas aqui -->
                         </div>
@@ -2528,42 +2631,48 @@
         function loadTasks() {
             let query;
             if (userRole === 'teacher') {
-                // Professor vê todas as tarefas que ele criou
                 query = db.collection('tasks')
                     .where('createdBy', '==', currentUser.uid)
                     .orderBy('createdAt', 'desc');
             } else {
-       // Aluno vê tarefas em sua própria coleção
                 query = db.collection('users')
                     .doc(currentUser.uid)
                     .collection('tasks')
                     .orderBy('createdAt', 'desc');
             }
-            
-            query.get().then(querySnapshot => {
+
+            query.get().then(async querySnapshot => {
                 const container = userRole === 'teacher'
                     ? document.getElementById('tasks-list')
                     : document.getElementById('student-tasks-list');
-                
+
                 container.innerHTML = '';
-                
+
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p>Nenhuma tarefa encontrada.</p>';
+                    updateTaskSummary({ total: 0, completed: 0, pending: 0, overdue: 0 });
+                    container.innerHTML = '<p style="padding:20px">Nenhuma tarefa encontrada.</p>';
                     return;
                 }
-                
-               
+
                 if (userRole === 'teacher') {
                     const tasksByStudent = {};
+                    let totalRecipients = 0;
 
                     querySnapshot.forEach(doc => {
                         const task = doc.data();
-                        (task.recipients || []).forEach(student => {
-                            if (!tasksByStudent[student]) {
-                                tasksByStudent[student] = [];
-                            }
-                            tasksByStudent[student].push({ task, id: doc.id });
+                        const recipients = task.recipients || [];
+                        totalRecipients += recipients.length;
+                        recipients.forEach(student => {
+                            if (!tasksByStudent[student]) tasksByStudent[student] = [];
+                            tasksByStudent[student].push({ task, id: doc.id, status: 'pending' });
                         });
+                    });
+
+                    updateTaskSummary({
+                        total: querySnapshot.size,
+                        completed: 0,
+                        pending: totalRecipients,
+                        overdue: 0
                     });
 
                     Object.keys(tasksByStudent).sort().forEach(student => {
@@ -2573,29 +2682,86 @@
                         header.textContent = student;
                         group.appendChild(header);
 
-                        tasksByStudent[student].forEach(({ task, id }) => {
-                            const taskElement = createTaskElement(task, id);
+                        tasksByStudent[student].forEach(({ task, id, status }) => {
+                            const taskElement = createTaskElement(task, id, status);
                             group.appendChild(taskElement);
                         });
 
                         container.appendChild(group);
                     });
                 } else {
+                    const responsesSnapshot = await db.collection('responses')
+                        .where('studentId', '==', currentUser.uid)
+                        .get();
+                    const answeredTaskIds = new Set();
+                    responsesSnapshot.forEach(doc => {
+                        const response = doc.data();
+                        if (response.taskId) answeredTaskIds.add(response.taskId);
+                    });
+
+                    let total = 0;
+                    let completed = 0;
                     querySnapshot.forEach(doc => {
+                        total += 1;
                         const task = doc.data();
-                        const taskElement = createTaskElement(task, doc.id);
+                        const status = answeredTaskIds.has(doc.id) ? 'completed' : 'pending';
+                        if (status === 'completed') completed += 1;
+                        const taskElement = createTaskElement(task, doc.id, status);
                         container.appendChild(taskElement);
                     });
+
+                    updateTaskSummary({
+                        total,
+                        completed,
+                        pending: total - completed,
+                        overdue: 0
+                    });
                 }
+
+                setupTaskSearch();
             }).catch(error => {
                 console.error('Erro ao carregar tarefas:', error);
             });
         }
-        
-        function createTaskElement(task, taskId) {
+
+        function updateTaskSummary({ total = 0, completed = 0, pending = 0, overdue = 0 }) {
+            const prefix = userRole === 'teacher' ? 'teacher' : 'student';
+            const totalEl = document.getElementById(`${prefix}-total-count`);
+            const completedEl = document.getElementById(`${prefix}-completed-count`);
+            const pendingEl = document.getElementById(`${prefix}-pending-count`);
+            const overdueEl = document.getElementById(`${prefix}-overdue-count`);
+            if (totalEl) totalEl.textContent = total;
+            if (completedEl) completedEl.textContent = completed;
+            if (pendingEl) pendingEl.textContent = pending;
+            if (overdueEl) overdueEl.textContent = overdue;
+        }
+
+        function setupTaskSearch() {
+            const prefix = userRole === 'teacher' ? 'teacher' : 'student';
+            const input = document.getElementById(`${prefix}-task-search`);
+            const list = userRole === 'teacher'
+                ? document.getElementById('tasks-list')
+                : document.getElementById('student-tasks-list');
+            if (!input || !list) return;
+
+            input.oninput = () => {
+                const term = input.value.toLowerCase();
+                list.querySelectorAll('.task-item').forEach(item => {
+                    item.style.display = item.textContent.toLowerCase().includes(term) ? '' : 'none';
+                });
+            };
+        }
+
+        function getTaskStatusLabel(status) {
+            if (status === 'completed') return 'Concluída';
+            if (status === 'overdue') return 'Atrasada';
+            return 'Pendente';
+        }
+
+        function createTaskElement(task, taskId, status = 'pending') {
             const taskElement = document.createElement('div');
             taskElement.className = 'task-item';
-            
+
             let optionsHtml = '';
             if (task.type === 'multiple' && task.options) {
                 optionsHtml = '<div><strong>Opções:</strong><ul>';
@@ -2604,22 +2770,26 @@
                 });
                 optionsHtml += '</ul></div>';
             }
-            
+
             taskElement.innerHTML = `
+                <div class="task-header">
+                    <span class="task-status ${status}">${getTaskStatusLabel(status)}</span>
+                    <span>📅 ${formatDate(task.createdAt)}</span>
+                </div>
                 <div class="task-title">${task.title}</div>
                 <div class="task-meta">
-                    <span>Professor: ${task.createdByName}</span>
-                    <span>Data: ${formatDate(task.createdAt)}</span>
+                    <span>Professor: ${task.createdByName || 'Professor'}</span>
+                    <span>Tipo: ${task.type || 'texto'}</span>
                 </div>
                 <p class="preserved-text">${preserveText(task.description)}</p>
                 ${optionsHtml}
                 <div class="task-actions">
                     ${userRole === 'student'
-                        ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">Responder</button>`
+                        ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">${status === 'completed' ? 'Responder Novamente' : 'Responder'}</button>`
                         : `<button class="btn btn-danger" onclick="deleteTask('${taskId}', ${JSON.stringify(task.recipients || [])})">Excluir Tarefa</button>`}
                 </div>
             `;
-            
+
             return taskElement;
         }
 
