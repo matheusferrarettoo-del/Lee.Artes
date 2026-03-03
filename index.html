@@ -530,6 +530,226 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
+        .student-profile-layout {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 20px;
+        }
+
+        .profile-banner {
+            background: linear-gradient(120deg, #7e57c2 0%, #9575cd 45%, #b39ddb 100%);
+            border-radius: 16px;
+            padding: 18px 22px;
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(106, 27, 154, 0.18);
+            margin-bottom: 16px;
+        }
+
+        .profile-banner-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            font-size: 30px;
+        }
+
+        .profile-banner-name {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .profile-banner-level {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 12px;
+            border-radius: 100px;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .profile-progress-label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .profile-progress-track {
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #e1bee7 0%, #ffe082 100%);
+        }
+
+        .profile-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(3px);
+            border: 1px solid rgba(126, 87, 194, 0.2);
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.1);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .profile-panel-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid #ece4f8;
+            font-size: 28px;
+            font-weight: 700;
+            color: #3f2d71;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .profile-tile {
+            border: 1px solid #e9def8;
+            border-radius: 12px;
+            background: #fbf9ff;
+            padding: 12px;
+        }
+
+        .profile-tile h4 {
+            color: #4b2f82;
+            font-size: 17px;
+            margin-bottom: 6px;
+        }
+
+        .profile-tile p,
+        .profile-tile a {
+            color: #544a6e;
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .profile-tile.full {
+            grid-column: 1 / -1;
+        }
+
+        .profile-side {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-stats {
+            padding: 14px 16px;
+        }
+
+        .profile-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ebdef9;
+            padding: 10px 0;
+        }
+
+        .profile-stat-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .profile-stat-label {
+            color: #5d4589;
+            font-weight: 600;
+        }
+
+        .profile-stat-value {
+            color: #3f2d71;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .profile-level-bar {
+            padding: 10px 16px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #7b5bb9;
+            font-weight: 700;
+        }
+
+        .profile-level-point {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-level-point::before {
+            content: '';
+            position: absolute;
+            left: -50%;
+            top: 50%;
+            width: 100%;
+            height: 4px;
+            background: #d8c9f1;
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+
+        .profile-level-point:first-child::before {
+            display: none;
+        }
+
+        .profile-level-point.active {
+            color: #fff;
+        }
+
+        .profile-level-point.active span {
+            background: linear-gradient(90deg, #f6a742, #e08a1e);
+            border-radius: 999px;
+            padding: 2px 12px;
+            box-shadow: 0 4px 8px rgba(224, 138, 30, 0.35);
+        }
+
+        .profile-cta {
+            padding: 0 16px 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .profile-cta .btn {
+            flex: 1;
+            text-align: center;
+        }
+
+        @media (max-width: 1000px) {
+            .student-profile-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-banner-name {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .question-form {
             background: white;
             border-radius: 12px;
@@ -1510,56 +1730,143 @@
             }
         }
 
-        function loadMyProfile() {
+        function parseLevelAndProgress(levelText = '') {
+            const normalized = String(levelText || '').toUpperCase();
+            const levelMatch = normalized.match(/A1|A2|B1|B2|C1|C2/);
+            const currentLevel = levelMatch ? levelMatch[0] : 'B1';
+            const progressMatch = normalized.match(/(\d{1,3})\s*%/);
+            const progress = progressMatch ? Math.min(100, Number(progressMatch[1])) : 70;
+            return { currentLevel, progress };
+        }
+
+        async function loadMyProfile() {
             const container = document.getElementById('my-profile-content');
             if (!container || !currentUser) return;
 
             container.innerHTML = '<p>Carregando perfil...</p>';
 
-            db.collection('studentProfiles')
-                .where('studentId', '==', currentUser.uid)
-                .get()
-                .then(querySnapshot => {
-                    if (querySnapshot.empty) {
-                        container.innerHTML = '<p>Seu perfil ainda não foi cadastrado pela professora.</p>';
-                        return;
-                    }
+            try {
+                const [profileSnapshot, tasksSnapshot, responsesSnapshot, userDoc] = await Promise.all([
+                    db.collection('studentProfiles').where('studentId', '==', currentUser.uid).get(),
+                    db.collection('users').doc(currentUser.uid).collection('tasks').get(),
+                    db.collection('responses').where('studentId', '==', currentUser.uid).get(),
+                    db.collection('users').doc(currentUser.uid).get()
+                ]);
 
-                    const profiles = [];
-                    querySnapshot.forEach(doc => profiles.push(doc.data()));
-                    const profile = profiles[0];
+                if (profileSnapshot.empty) {
+                    container.innerHTML = '<p>Seu perfil ainda não foi cadastrado pela professora.</p>';
+                    return;
+                }
 
-                    container.innerHTML = `
-                        <div class="profile-section">
-                            <h4>Informações de Contato</h4>
-                            <div class="profile-value preserved-text">${preserveText(profile.contactInfo || 'Não informado')}</div>
+                const profile = profileSnapshot.docs[0].data();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                const studentName = userData.name || currentUser.email || 'Aluno';
+                const memberSince = profile.createdAt?.toDate ? profile.createdAt.toDate() : null;
+                const studyDays = memberSince
+                    ? Math.max(1, Math.ceil((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24)))
+                    : 0;
+                const totalTasks = tasksSnapshot.size;
+                const completedTasks = responsesSnapshot.size;
+                const weeklyGoal = 5;
+                const weeklyProgress = Math.min(100, Math.round((completedTasks / weeklyGoal) * 100));
+                const { currentLevel, progress } = parseLevelAndProgress(profile.englishLevel || '');
+                const nextLevelMap = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2', C2: 'Fluente' };
+                const nextLevel = nextLevelMap[currentLevel] || 'B2';
+
+                container.innerHTML = `
+                    <div class="student-profile-layout">
+                        <div>
+                            <div class="profile-banner">
+                                <div class="profile-banner-top">
+                                    <div class="profile-avatar">🧑</div>
+                                    <div>
+                                        <div class="profile-banner-name">${escapeHtml(studentName)}</div>
+                                        <div class="profile-banner-level">Nível ${escapeHtml(currentLevel)}</div>
+                                    </div>
+                                </div>
+                                <div class="profile-progress-label">Progresso para ${escapeHtml(nextLevel)}: ${progress}%</div>
+                                <div class="profile-progress-track">
+                                    <div class="profile-progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="profile-panel">
+                                <div class="profile-panel-header">Meu Perfil</div>
+                                <div class="profile-grid">
+                                    <div class="profile-tile">
+                                        <h4>📞 Informações de Contato</h4>
+                                        <p class="preserved-text">${preserveText(profile.contactInfo || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>👤 Informações Pessoais</h4>
+                                        <p class="preserved-text">${preserveText(profile.personalInfo || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile full">
+                                        <h4>📁 Link da Pasta dos Conteúdos</h4>
+                                        ${profile.contentFolderLink
+                                            ? `<a href="${escapeHtml(profile.contentFolderLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.contentFolderLink)}</a>`
+                                            : '<p>Não informado</p>'}
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>🏁 Nível do Inglês</h4>
+                                        <p class="preserved-text">${preserveText(profile.englishLevel || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>📈 Evolução</h4>
+                                        <p class="preserved-text">${preserveText(profile.evolution || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile full">
+                                        <h4>💜 Constância</h4>
+                                        <p class="preserved-text">${preserveText(profile.consistency || 'Não informado')}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="profile-section">
-                            <h4>Informações Pessoais</h4>
-                            <div class="profile-value preserved-text">${preserveText(profile.personalInfo || 'Não informado')}</div>
+
+                        <div class="profile-side">
+                            <div class="profile-panel">
+                                <div class="profile-panel-header">Estatísticas do Aluno</div>
+                                <div class="profile-stats">
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Dias estudando</div>
+                                        <div class="profile-stat-value">${studyDays}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Tarefas recebidas</div>
+                                        <div class="profile-stat-value">${totalTasks}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Tarefas concluídas</div>
+                                        <div class="profile-stat-value">${completedTasks}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Meta semanal (${weeklyGoal})</div>
+                                        <div class="profile-stat-value">${completedTasks}/${weeklyGoal}</div>
+                                    </div>
+                                </div>
+                                <div style="padding: 0 16px 16px;">
+                                    <div class="profile-progress-track" style="height:10px;background:#e8ddf8;">
+                                        <div class="profile-progress-fill" style="width:${weeklyProgress}%"></div>
+                                    </div>
+                                </div>
+                                <div class="profile-level-bar">
+                                    <div class="profile-level-point"><span>A1</span></div>
+                                    <div class="profile-level-point"><span>A2</span></div>
+                                    <div class="profile-level-point ${currentLevel === 'B1' ? 'active' : ''}"><span>B1</span></div>
+                                    <div class="profile-level-point"><span>B2</span></div>
+                                </div>
+                                <div class="profile-cta">
+                                    <button class="btn btn-primary" onclick="setActiveTab('tips')">Ver Dicas</button>
+                                    <button class="btn btn-outline" onclick="setActiveTab('tasks')">Ir para Tarefas</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="profile-section">
-                            <h4>Link da Pasta dos Conteúdos</h4>
-                            <div class="profile-value">${profile.contentFolderLink ? `<a href="${escapeHtml(profile.contentFolderLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.contentFolderLink)}</a>` : 'Não informado'}</div>
-                        </div>
-                        <div class="profile-section">
-                            <h4>Nível do Inglês</h4>
-                            <div class="profile-value preserved-text">${preserveText(profile.englishLevel || 'Não informado')}</div>
-                        </div>
-                        <div class="profile-section">
-                            <h4>Evolução</h4>
-                            <div class="profile-value preserved-text">${preserveText(profile.evolution || 'Não informado')}</div>
-                        </div>
-                        <div class="profile-section">
-                            <h4>Constância</h4>
-                            <div class="profile-value preserved-text">${preserveText(profile.consistency || 'Não informado')}</div>
-                        </div>
-                    `;
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar perfil do aluno:', error);
-                    container.innerHTML = '<p>Erro ao carregar seu perfil.</p>';
-                });
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erro ao carregar perfil do aluno:', error);
+                container.innerHTML = '<p>Erro ao carregar seu perfil.</p>';
+            }
         }
         
         // Função para autenticar o usuário
