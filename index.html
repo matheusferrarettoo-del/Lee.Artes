@@ -735,6 +735,118 @@
             text-align: center;
         }
 
+        .calendar-form-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1.2fr auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .calendar-entries {
+            border: 1px solid #ece4f8;
+            border-radius: 10px;
+            background: #fcfaff;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .calendar-entry {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #efe7fb;
+            margin-bottom: 8px;
+        }
+
+        .calendar-entry:last-child {
+            margin-bottom: 0;
+        }
+
+        .calendar-tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .calendar-tag.class-day {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .calendar-tag.makeup-day {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .profile-calendar-wrapper {
+            padding: 14px 16px 16px;
+        }
+
+        .calendar-month {
+            margin-bottom: 18px;
+        }
+
+        .calendar-month h5 {
+            color: #4b2f82;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-cell {
+            min-height: 42px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            background: #fff;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #5a4d7b;
+        }
+
+        .calendar-cell.header {
+            min-height: 30px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+        }
+
+        .calendar-cell.empty {
+            border: none;
+            background: transparent;
+        }
+
+        .calendar-cell.class-day {
+            border-color: #a5d6a7;
+            background: #edf7ee;
+        }
+
+        .calendar-cell.makeup-day {
+            border-color: #ffcc80;
+            background: #fff4e8;
+        }
+
+        .calendar-cell small {
+            font-size: 10px;
+            font-weight: 600;
+            color: #7b5bb9;
+        }
+
         @media (max-width: 1000px) {
             .student-profile-layout {
                 grid-template-columns: 1fr;
@@ -747,6 +859,10 @@
 
         @media (max-width: 680px) {
             .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-form-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -1197,6 +1313,29 @@
                         <label for="profile-consistency">Constância</label>
                         <textarea id="profile-consistency" class="form-control" placeholder="Frequência, rotina e participação"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="profile-present-days">Dias de aula presentes</label>
+                        <input type="number" id="profile-present-days" class="form-control" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-absences">Faltas</label>
+                        <input type="number" id="profile-absences" class="form-control" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Calendário de aulas e reposições</label>
+                        <div class="calendar-form-row">
+                            <input type="date" id="profile-calendar-date" class="form-control">
+                            <select id="profile-calendar-type" class="form-control">
+                                <option value="class">Dia de aula</option>
+                                <option value="makeup">Reposição</option>
+                            </select>
+                            <input type="text" id="profile-calendar-note" class="form-control" placeholder="Observação (opcional)">
+                            <button type="button" id="add-calendar-entry-btn" class="btn btn-outline">Adicionar</button>
+                        </div>
+                        <div id="profile-calendar-entries" class="calendar-entries">
+                            <p>Nenhuma data cadastrada.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-footer" style="justify-content: space-between;">
                     <button id="clear-profile-form-btn" class="btn btn-outline">Limpar</button>
@@ -1264,6 +1403,7 @@
         let userRole = 'student'; // 'student' ou 'teacher'
         let studentsList = []; // Lista de alunos para seleção
         let currentTaskId = null; // ID da tarefa sendo respondida
+        let profileCalendarEntries = []; // Datas de aula/reposição do perfil
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -1386,6 +1526,10 @@
 
             if (document.getElementById('clear-profile-form-btn')) {
                 document.getElementById('clear-profile-form-btn').addEventListener('click', clearProfileForm);
+            }
+
+            if (document.getElementById('add-calendar-entry-btn')) {
+                document.getElementById('add-calendar-entry-btn').addEventListener('click', addProfileCalendarEntry);
             }
             // Configura o upload de áudio
             const audioUploadArea = document.getElementById('audio-upload-area');
@@ -1588,7 +1732,71 @@
             document.getElementById('profile-english-level').value = '';
             document.getElementById('profile-evolution').value = '';
             document.getElementById('profile-consistency').value = '';
+            document.getElementById('profile-present-days').value = '0';
+            document.getElementById('profile-absences').value = '0';
+            document.getElementById('profile-calendar-date').value = '';
+            document.getElementById('profile-calendar-type').value = 'class';
+            document.getElementById('profile-calendar-note').value = '';
+            profileCalendarEntries = [];
+            renderProfileCalendarEntries();
             document.getElementById('save-profile-btn').textContent = 'Salvar Perfil';
+        }
+
+        function getCalendarTypeLabel(type) {
+            return type === 'makeup' ? 'Reposição' : 'Aula';
+        }
+
+        function renderProfileCalendarEntries() {
+            const container = document.getElementById('profile-calendar-entries');
+            if (!container) return;
+
+            if (!profileCalendarEntries.length) {
+                container.innerHTML = '<p>Nenhuma data cadastrada.</p>';
+                return;
+            }
+
+            const sortedEntries = [...profileCalendarEntries].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+            container.innerHTML = sortedEntries.map(entry => {
+                const index = profileCalendarEntries.findIndex(item => item.date === entry.date && item.type === entry.type && item.note === entry.note);
+                return `
+                    <div class="calendar-entry">
+                        <div>
+                            <strong>${escapeHtml(formatLocalDate(entry.date))}</strong>
+                            <span class="calendar-tag ${entry.type === 'makeup' ? 'makeup-day' : 'class-day'}">${escapeHtml(getCalendarTypeLabel(entry.type))}</span>
+                            ${entry.note ? `<div class="student-meta">${escapeHtml(entry.note)}</div>` : ''}
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="removeProfileCalendarEntry(${index})">Remover</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addProfileCalendarEntry() {
+            const date = document.getElementById('profile-calendar-date').value;
+            const type = document.getElementById('profile-calendar-type').value;
+            const note = document.getElementById('profile-calendar-note').value.trim();
+
+            if (!date) {
+                alert('Selecione uma data para adicionar ao calendário.');
+                return;
+            }
+
+            const alreadyExists = profileCalendarEntries.some(entry => entry.date === date && entry.type === type);
+            if (alreadyExists) {
+                alert('Essa data já foi cadastrada para esse tipo de evento.');
+                return;
+            }
+
+            profileCalendarEntries.push({ date, type, note });
+            document.getElementById('profile-calendar-date').value = '';
+            document.getElementById('profile-calendar-note').value = '';
+            renderProfileCalendarEntries();
+        }
+
+        function removeProfileCalendarEntry(index) {
+            if (index < 0 || index >= profileCalendarEntries.length) return;
+            profileCalendarEntries.splice(index, 1);
+            renderProfileCalendarEntries();
         }
 
         async function saveStudentProfile() {
@@ -1608,6 +1816,13 @@
                 englishLevel: document.getElementById('profile-english-level').value.trim(),
                 evolution: document.getElementById('profile-evolution').value.trim(),
                 consistency: document.getElementById('profile-consistency').value.trim(),
+                attendancePresentDays: Number(document.getElementById('profile-present-days').value || 0),
+                attendanceAbsences: Number(document.getElementById('profile-absences').value || 0),
+                classCalendar: profileCalendarEntries.map(entry => ({
+                    date: entry.date,
+                    type: entry.type === 'makeup' ? 'makeup' : 'class',
+                    note: entry.note || ''
+                })),
                 createdBy: currentUser.uid,
                 createdByEmail: currentUser.email,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1661,6 +1876,7 @@
                                 <strong>${escapeHtml(profile.studentName || profile.studentEmail || 'Aluno')}</strong>
                                 <div class="student-meta">Email: ${escapeHtml(profile.studentEmail || 'Não informado')}</div>
                                 <div class="student-meta">Nível de inglês: ${escapeHtml(profile.englishLevel || 'Não informado')}</div>
+                                <div class="student-meta">Presenças: ${Number(profile.attendancePresentDays || 0)} | Faltas: ${Number(profile.attendanceAbsences || 0)}</div>
                                 <div class="student-meta">Atualizado em: ${formatDate(profile.updatedAt || profile.createdAt)}</div>
                             </div>
                             <div class="profile-actions">
@@ -1695,6 +1911,18 @@
                     document.getElementById('profile-english-level').value = profile.englishLevel || '';
                     document.getElementById('profile-evolution').value = profile.evolution || '';
                     document.getElementById('profile-consistency').value = profile.consistency || '';
+                    document.getElementById('profile-present-days').value = Number(profile.attendancePresentDays || 0);
+                    document.getElementById('profile-absences').value = Number(profile.attendanceAbsences || 0);
+                    profileCalendarEntries = Array.isArray(profile.classCalendar)
+                        ? profile.classCalendar
+                            .filter(entry => entry && entry.date)
+                            .map(entry => ({
+                                date: entry.date,
+                                type: entry.type === 'makeup' ? 'makeup' : 'class',
+                                note: entry.note || ''
+                            }))
+                        : [];
+                    renderProfileCalendarEntries();
                     document.getElementById('save-profile-btn').textContent = 'Atualizar Perfil';
                     setActiveTab('profile-management');
                 })
@@ -1728,6 +1956,72 @@
                 console.error('Erro ao excluir perfil:', error);
                 alert('Erro ao excluir perfil.');
             }
+        }
+
+        function formatLocalDate(dateText) {
+            if (!dateText) return 'Data não informada';
+            const [year, month, day] = String(dateText).split('-').map(Number);
+            if (!year || !month || !day) return dateText;
+            return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+        }
+
+        function buildClassCalendarMarkup(entries = []) {
+            if (!entries.length) {
+                return '<p>Nenhuma aula/reposição cadastrada até o momento.</p>';
+            }
+
+            const normalized = entries
+                .filter(entry => entry && entry.date)
+                .map(entry => ({
+                    date: entry.date,
+                    type: entry.type === 'makeup' ? 'makeup' : 'class',
+                    note: entry.note || ''
+                }))
+                .sort((a, b) => a.date.localeCompare(b.date));
+
+            const byMonth = normalized.reduce((acc, entry) => {
+                const monthKey = entry.date.slice(0, 7);
+                if (!acc[monthKey]) acc[monthKey] = [];
+                acc[monthKey].push(entry);
+                return acc;
+            }, {});
+
+            const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            return Object.keys(byMonth).sort().map(monthKey => {
+                const [year, month] = monthKey.split('-').map(Number);
+                const monthName = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                const totalDays = new Date(year, month, 0).getDate();
+                const mapByDate = byMonth[monthKey].reduce((acc, entry) => {
+                    acc[entry.date] = entry;
+                    return acc;
+                }, {});
+
+                let cells = weekDays.map(day => `<div class="calendar-cell header">${day}</div>`).join('');
+                for (let i = 0; i < firstDay; i += 1) {
+                    cells += '<div class="calendar-cell empty"></div>';
+                }
+
+                for (let day = 1; day <= totalDays; day += 1) {
+                    const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const event = mapByDate[dateKey];
+                    const className = event ? (event.type === 'makeup' ? 'makeup-day' : 'class-day') : '';
+                    const label = event ? (event.type === 'makeup' ? 'Reposição' : 'Aula') : '';
+                    cells += `
+                        <div class="calendar-cell ${className}">
+                            <span>${day}</span>
+                            ${label ? `<small>${label}</small>` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="calendar-month">
+                        <h5>${escapeHtml(monthName.charAt(0).toUpperCase() + monthName.slice(1))}</h5>
+                        <div class="calendar-grid">${cells}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function parseLevelAndProgress(levelText = '') {
@@ -1770,6 +2064,11 @@
                 const weeklyGoal = 5;
                 const weeklyProgress = Math.min(100, Math.round((completedTasks / weeklyGoal) * 100));
                 const { currentLevel, progress } = parseLevelAndProgress(profile.englishLevel || '');
+                const attendancePresentDays = Number(profile.attendancePresentDays || 0);
+                const attendanceAbsences = Number(profile.attendanceAbsences || 0);
+                const classCalendar = Array.isArray(profile.classCalendar) ? profile.classCalendar : [];
+                const scheduledLessons = classCalendar.filter(item => item.type !== 'makeup').length;
+                const scheduledMakeups = classCalendar.filter(item => item.type === 'makeup').length;
                 const nextLevelMap = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2', C2: 'Fluente' };
                 const nextLevel = nextLevelMap[currentLevel] || 'B2';
 
@@ -1832,6 +2131,14 @@
                                         <div class="profile-stat-value">${studyDays}</div>
                                     </div>
                                     <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Presenças</div>
+                                        <div class="profile-stat-value">${attendancePresentDays}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Faltas</div>
+                                        <div class="profile-stat-value">${attendanceAbsences}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
                                         <div class="profile-stat-label">Tarefas recebidas</div>
                                         <div class="profile-stat-value">${totalTasks}</div>
                                     </div>
@@ -1842,6 +2149,14 @@
                                     <div class="profile-stat-row">
                                         <div class="profile-stat-label">Meta semanal (${weeklyGoal})</div>
                                         <div class="profile-stat-value">${completedTasks}/${weeklyGoal}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Aulas no calendário</div>
+                                        <div class="profile-stat-value">${scheduledLessons}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Reposições no calendário</div>
+                                        <div class="profile-stat-value">${scheduledMakeups}</div>
                                     </div>
                                 </div>
                                 <div style="padding: 0 16px 16px;">
@@ -1854,6 +2169,10 @@
                                     <div class="profile-level-point"><span>A2</span></div>
                                     <div class="profile-level-point ${currentLevel === 'B1' ? 'active' : ''}"><span>B1</span></div>
                                     <div class="profile-level-point"><span>B2</span></div>
+                                </div>
+                                <div class="profile-calendar-wrapper">
+                                    <h4 style="color:#4b2f82;margin-bottom:10px;">Calendário de aulas e reposições</h4>
+                                    ${buildClassCalendarMarkup(classCalendar)}
                                 </div>
                                 <div class="profile-cta">
                                     <button class="btn btn-primary" onclick="setActiveTab('tips')">Ver Dicas</button>
