@@ -506,6 +506,30 @@
             font-size: 14px;
             margin-bottom: 3px;
         }
+
+        .profile-section {
+            margin-bottom: 18px;
+        }
+
+        .profile-section h4 {
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .profile-value {
+            background: #f9f5ff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            color: #555;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
         .question-form {
             background: white;
             border-radius: 12px;
@@ -621,6 +645,8 @@
                         <li><a href="#" class="nav-link active" data-tab="tasks">Tarefas</a></li>
                         <li><a href="#" class="nav-link" data-tab="tips">Dicas</a></li>
                         <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
+                        <li id="nav-student-profile" class="hidden"><a href="#" class="nav-link" data-tab="my-profile">Meu Perfil</a></li>
+                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno</a></li>
                     </ul>
                 </nav>
                 <div class="user-info">
@@ -906,6 +932,65 @@
                 </div>
             </div>
         </div>
+
+        <div id="my-profile-tab" class="tab-container">
+            <div class="card">
+                <div class="card-header">Meu Perfil</div>
+                <div class="card-body" id="my-profile-content">
+                    <p>Carregando perfil...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-management-tab" class="tab-container">
+            <div class="card">
+                <div class="card-header">Cadastro de Perfil do Aluno</div>
+                <div class="card-body">
+                    <input type="hidden" id="profile-doc-id">
+                    <div class="form-group">
+                        <label for="profile-student-id">Aluno</label>
+                        <select id="profile-student-id" class="form-control">
+                            <option value="">Selecione um aluno</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-contact">Informações de contato</label>
+                        <textarea id="profile-contact" class="form-control" placeholder="Telefone, email e demais contatos"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-personal">Informações pessoais</label>
+                        <textarea id="profile-personal" class="form-control" placeholder="Dados pessoais relevantes do aluno"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-folder-link">Link da pasta dos conteúdos</label>
+                        <input type="url" id="profile-folder-link" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-english-level">Nível de inglês</label>
+                        <input type="text" id="profile-english-level" class="form-control" placeholder="Ex: Intermediário B1">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-evolution">Evolução</label>
+                        <textarea id="profile-evolution" class="form-control" placeholder="Resumo da evolução"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-consistency">Constância</label>
+                        <textarea id="profile-consistency" class="form-control" placeholder="Frequência, rotina e participação"></textarea>
+                    </div>
+                </div>
+                <div class="card-footer" style="justify-content: space-between;">
+                    <button id="clear-profile-form-btn" class="btn btn-outline">Limpar</button>
+                    <button id="save-profile-btn" class="btn btn-accent">Salvar Perfil</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:25px;">
+                <div class="card-header">Perfis Cadastrados por Você</div>
+                <div class="card-body" id="teacher-profiles-list">
+                    <p>Carregando perfis...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -982,10 +1067,16 @@
 
                     if (userRole === 'teacher') {
                         document.getElementById('nav-users').classList.remove('hidden');
+                        document.getElementById('nav-teacher-profile').classList.remove('hidden');
+                        document.getElementById('nav-student-profile').classList.add('hidden');
                         loadStudents();
+                        loadTeacherProfiles();
                         setActiveTab('users');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
+                        document.getElementById('nav-teacher-profile').classList.add('hidden');
+                        document.getElementById('nav-student-profile').classList.remove('hidden');
+                        loadMyProfile();
                         setActiveTab('tasks');
                     }
 
@@ -1002,6 +1093,8 @@
                     loginScreen.classList.remove('hidden');
                     mainContent.classList.add('hidden');
                     document.getElementById('nav-users').classList.add('hidden');
+                    document.getElementById('nav-teacher-profile').classList.add('hidden');
+                    document.getElementById('nav-student-profile').classList.add('hidden');
                 }
             });
             
@@ -1039,6 +1132,14 @@
                     // Mostra a aba selecionada
                     tabContainers.forEach(tab => tab.classList.remove('active'));
                     document.getElementById(`${tabId}-tab`).classList.add('active');
+
+                    if (tabId === 'my-profile' && userRole === 'student') {
+                        loadMyProfile();
+                    }
+
+                    if (tabId === 'profile-management' && userRole === 'teacher') {
+                        loadTeacherProfiles();
+                    }
                 });
             });
             
@@ -1057,6 +1158,14 @@
             
             if (document.getElementById('register-student-btn')) {
                 document.getElementById('register-student-btn').addEventListener('click', registerStudent);
+            }
+
+            if (document.getElementById('save-profile-btn')) {
+                document.getElementById('save-profile-btn').addEventListener('click', saveStudentProfile);
+            }
+
+            if (document.getElementById('clear-profile-form-btn')) {
+                document.getElementById('clear-profile-form-btn').addEventListener('click', clearProfileForm);
             }
             // Configura o upload de áudio
             const audioUploadArea = document.getElementById('audio-upload-area');
@@ -1092,10 +1201,12 @@
                     const taskRecipientsContainer = document.getElementById('task-recipients');
                     const tipRecipientsContainer = document.getElementById('tip-recipients');
                     const studentsListContainer = document.getElementById('students-list');
+                    const profileStudentSelect = document.getElementById('profile-student-id');
 
                     if (taskRecipientsContainer) taskRecipientsContainer.innerHTML = '';
                     if (tipRecipientsContainer) tipRecipientsContainer.innerHTML = '';
                     if (studentsListContainer) studentsListContainer.innerHTML = '';
+                    if (profileStudentSelect) profileStudentSelect.innerHTML = '<option value="">Selecione um aluno</option>';
 
                     if (querySnapshot.empty) {
                         if (taskRecipientsContainer) taskRecipientsContainer.innerHTML = '<p>Nenhum aluno cadastrado ainda.</p>';
@@ -1126,6 +1237,16 @@
                                 <label for="tip-${doc.id}">${student.name || student.email} (${student.email})</label>
                             `;
                             tipRecipientsContainer.appendChild(tipRecipientItem);
+                        }
+
+
+                        if (profileStudentSelect) {
+                            const option = document.createElement('option');
+                            option.value = doc.id;
+                            option.textContent = `${student.name || student.email} (${student.email})`;
+                            option.dataset.studentName = student.name || '';
+                            option.dataset.studentEmail = student.email || '';
+                            profileStudentSelect.appendChild(option);
                         }
 
                         if (studentsListContainer) {
@@ -1235,6 +1356,209 @@
                 .catch(error => {
                     console.error('Erro ao excluir aluno:', error);
                     alert('Erro ao excluir aluno.');
+                });
+        }
+
+        function clearProfileForm() {
+            document.getElementById('profile-doc-id').value = '';
+            document.getElementById('profile-student-id').value = '';
+            document.getElementById('profile-contact').value = '';
+            document.getElementById('profile-personal').value = '';
+            document.getElementById('profile-folder-link').value = '';
+            document.getElementById('profile-english-level').value = '';
+            document.getElementById('profile-evolution').value = '';
+            document.getElementById('profile-consistency').value = '';
+            document.getElementById('save-profile-btn').textContent = 'Salvar Perfil';
+        }
+
+        async function saveStudentProfile() {
+            const docId = document.getElementById('profile-doc-id').value;
+            const studentId = document.getElementById('profile-student-id').value;
+            const selectedOption = document.querySelector('#profile-student-id option:checked');
+            const studentName = selectedOption?.dataset.studentName || selectedOption?.textContent || '';
+            const studentEmail = selectedOption?.dataset.studentEmail || '';
+
+            const profileData = {
+                studentId,
+                studentName,
+                studentEmail,
+                contactInfo: document.getElementById('profile-contact').value.trim(),
+                personalInfo: document.getElementById('profile-personal').value.trim(),
+                contentFolderLink: document.getElementById('profile-folder-link').value.trim(),
+                englishLevel: document.getElementById('profile-english-level').value.trim(),
+                evolution: document.getElementById('profile-evolution').value.trim(),
+                consistency: document.getElementById('profile-consistency').value.trim(),
+                createdBy: currentUser.uid,
+                createdByEmail: currentUser.email,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (!profileData.studentId) {
+                alert('Selecione o aluno para cadastrar o perfil.');
+                return;
+            }
+
+            try {
+                if (docId) {
+                    await db.collection('studentProfiles').doc(docId).update(profileData);
+                    alert('Perfil atualizado com sucesso!');
+                } else {
+                    profileData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('studentProfiles').add(profileData);
+                    alert('Perfil cadastrado com sucesso!');
+                }
+
+                clearProfileForm();
+                loadTeacherProfiles();
+            } catch (error) {
+                console.error('Erro ao salvar perfil do aluno:', error);
+                alert('Erro ao salvar perfil do aluno.');
+            }
+        }
+
+        function loadTeacherProfiles() {
+            const container = document.getElementById('teacher-profiles-list');
+            if (!container || !currentUser) return;
+
+            container.innerHTML = '<p>Carregando perfis...</p>';
+
+            db.collection('studentProfiles')
+                .where('createdBy', '==', currentUser.uid)
+                .get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<p>Você ainda não cadastrou nenhum perfil.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    querySnapshot.forEach(doc => {
+                        const profile = doc.data();
+                        const profileElement = document.createElement('div');
+                        profileElement.className = 'student-item';
+                        profileElement.innerHTML = `
+                            <div class="student-data">
+                                <strong>${escapeHtml(profile.studentName || profile.studentEmail || 'Aluno')}</strong>
+                                <div class="student-meta">Email: ${escapeHtml(profile.studentEmail || 'Não informado')}</div>
+                                <div class="student-meta">Nível de inglês: ${escapeHtml(profile.englishLevel || 'Não informado')}</div>
+                                <div class="student-meta">Atualizado em: ${formatDate(profile.updatedAt || profile.createdAt)}</div>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="btn btn-outline" onclick="editStudentProfile('${doc.id}')">Editar</button>
+                                <button class="btn btn-danger" onclick="deleteStudentProfile('${doc.id}')">Excluir</button>
+                            </div>
+                        `;
+                        container.appendChild(profileElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar perfis de alunos:', error);
+                    container.innerHTML = '<p>Erro ao carregar perfis.</p>';
+                });
+        }
+
+        function editStudentProfile(profileId) {
+            db.collection('studentProfiles').doc(profileId).get()
+                .then(doc => {
+                    if (!doc.exists) return;
+                    const profile = doc.data();
+                    if (profile.createdBy !== currentUser.uid) {
+                        alert('Você só pode editar perfis cadastrados por você.');
+                        return;
+                    }
+
+                    document.getElementById('profile-doc-id').value = profileId;
+                    document.getElementById('profile-student-id').value = profile.studentId || '';
+                    document.getElementById('profile-contact').value = profile.contactInfo || '';
+                    document.getElementById('profile-personal').value = profile.personalInfo || '';
+                    document.getElementById('profile-folder-link').value = profile.contentFolderLink || '';
+                    document.getElementById('profile-english-level').value = profile.englishLevel || '';
+                    document.getElementById('profile-evolution').value = profile.evolution || '';
+                    document.getElementById('profile-consistency').value = profile.consistency || '';
+                    document.getElementById('save-profile-btn').textContent = 'Atualizar Perfil';
+                    setActiveTab('profile-management');
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar perfil para edição:', error);
+                    alert('Erro ao carregar perfil para edição.');
+                });
+        }
+
+        async function deleteStudentProfile(profileId) {
+            if (!confirm('Tem certeza que deseja excluir este perfil?')) return;
+
+            try {
+                const doc = await db.collection('studentProfiles').doc(profileId).get();
+                if (!doc.exists) {
+                    alert('Perfil não encontrado.');
+                    return;
+                }
+
+                const profile = doc.data();
+                if (profile.createdBy !== currentUser.uid) {
+                    alert('Você só pode excluir perfis cadastrados por você.');
+                    return;
+                }
+
+                await db.collection('studentProfiles').doc(profileId).delete();
+                alert('Perfil excluído com sucesso!');
+                clearProfileForm();
+                loadTeacherProfiles();
+            } catch (error) {
+                console.error('Erro ao excluir perfil:', error);
+                alert('Erro ao excluir perfil.');
+            }
+        }
+
+        function loadMyProfile() {
+            const container = document.getElementById('my-profile-content');
+            if (!container || !currentUser) return;
+
+            container.innerHTML = '<p>Carregando perfil...</p>';
+
+            db.collection('studentProfiles')
+                .where('studentId', '==', currentUser.uid)
+                .get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = '<p>Seu perfil ainda não foi cadastrado pela professora.</p>';
+                        return;
+                    }
+
+                    const profiles = [];
+                    querySnapshot.forEach(doc => profiles.push(doc.data()));
+                    const profile = profiles[0];
+
+                    container.innerHTML = `
+                        <div class="profile-section">
+                            <h4>Informações de Contato</h4>
+                            <div class="profile-value preserved-text">${preserveText(profile.contactInfo || 'Não informado')}</div>
+                        </div>
+                        <div class="profile-section">
+                            <h4>Informações Pessoais</h4>
+                            <div class="profile-value preserved-text">${preserveText(profile.personalInfo || 'Não informado')}</div>
+                        </div>
+                        <div class="profile-section">
+                            <h4>Link da Pasta dos Conteúdos</h4>
+                            <div class="profile-value">${profile.contentFolderLink ? `<a href="${escapeHtml(profile.contentFolderLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.contentFolderLink)}</a>` : 'Não informado'}</div>
+                        </div>
+                        <div class="profile-section">
+                            <h4>Nível do Inglês</h4>
+                            <div class="profile-value preserved-text">${preserveText(profile.englishLevel || 'Não informado')}</div>
+                        </div>
+                        <div class="profile-section">
+                            <h4>Evolução</h4>
+                            <div class="profile-value preserved-text">${preserveText(profile.evolution || 'Não informado')}</div>
+                        </div>
+                        <div class="profile-section">
+                            <h4>Constância</h4>
+                            <div class="profile-value preserved-text">${preserveText(profile.consistency || 'Não informado')}</div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar perfil do aluno:', error);
+                    container.innerHTML = '<p>Erro ao carregar seu perfil.</p>';
                 });
         }
         
