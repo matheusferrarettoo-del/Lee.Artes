@@ -318,6 +318,11 @@
             gap: 10px;
             margin-top: 18px;
         }
+
+        .preserved-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
         
         .tip-item {
             padding: 20px;
@@ -1656,7 +1661,7 @@
                     <span>Professor: ${task.createdByName}</span>
                     <span>Data: ${formatDate(task.createdAt)}</span>
                 </div>
-                <p>${task.description}</p>
+                <p class="preserved-text">${preserveText(task.description)}</p>
                 ${optionsHtml}
                 <div class="task-actions">
                     ${userRole === 'student'
@@ -1763,7 +1768,7 @@
                 }
                 
                 modalContent.innerHTML = `
-                    <p>${task.description}</p>
+                    <p class="preserved-text">${preserveText(task.description)}</p>
                     <div style="margin-top:20px">
                         ${formHtml}
                     </div>
@@ -1881,7 +1886,7 @@
                 <div class="tip-icon">${icon}</div>
                 <div>
                     <h3>${tip.title}</h3>
-                    <p>${tip.content}</p>
+                    <p class="preserved-text">${preserveText(tip.content)}</p>
                     <p class="task-meta">Postado por: ${tip.createdByName} em ${formatDate(tip.createdAt)}</p>
                     ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
                 </div>
@@ -1979,7 +1984,7 @@
             if (question.answered) {
                 answerHtml = `
                     <div class="answer-card">
-                        <strong>Resposta:</strong> ${question.answer}
+                        <strong>Resposta:</strong> <span class="preserved-text">${preserveText(question.answer)}</span>
                         <div class="task-meta">Respondido por: ${question.answeredBy} em ${formatDate(question.answeredAt)}</div>
                     </div>
                 `;
@@ -1996,7 +2001,7 @@
             questionElement.innerHTML = `
                 <div class="help-question">${question.title}</div>
                 <div class="task-meta">Aluno: ${question.studentName} - ${formatDate(question.createdAt)}</div>
-                <p>${question.content}</p>
+                <p class="preserved-text">${preserveText(question.content)}</p>
                 ${answerHtml}
             `;
             
@@ -2011,7 +2016,7 @@
             if (question.answered) {
                 answerHtml = `
                     <div class="answer-card">
-                        <strong>Resposta:</strong> ${question.answer}
+                        <strong>Resposta:</strong> <span class="preserved-text">${preserveText(question.answer)}</span>
                         <div class="task-meta">Respondido por: Professor em ${formatDate(question.answeredAt)}</div>
                     </div>
                 `;
@@ -2022,7 +2027,7 @@
             questionElement.innerHTML = `
                 <div class="help-question">${question.title}</div>
                 <div class="task-meta">Enviado em: ${formatDate(question.createdAt)}</div>
-                <p>${question.content}</p>
+                <p class="preserved-text">${preserveText(question.content)}</p>
                 ${answerHtml}
             `;
             
@@ -2058,6 +2063,19 @@
             if (!timestamp) return '';
             const date = timestamp.toDate();
             return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+        }
+
+        function preserveText(text) {
+            return escapeHtml(text || '');
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
         
         // Inicializa a aplicação quando o DOM estiver pronto
