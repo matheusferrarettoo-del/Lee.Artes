@@ -1215,6 +1215,85 @@
             cursor: pointer;
             color: #777;
         }
+
+        .reward-card {
+            border: 1px solid #e9d9ff;
+            border-radius: 14px;
+            background: #faf6ff;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .reward-card h4 {
+            margin: 0 0 8px;
+            color: #4b2f82;
+        }
+
+        .reward-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .reward-metric {
+            background: #fff;
+            border: 1px solid #e8ddf8;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .reward-metric-label {
+            font-size: 12px;
+            color: #7f67b8;
+        }
+
+        .reward-metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3c2968;
+        }
+
+        .status-pill {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-pill.pending {
+            background: #fff3cd;
+            color: #8a6d1f;
+        }
+
+        .status-pill.done {
+            background: #dff5e6;
+            color: #216b3b;
+        }
+
+        .reward-request-item {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+
+        .pending-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: #ff4d4f;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 6px;
+            padding: 0 6px;
+        }
         
         @media (max-width: 768px) {
             .header-content {
@@ -1260,7 +1339,7 @@
                         <li><a href="#" class="nav-link" data-tab="tips">Dicas</a></li>
                         <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
                         <li id="nav-student-profile" class="hidden"><a href="#" class="nav-link" data-tab="my-profile">Meu Perfil</a></li>
-                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno</a></li>
+                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno <span id="teacher-reward-badge" class="pending-badge hidden">0</span></a></li>
                         <li id="nav-teacher-calendar" class="hidden"><a href="#" class="nav-link" data-tab="teacher-calendar">Calendário de Aulas</a></li>
                     </ul>
                 </nav>
@@ -1660,6 +1739,13 @@
                     <p>Carregando perfis...</p>
                 </div>
             </div>
+
+            <div class="card" style="margin-top:25px;">
+                <div class="card-header">Resgates Pendentes do Mascote Evolutivo</div>
+                <div class="card-body" id="teacher-reward-requests-list">
+                    <p>Carregando pedidos de resgate...</p>
+                </div>
+            </div>
         </div>
 
         <div id="teacher-calendar-tab" class="tab-container">
@@ -1744,6 +1830,7 @@
         let selectedTipFilter = 'all';
         let teacherCalendarLessons = [];
         let selectedTeacherCalendarMonth = '';
+        let teacherRewardRequestsCache = [];
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -1772,6 +1859,7 @@
                         document.getElementById('nav-student-profile').classList.add('hidden');
                         loadStudents();
                         loadTeacherProfiles();
+                        loadTeacherRewardRequests();
                         setActiveTab('users');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
@@ -1842,6 +1930,7 @@
 
                     if (tabId === 'profile-management' && userRole === 'teacher') {
                         loadTeacherProfiles();
+                        loadTeacherRewardRequests();
                     }
 
                     if (tabId === 'teacher-calendar' && userRole === 'teacher') {
@@ -2623,6 +2712,51 @@
             return { currentLevel, progress };
         }
 
+        function calculateRewardMetrics(totalPoints = 0, usedRescues = 0) {
+            const rescuesTotal = Math.floor(Number(totalPoints || 0) / 500);
+            const rescuesUsed = Math.max(0, Number(usedRescues || 0));
+            return {
+                rescuesTotal,
+                rescuesUsed,
+                rescuesAvailable: Math.max(0, rescuesTotal - rescuesUsed)
+            };
+        }
+
+        async function recalculateStudentRewardStatus(studentId) {
+            if (!studentId) {
+                return {
+                    totalPoints: 0,
+                    rescuesTotal: 0,
+                    rescuesUsed: 0,
+                    rescuesAvailable: 0,
+                    hasPending: false,
+                    requests: []
+                };
+            }
+
+            const [profileSnapshot, responsesSnapshot, requestsSnapshot] = await Promise.all([
+                db.collection('studentProfiles').where('studentId', '==', studentId).limit(1).get(),
+                db.collection('responses').where('studentId', '==', studentId).get(),
+                db.collection('mascotRewardRequests').where('studentId', '==', studentId).get()
+            ]);
+
+            const profile = profileSnapshot.empty ? {} : profileSnapshot.docs[0].data();
+            const attendancePresentDays = Number(profile.attendancePresentDays || 0);
+            const completedTasks = responsesSnapshot.size;
+            const totalPoints = (attendancePresentDays * 100) + (completedTasks * 10);
+            const requests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const rescuesUsed = requests.filter(item => ['PENDENTE', 'CONCLUIDO'].includes(item.status)).length;
+            const hasPending = requests.some(item => item.status === 'PENDENTE');
+            const rewardMetrics = calculateRewardMetrics(totalPoints, rescuesUsed);
+
+            return {
+                totalPoints,
+                ...rewardMetrics,
+                hasPending,
+                requests
+            };
+        }
+
         async function loadMyProfile() {
             const container = document.getElementById('my-profile-content');
             if (!container || !currentUser) return;
@@ -2630,11 +2764,12 @@
             container.innerHTML = '<p>Carregando perfil...</p>';
 
             try {
-                const [profileSnapshot, tasksSnapshot, responsesSnapshot, userDoc] = await Promise.all([
+                const [profileSnapshot, tasksSnapshot, responsesSnapshot, userDoc, requestsSnapshot] = await Promise.all([
                     db.collection('studentProfiles').where('studentId', '==', currentUser.uid).get(),
                     db.collection('users').doc(currentUser.uid).collection('tasks').get(),
                     db.collection('responses').where('studentId', '==', currentUser.uid).get(),
-                    db.collection('users').doc(currentUser.uid).get()
+                    db.collection('users').doc(currentUser.uid).get(),
+                    db.collection('mascotRewardRequests').where('studentId', '==', currentUser.uid).get()
                 ]);
 
                 if (profileSnapshot.empty) {
@@ -2666,42 +2801,56 @@
                 const nextLevelMap = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2', C2: 'Fluente' };
                 const nextLevel = nextLevelMap[currentLevel] || 'B2';
 
+                const rewardRequests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => {
+                        const aTime = a.requestedAt?.toMillis ? a.requestedAt.toMillis() : 0;
+                        const bTime = b.requestedAt?.toMillis ? b.requestedAt.toMillis() : 0;
+                        return bTime - aTime;
+                    });
+                const rescuesUsed = rewardRequests.filter(item => ['PENDENTE', 'CONCLUIDO'].includes(item.status)).length;
+                const totalPoints = (attendancePresentDays * 100) + (completedTasks * 10);
+                const rewardMetrics = calculateRewardMetrics(totalPoints, rescuesUsed);
+                const pendingRequest = rewardRequests.find(item => item.status === 'PENDENTE');
+                const latestCompletedRequest = rewardRequests.find(item => item.status === 'CONCLUIDO' && isValidHttpUrl(item.imageUrl || ''));
+                const canRedeemNow = rewardMetrics.rescuesAvailable > 0 && !pendingRequest;
+                const chosenPath = pendingRequest?.chosenPath || latestCompletedRequest?.chosenPath || '';
+                const mascotCurrentImage = latestCompletedRequest?.imageUrl || '';
+                const pendingDate = pendingRequest?.requestedAt?.toDate ? pendingRequest.requestedAt.toDate().toLocaleDateString('pt-BR') : '';
+                const completedDate = latestCompletedRequest?.completedAt?.toDate ? latestCompletedRequest.completedAt.toDate().toLocaleDateString('pt-BR') : '';
+
                 container.innerHTML = `
                     <div class="student-profile-layout">
-                        <div>
-                            <div class="profile-banner">
-                                <div class="profile-banner-top">
-                                    <div class="profile-avatar">${profileAvatarMarkup}</div>
-                                    <div>
-                                        <div class="profile-banner-name">${escapeHtml(studentName)}</div>
-                                        <div class="profile-banner-level">Nível ${escapeHtml(currentLevel)}</div>
+                        <div class="profile-main">
+                            <div class="profile-hero">
+                                <div class="profile-avatar">${profileAvatarMarkup}</div>
+                                <div class="profile-hero-content">
+                                    <h2>${escapeHtml(studentName)}</h2>
+                                    <p>Bem-vindo(a)! Continue avançando no inglês e na arte.</p>
+                                    <div class="profile-level-chip">Nível atual: ${escapeHtml(currentLevel)}</div>
+                                    <div class="profile-progress-track">
+                                        <div class="profile-progress-fill" style="width:${progress}%"></div>
                                     </div>
-                                </div>
-                                <div class="profile-progress-label">Progresso para ${escapeHtml(nextLevel)}: ${progress}%</div>
-                                <div class="profile-progress-track">
-                                    <div class="profile-progress-fill" style="width: ${progress}%"></div>
+                                    <small>Próximo nível: ${escapeHtml(nextLevel)}</small>
                                 </div>
                             </div>
 
-                            <div class="profile-panel">
-                                <div class="profile-panel-header">Meu Perfil</div>
+                            <div class="profile-panel" style="margin-top:16px;">
+                                <div class="profile-panel-header">Resumo do Perfil</div>
                                 <div class="profile-grid">
-                                    <div class="profile-tile">
-                                        <h4>📞 Informações de Contato</h4>
-                                        <p class="preserved-text">${preserveText(profile.contactInfo || 'Não informado')}</p>
-                                    </div>
-                                    <div class="profile-tile">
-                                        <h4>👤 Informações Pessoais</h4>
-                                        <p class="preserved-text">${preserveText(profile.personalInfo || 'Não informado')}</p>
-                                    </div>
                                     <div class="profile-tile full">
-                                        <h4>📁 Link da Pasta dos Conteúdos</h4>
-                                        ${profile.contentFolderLink
-                                            ? `<a href="${escapeHtml(profile.contentFolderLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.contentFolderLink)}</a>`
-                                            : '<p>Não informado</p>'}
+                                        <h4>🎯 Objetivo</h4>
+                                        <p class="preserved-text">${preserveText(profile.goal || 'Não informado')}</p>
                                     </div>
                                     <div class="profile-tile">
-                                        <h4>🏁 Nível do Inglês</h4>
+                                        <h4>📒 Dados pessoais</h4>
+                                        <p class="preserved-text">${preserveText(profile.personal || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>🗂️ Pasta da estudante</h4>
+                                        <p>${profile.folderLink ? `<a href="${escapeHtml(profile.folderLink)}" target="_blank" rel="noopener noreferrer">Abrir pasta</a>` : 'Não informado'}</p>
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>🇬🇧 Nível de inglês</h4>
                                         <p class="preserved-text">${preserveText(profile.englishLevel || 'Não informado')}</p>
                                     </div>
                                     <div class="profile-tile">
@@ -2714,49 +2863,65 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="reward-card">
+                                <h4>🐾 Sistema Mascote Evolutivo</h4>
+                                <p>Presença em aula: +100 pontos | Tarefa concluída: +10 pontos | 500 pontos = 1 resgate.</p>
+                                <div class="reward-metrics">
+                                    <div class="reward-metric"><div class="reward-metric-label">Pontos totais</div><div class="reward-metric-value">${totalPoints}</div></div>
+                                    <div class="reward-metric"><div class="reward-metric-label">Resgates totais</div><div class="reward-metric-value">${rewardMetrics.rescuesTotal}</div></div>
+                                    <div class="reward-metric"><div class="reward-metric-label">Resgates usados</div><div class="reward-metric-value">${rewardMetrics.rescuesUsed}</div></div>
+                                    <div class="reward-metric"><div class="reward-metric-label">Disponíveis</div><div class="reward-metric-value">${rewardMetrics.rescuesAvailable}</div></div>
+                                </div>
+                                ${pendingRequest ? `
+                                    <div class="reward-request-item">
+                                        <strong>✅ Evolução resgatada!</strong><br>
+                                        <span class="status-pill pending">Aguardando o professor concluir</span>
+                                        <p style="margin-top:8px;">Data do resgate: ${pendingDate || 'Agora'}</p>
+                                        ${pendingRequest.chosenPath ? `<p>Caminho escolhido: <strong>${escapeHtml(pendingRequest.chosenPath)}</strong></p>` : ''}
+                                    </div>
+                                ` : ''}
+                                ${latestCompletedRequest ? `
+                                    <div class="reward-request-item">
+                                        <strong>✅ Evolução concluída</strong><br>
+                                        <span class="status-pill done">Concluído</span>
+                                        <p style="margin-top:8px;">Data de conclusão: ${completedDate || 'Não informada'}</p>
+                                        ${chosenPath ? `<p>Caminho: <strong>${escapeHtml(chosenPath)}</strong></p>` : ''}
+                                        ${mascotCurrentImage ? `<p><img src="${escapeHtml(mascotCurrentImage)}" alt="Mascote evoluído" style="max-width:140px;border-radius:10px;border:1px solid #ddd;"></p><p><a href="${escapeHtml(mascotCurrentImage)}" target="_blank" rel="noopener noreferrer">Abrir imagem da evolução</a></p>` : ''}
+                                    </div>
+                                ` : ''}
+                                ${canRedeemNow ? `
+                                    <div class="form-group" style="margin-bottom:10px;max-width:280px;">
+                                        <label for="reward-path-select">Caminho da evolução (opcional)</label>
+                                        <select id="reward-path-select" class="form-control">
+                                            <option value="">Sem caminho definido</option>
+                                            <option value="Fogo">Fogo</option>
+                                            <option value="Água">Água</option>
+                                            <option value="Ar">Ar</option>
+                                            <option value="Terra">Terra</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-accent" onclick="redeemMascotEvolution('${profileSnapshot.docs[0].id}')">Resgatar evolução</button>
+                                ` : `<p style="margin-top:8px;color:#6f5a98;">${pendingRequest ? 'Você já possui um pedido pendente. Aguarde a conclusão da professora.' : 'Acumule mais pontos para liberar novos resgates.'}</p>`}
+                            </div>
                         </div>
 
                         <div class="profile-side">
                             <div class="profile-panel">
                                 <div class="profile-panel-header">Estatísticas do Aluno</div>
                                 <div class="profile-stats">
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Dias estudando</div>
-                                        <div class="profile-stat-value">${studyDays}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Presenças</div>
-                                        <div class="profile-stat-value">${attendancePresentDays}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Faltas</div>
-                                        <div class="profile-stat-value">${attendanceAbsences}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Tarefas recebidas</div>
-                                        <div class="profile-stat-value">${totalTasks}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Tarefas concluídas</div>
-                                        <div class="profile-stat-value">${completedTasks}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Meta semanal (${weeklyGoal})</div>
-                                        <div class="profile-stat-value">${completedTasks}/${weeklyGoal}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Aulas no calendário</div>
-                                        <div class="profile-stat-value">${scheduledLessons}</div>
-                                    </div>
-                                    <div class="profile-stat-row">
-                                        <div class="profile-stat-label">Reposições no calendário</div>
-                                        <div class="profile-stat-value">${scheduledMakeups}</div>
-                                    </div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Dias estudando</div><div class="profile-stat-value">${studyDays}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Presenças</div><div class="profile-stat-value">${attendancePresentDays}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Faltas</div><div class="profile-stat-value">${attendanceAbsences}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Tarefas recebidas</div><div class="profile-stat-value">${totalTasks}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Tarefas concluídas</div><div class="profile-stat-value">${completedTasks}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Pontos do mascote</div><div class="profile-stat-value">${totalPoints}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Meta semanal (${weeklyGoal})</div><div class="profile-stat-value">${completedTasks}/${weeklyGoal}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Aulas no calendário</div><div class="profile-stat-value">${scheduledLessons}</div></div>
+                                    <div class="profile-stat-row"><div class="profile-stat-label">Reposições no calendário</div><div class="profile-stat-value">${scheduledMakeups}</div></div>
                                 </div>
                                 <div style="padding: 0 16px 16px;">
-                                    <div class="profile-progress-track" style="height:10px;background:#e8ddf8;">
-                                        <div class="profile-progress-fill" style="width:${weeklyProgress}%"></div>
-                                    </div>
+                                    <div class="profile-progress-track" style="height:10px;background:#e8ddf8;"><div class="profile-progress-fill" style="width:${weeklyProgress}%"></div></div>
                                 </div>
                                 <div class="profile-level-bar">
                                     <div class="profile-level-point"><span>A1</span></div>
@@ -2782,6 +2947,175 @@
             }
         }
         
+        async function redeemMascotEvolution(profileId) {
+            if (!currentUser || !profileId) return;
+
+            try {
+                const profileDoc = await db.collection('studentProfiles').doc(profileId).get();
+                if (!profileDoc.exists) {
+                    alert('Perfil não encontrado para realizar o resgate.');
+                    return;
+                }
+
+                const profile = profileDoc.data();
+                if (profile.studentId !== currentUser.uid) {
+                    alert('Você só pode resgatar evolução no seu próprio perfil.');
+                    return;
+                }
+
+                const chosenPathRaw = document.getElementById('reward-path-select')?.value || '';
+                const chosenPath = String(chosenPathRaw).trim();
+                const status = await recalculateStudentRewardStatus(currentUser.uid);
+
+                if (status.hasPending) {
+                    alert('Você já possui um pedido pendente de evolução.');
+                    return;
+                }
+
+                if (status.rescuesAvailable <= 0) {
+                    alert('Você ainda não possui resgates disponíveis.');
+                    return;
+                }
+
+                const requestPayload = {
+                    studentId: currentUser.uid,
+                    teacherId: profile.createdBy,
+                    status: 'PENDENTE',
+                    requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    pointsSnapshot: status.totalPoints,
+                    chosenPath: chosenPath || null,
+                    rewardIndex: status.rescuesUsed + 1,
+                    profileId
+                };
+
+                const requestRef = await db.collection('mascotRewardRequests').add(requestPayload);
+                await db.collection('teacherNotifications').add({
+                    teacherId: profile.createdBy,
+                    requestId: requestRef.id,
+                    studentId: currentUser.uid,
+                    message: `Aluno ${currentUser.email} resgatou uma evolução do mascote. Pendência: anexar imagem e concluir.`,
+                    type: 'MASCOT_REWARD_REQUEST',
+                    isRead: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('Resgate criado com sucesso! Agora aguarde a conclusão da professora.');
+                loadMyProfile();
+            } catch (error) {
+                console.error('Erro ao resgatar evolução do mascote:', error);
+                alert('Erro ao criar pedido de resgate.');
+            }
+        }
+
+        function updateTeacherRewardBadge() {
+            const badge = document.getElementById('teacher-reward-badge');
+            if (!badge) return;
+            const pendingCount = teacherRewardRequestsCache.filter(item => item.status === 'PENDENTE').length;
+            badge.textContent = String(pendingCount);
+            badge.classList.toggle('hidden', pendingCount === 0);
+        }
+
+        async function loadTeacherRewardRequests() {
+            const container = document.getElementById('teacher-reward-requests-list');
+            if (!container || !currentUser || userRole !== 'teacher') return;
+
+            container.innerHTML = '<p>Carregando pedidos de resgate...</p>';
+
+            try {
+                const snapshot = await db.collection('mascotRewardRequests')
+                    .where('teacherId', '==', currentUser.uid)
+                    .get();
+
+                teacherRewardRequestsCache = snapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => {
+                        const aTime = a.requestedAt?.toMillis ? a.requestedAt.toMillis() : 0;
+                        const bTime = b.requestedAt?.toMillis ? b.requestedAt.toMillis() : 0;
+                        return bTime - aTime;
+                    });
+
+                updateTeacherRewardBadge();
+
+                const pending = teacherRewardRequestsCache.filter(item => item.status === 'PENDENTE');
+                if (!pending.length) {
+                    container.innerHTML = '<p>Não há resgates pendentes no momento.</p>';
+                    return;
+                }
+
+                const studentIds = Array.from(new Set(pending.map(item => item.studentId).filter(Boolean)));
+                const studentDocs = await Promise.all(studentIds.map(id => db.collection('users').doc(id).get()));
+                const studentMap = studentDocs.reduce((acc, doc) => {
+                    acc[doc.id] = doc.exists ? (doc.data().name || doc.data().email || 'Aluno') : 'Aluno';
+                    return acc;
+                }, {});
+
+                container.innerHTML = pending.map(item => {
+                    const dateText = item.requestedAt?.toDate ? item.requestedAt.toDate().toLocaleDateString('pt-BR') : 'Data não informada';
+                    const studentName = studentMap[item.studentId] || 'Aluno';
+                    return `
+                        <div class="reward-request-item">
+                            <h4 style="margin:0 0 8px;">${escapeHtml(studentName)}</h4>
+                            <p><strong>Data:</strong> ${dateText}</p>
+                            <p><strong>Pontos no resgate:</strong> ${Number(item.pointsSnapshot || 0)}</p>
+                            ${item.chosenPath ? `<p><strong>Caminho escolhido:</strong> ${escapeHtml(item.chosenPath)}</p>` : ''}
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label for="reward-image-${item.id}">Link da imagem da evolução</label>
+                                <input type="url" id="reward-image-${item.id}" class="form-control" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-accent" onclick="concludeRewardRequest('${item.id}')">Concluir</button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Erro ao carregar resgates pendentes:', error);
+                container.innerHTML = '<p>Erro ao carregar pedidos de resgate.</p>';
+            }
+        }
+
+        async function concludeRewardRequest(requestId) {
+            if (!requestId || !currentUser || userRole !== 'teacher') return;
+
+            const imageInput = document.getElementById(`reward-image-${requestId}`);
+            const imageUrl = imageInput ? imageInput.value.trim() : '';
+            if (!isValidHttpUrl(imageUrl)) {
+                alert('Informe um link válido (http/https) para a imagem.');
+                return;
+            }
+
+            try {
+                const requestRef = db.collection('mascotRewardRequests').doc(requestId);
+                const requestDoc = await requestRef.get();
+                if (!requestDoc.exists) {
+                    alert('Pedido não encontrado.');
+                    return;
+                }
+
+                const request = requestDoc.data();
+                if (request.teacherId !== currentUser.uid) {
+                    alert('Você só pode concluir pedidos dos seus alunos.');
+                    return;
+                }
+                if (request.status !== 'PENDENTE') {
+                    alert('Esse pedido já foi concluído.');
+                    return;
+                }
+
+                await requestRef.update({
+                    status: 'CONCLUIDO',
+                    imageUrl,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    completedBy: currentUser.uid
+                });
+
+                alert('Resgate concluído com sucesso!');
+                loadTeacherRewardRequests();
+            } catch (error) {
+                console.error('Erro ao concluir pedido de resgate:', error);
+                alert('Erro ao concluir pedido.');
+            }
+        }
+
+
         // Função para autenticar o usuário
         async function signIn() {
             const email = loginEmail.value;
@@ -3431,23 +3765,36 @@
             saveResponse(selectedOption.value);
         }
         
-        function saveResponse(response) {
-            db.collection('responses').add({
-                taskId: currentTaskId,
-                studentId: currentUser.uid,
-                studentName: currentUser.email,
-                response: response,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                alert('Resposta enviada com sucesso!');
+        async function saveResponse(response) {
+            try {
+                const existing = await db.collection('responses')
+                    .where('taskId', '==', currentTaskId)
+                    .where('studentId', '==', currentUser.uid)
+                    .limit(1)
+                    .get();
+
+                if (!existing.empty) {
+                    alert('Você já concluiu essa tarefa.');
+                    responseModal.style.display = 'none';
+                    return;
+                }
+
+                await db.collection('responses').add({
+                    taskId: currentTaskId,
+                    studentId: currentUser.uid,
+                    studentName: currentUser.email,
+                    response: response,
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('Resposta enviada com sucesso! (+10 pontos no mascote)');
                 responseModal.style.display = 'none';
                 loadTasks();
-            })
-            .catch(error => {
+                if (userRole === 'student') loadMyProfile();
+            } catch (error) {
                 console.error('Erro ao enviar resposta:', error);
                 alert('Erro ao enviar resposta. Tente novamente.');
-            });
+            }
         }
         
         function loadTips() {
