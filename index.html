@@ -407,22 +407,157 @@
         .task-status.completed { background: #7c4dff; }
         .task-status.overdue { background: #f06292; }
         
-        .tip-item {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
+        .tips-layout {
+            background: linear-gradient(160deg, #f8f1ff 0%, #f3e8ff 45%, #efe1ff 100%);
+            border-radius: 22px;
+            padding: 24px;
+            border: 1px solid #e6d3ff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 12px 24px rgba(116, 49, 177, 0.08);
+        }
+
+        .tips-topbar {
             display: flex;
-            transition: all 0.3s;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
         }
-        
-        .tip-item:hover {
-            background-color: #faf5ff;
+
+        .tips-heading {
+            font-size: 34px;
+            color: #4a2670;
+            font-weight: 800;
+            line-height: 1.1;
         }
-        
+
+        .tips-subheading {
+            color: #6d4f93;
+            font-weight: 500;
+        }
+
+        .tips-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .tips-filter-btn {
+            border: none;
+            border-radius: 999px;
+            background: #efe5ff;
+            color: #5d3586;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 9px 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tips-filter-btn:hover {
+            background: #e2cffd;
+        }
+
+        .tips-filter-btn.active {
+            background: linear-gradient(135deg, #8d46de, #6d2ec5);
+            color: white;
+            box-shadow: 0 8px 14px rgba(109, 46, 197, 0.28);
+        }
+
+        .tips-featured {
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(120deg, #b47af6, #8f53e7);
+            color: white;
+            box-shadow: 0 14px 24px rgba(95, 39, 160, 0.24);
+            margin-bottom: 16px;
+        }
+
+        .tips-featured-label {
+            background: rgba(51, 0, 110, 0.22);
+            padding: 10px 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tips-featured-content {
+            padding: 20px;
+        }
+
+        .tips-featured-content h3 {
+            font-size: 30px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .tips-featured-content p {
+            color: #f3e8ff;
+            margin-bottom: 10px;
+        }
+
+        .tips-featured-meta {
+            font-size: 14px;
+            opacity: 0.95;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .tip-item {
+            background: rgba(255, 255, 255, 0.88);
+            border-radius: 16px;
+            border: 1px solid #e5d4fd;
+            padding: 18px;
+            box-shadow: 0 8px 18px rgba(107, 56, 171, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tip-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .tip-icon {
-            font-size: 28px;
-            margin-right: 15px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            background: #f0e2ff;
             color: var(--secondary);
-            min-width: 40px;
+            flex-shrink: 0;
+        }
+
+        .tip-item h3 {
+            font-size: 23px;
+            line-height: 1.2;
+            color: #52267a;
+        }
+
+        .tip-item .task-meta {
+            font-size: 13px;
+        }
+
+        .tip-item .task-actions {
+            margin-top: auto;
         }
         
         .help-item {
@@ -1220,9 +1355,21 @@
             <!-- Aba de Dicas -->
             <div id="tips-tab" class="tab-container">
                 <div class="card">
-                    <div class="card-header">Dicas e Recomendações</div>
-                    <div id="tips-list">
-                        <!-- Dicas serão carregadas aqui -->
+                    <div class="card-body">
+                        <div class="tips-layout">
+                            <div class="tips-topbar">
+                                <div>
+                                    <h2 class="tips-heading">Dicas &amp; Recomendações</h2>
+                                    <p class="tips-subheading">Conteúdos práticos para acelerar seu inglês.</p>
+                                </div>
+                            </div>
+                            <div id="tips-filters" class="tips-filters">
+                                <!-- Filtros serão carregados aqui -->
+                            </div>
+                            <div id="tips-list">
+                                <!-- Dicas serão carregadas aqui -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -1507,6 +1654,8 @@
         let studentsList = []; // Lista de alunos para seleção
         let currentTaskId = null; // ID da tarefa sendo respondida
         let profileCalendarEntries = []; // Datas de aula/reposição do perfil
+        let tipsCache = [];
+        let selectedTipFilter = 'all';
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -2967,51 +3116,126 @@
                     .where('createdBy', '==', currentUser.uid)
                     .orderBy('createdAt', 'desc');
             } else {
-  // Aluno vê dicas em sua própria coleção
+                // Aluno vê dicas em sua própria coleção
                 query = db.collection('users')
                     .doc(currentUser.uid)
                     .collection('tips')
                     .orderBy('createdAt', 'desc');
             }
-            
+
             query.get().then(querySnapshot => {
-                const container = document.getElementById('tips-list');
-                container.innerHTML = '';
-                
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="padding:20px; text-align:center">Nenhuma dica encontrada.</p>';
-                    return;
-                }
-                
-                querySnapshot.forEach(doc => {
-                    const tip = doc.data();
-                    const tipElement = createTipElement(tip, doc.id);
-                    container.appendChild(tipElement);
-                });
+                tipsCache = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                renderTipsFilters();
+                renderTipsList();
             }).catch(error => {
                 console.error('Erro ao carregar dicas:', error);
             });
         }
-        
-        function createTipElement(tip, tipId) {
-            const tipElement = document.createElement('div');
-            tipElement.className = 'tip-item';
-            
-            let icon = '💡';
-            if (tip.type === 'reading') icon = '📖';
-            else if (tip.type === 'movie') icon = '🎬';
-            else if (tip.type === 'music') icon = '🎵';
-            
-            tipElement.innerHTML = `
-                <div class="tip-icon">${icon}</div>
-                <div>
+
+        function renderTipsFilters() {
+            const filtersContainer = document.getElementById('tips-filters');
+            if (!filtersContainer) return;
+
+            const filterOptions = [
+                { value: 'all', label: 'Todas', icon: '💬' },
+                { value: 'reading', label: 'Gramática', icon: '📘' },
+                { value: 'music', label: 'Listening', icon: '🎧' },
+                { value: 'movie', label: 'Speaking', icon: '🗣️' },
+                { value: 'other', label: 'Motivação', icon: '💡' }
+            ];
+
+            filtersContainer.innerHTML = '';
+            filterOptions.forEach(filter => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `tips-filter-btn ${selectedTipFilter === filter.value ? 'active' : ''}`;
+                button.dataset.filter = filter.value;
+                button.innerHTML = `<span>${filter.icon}</span><span>${filter.label}</span>`;
+                button.addEventListener('click', () => {
+                    selectedTipFilter = filter.value;
+                    renderTipsFilters();
+                    renderTipsList();
+                });
+                filtersContainer.appendChild(button);
+            });
+        }
+
+        function renderTipsList() {
+            const container = document.getElementById('tips-list');
+            if (!container) return;
+
+            const filteredTips = tipsCache.filter(tip => selectedTipFilter === 'all' || tip.type === selectedTipFilter);
+
+            container.innerHTML = '';
+            if (filteredTips.length === 0) {
+                container.innerHTML = '<p style="padding:20px; text-align:center">Nenhuma dica encontrada para este filtro.</p>';
+                return;
+            }
+
+            const [featuredTip, ...otherTips] = filteredTips;
+
+            const featuredElement = createFeaturedTipElement(featuredTip, featuredTip.id);
+            container.appendChild(featuredElement);
+
+            if (otherTips.length > 0) {
+                const grid = document.createElement('div');
+                grid.className = 'tips-grid';
+
+                otherTips.forEach(tip => {
+                    const tipElement = createTipElement(tip, tip.id);
+                    grid.appendChild(tipElement);
+                });
+
+                container.appendChild(grid);
+            }
+        }
+
+        function getTipIcon(type) {
+            if (type === 'reading') return '📖';
+            if (type === 'movie') return '🎬';
+            if (type === 'music') return '🎵';
+            return '💡';
+        }
+
+        function createFeaturedTipElement(tip, tipId) {
+            const featured = document.createElement('div');
+            featured.className = 'tips-featured';
+            const icon = getTipIcon(tip.type);
+            featured.innerHTML = `
+                <div class="tips-featured-label">${icon} Dica em destaque da semana</div>
+                <div class="tips-featured-content">
                     <h3>${tip.title}</h3>
                     <p class="preserved-text">${preserveText(tip.content)}</p>
-                    <p class="task-meta">Postado por: ${tip.createdByName} em ${formatDate(tip.createdAt)}</p>
+                    <div class="tips-featured-meta">
+                        <span>📅 ${formatDate(tip.createdAt)}</span>
+                        <span>👩‍🏫 ${tip.createdByName || 'Professora'}</span>
+                    </div>
                     ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
                 </div>
             `;
-            
+            return featured;
+        }
+
+        function createTipElement(tip, tipId) {
+            const tipElement = document.createElement('div');
+            tipElement.className = 'tip-item';
+
+            const icon = getTipIcon(tip.type);
+
+            tipElement.innerHTML = `
+                <div class="tip-item-header">
+                    <div class="tip-icon">${icon}</div>
+                    <h3>${tip.title}</h3>
+                </div>
+                <p class="preserved-text">${preserveText(tip.content)}</p>
+                <p class="task-meta">Postado por: ${tip.createdByName || 'Professora'} em ${formatDate(tip.createdAt)}</p>
+                ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
+            `;
+
             return tipElement;
         }
 
