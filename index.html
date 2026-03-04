@@ -1065,6 +1065,53 @@
             color: #7b5bb9;
         }
 
+
+        .teacher-calendar-toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .teacher-calendar-day-list {
+            margin-top: 4px;
+            font-size: 10px;
+            width: 100%;
+            text-align: center;
+            color: #4b2f82;
+            line-height: 1.2;
+        }
+
+        .attendance-status {
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 4px 10px;
+            display: inline-block;
+        }
+
+        .attendance-status.pending {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .attendance-status.present {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .attendance-status.absent {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        .attendance-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 1000px) {
             .student-profile-layout {
                 grid-template-columns: 1fr;
@@ -1082,6 +1129,12 @@
 
             .calendar-form-row {
                 grid-template-columns: 1fr;
+            }
+
+
+            .teacher-calendar-toolbar {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
         .question-form {
@@ -1201,6 +1254,7 @@
                         <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
                         <li id="nav-student-profile" class="hidden"><a href="#" class="nav-link" data-tab="my-profile">Meu Perfil</a></li>
                         <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno</a></li>
+                        <li id="nav-teacher-calendar" class="hidden"><a href="#" class="nav-link" data-tab="teacher-calendar">Calendário de Aulas</a></li>
                     </ul>
                 </nav>
                 <div class="user-info">
@@ -1600,6 +1654,31 @@
                 </div>
             </div>
         </div>
+
+        <div id="teacher-calendar-tab" class="tab-container">
+            <div class="card">
+                <div class="card-header">Calendário de Aulas</div>
+                <div class="card-body">
+                    <div class="teacher-calendar-toolbar">
+                        <div class="form-group" style="margin:0;">
+                            <label for="teacher-calendar-month">Mês</label>
+                            <input type="month" id="teacher-calendar-month" class="form-control">
+                        </div>
+                        <button id="teacher-calendar-refresh-btn" class="btn btn-outline">Atualizar</button>
+                    </div>
+                    <div id="teacher-calendar-grid" class="profile-calendar-wrapper">
+                        <p>Carregando calendário...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:25px;">
+                <div class="card-header">Aulas Cadastradas e Chamada</div>
+                <div class="card-body" id="teacher-calendar-lessons">
+                    <p>Carregando aulas...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1656,6 +1735,8 @@
         let profileCalendarEntries = []; // Datas de aula/reposição do perfil
         let tipsCache = [];
         let selectedTipFilter = 'all';
+        let teacherCalendarLessons = [];
+        let selectedTeacherCalendarMonth = '';
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -1680,6 +1761,7 @@
                     if (userRole === 'teacher') {
                         document.getElementById('nav-users').classList.remove('hidden');
                         document.getElementById('nav-teacher-profile').classList.remove('hidden');
+                        document.getElementById('nav-teacher-calendar').classList.remove('hidden');
                         document.getElementById('nav-student-profile').classList.add('hidden');
                         loadStudents();
                         loadTeacherProfiles();
@@ -1687,6 +1769,7 @@
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
                         document.getElementById('nav-teacher-profile').classList.add('hidden');
+                        document.getElementById('nav-teacher-calendar').classList.add('hidden');
                         document.getElementById('nav-student-profile').classList.remove('hidden');
                         loadMyProfile();
                         setActiveTab('tasks');
@@ -1706,6 +1789,7 @@
                     mainContent.classList.add('hidden');
                     document.getElementById('nav-users').classList.add('hidden');
                     document.getElementById('nav-teacher-profile').classList.add('hidden');
+                    document.getElementById('nav-teacher-calendar').classList.add('hidden');
                     document.getElementById('nav-student-profile').classList.add('hidden');
                 }
             });
@@ -1752,6 +1836,10 @@
                     if (tabId === 'profile-management' && userRole === 'teacher') {
                         loadTeacherProfiles();
                     }
+
+                    if (tabId === 'teacher-calendar' && userRole === 'teacher') {
+                        loadTeacherLessonCalendar();
+                    }
                 });
             });
             
@@ -1782,6 +1870,17 @@
 
             if (document.getElementById('add-calendar-entry-btn')) {
                 document.getElementById('add-calendar-entry-btn').addEventListener('click', addProfileCalendarEntry);
+            }
+
+            if (document.getElementById('teacher-calendar-refresh-btn')) {
+                document.getElementById('teacher-calendar-refresh-btn').addEventListener('click', loadTeacherLessonCalendar);
+            }
+
+            if (document.getElementById('teacher-calendar-month')) {
+                document.getElementById('teacher-calendar-month').addEventListener('change', event => {
+                    selectedTeacherCalendarMonth = event.target.value;
+                    renderTeacherLessonCalendarView();
+                });
             }
             // Configura o upload de áudio
             const audioUploadArea = document.getElementById('audio-upload-area');
@@ -2144,6 +2243,212 @@
                     container.innerHTML = '<p>Erro ao carregar perfis.</p>';
                 });
         }
+
+        function toMonthValue(dateText) {
+            if (!dateText || !String(dateText).includes('-')) return '';
+            return String(dateText).slice(0, 7);
+        }
+
+        function getAttendanceStatusLabel(status) {
+            if (status === 'present') return 'Presença';
+            if (status === 'absent') return 'Falta';
+            return 'Pendente';
+        }
+
+        function flattenTeacherCalendarLessons(profileDocs = []) {
+            return profileDocs.flatMap(profileDoc => {
+                const profile = profileDoc.data();
+                const classCalendar = Array.isArray(profile.classCalendar) ? profile.classCalendar : [];
+                const attendanceRecords = profile.attendanceRecords || {};
+                const studentName = profile.studentName || profile.studentEmail || 'Aluno';
+
+                return classCalendar
+                    .filter(entry => entry && entry.date)
+                    .map(entry => ({
+                        profileId: profileDoc.id,
+                        date: entry.date,
+                        type: entry.type === 'makeup' ? 'makeup' : 'class',
+                        note: entry.note || '',
+                        studentName,
+                        studentEmail: profile.studentEmail || '',
+                        attendanceStatus: attendanceRecords[entry.date] || 'pending'
+                    }));
+            }).sort((a, b) => a.date.localeCompare(b.date) || a.studentName.localeCompare(b.studentName));
+        }
+
+        function buildTeacherCalendarGridMarkup(lessons, monthValue) {
+            if (!monthValue) {
+                return '<p>Selecione um mês para visualizar o calendário.</p>';
+            }
+
+            const [year, month] = monthValue.split('-').map(Number);
+            if (!year || !month) {
+                return '<p>Mês inválido.</p>';
+            }
+
+            const lessonByDay = lessons.reduce((acc, lesson) => {
+                const day = Number(String(lesson.date).slice(8, 10));
+                if (!day) return acc;
+                if (!acc[day]) acc[day] = [];
+                acc[day].push(lesson);
+                return acc;
+            }, {});
+
+            const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const totalDays = new Date(year, month, 0).getDate();
+            const monthName = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+            let cells = weekDays.map(day => `<div class="calendar-cell header">${day}</div>`).join('');
+            for (let i = 0; i < firstDay; i += 1) {
+                cells += '<div class="calendar-cell empty"></div>';
+            }
+
+            for (let day = 1; day <= totalDays; day += 1) {
+                const dayLessons = lessonByDay[day] || [];
+                const hasMakeup = dayLessons.some(item => item.type === 'makeup');
+                const className = dayLessons.length ? (hasMakeup ? 'makeup-day' : 'class-day') : '';
+                const people = dayLessons.slice(0, 2).map(item => escapeHtml(item.studentName)).join('<br>');
+                const remaining = dayLessons.length > 2 ? `<br>+${dayLessons.length - 2} aluno(s)` : '';
+                cells += `
+                    <div class="calendar-cell ${className}">
+                        <span>${day}</span>
+                        ${dayLessons.length ? `<div class="teacher-calendar-day-list">${people}${remaining}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="calendar-month">
+                    <h5>${escapeHtml(monthName.charAt(0).toUpperCase() + monthName.slice(1))}</h5>
+                    <div class="calendar-grid">${cells}</div>
+                </div>
+            `;
+        }
+
+        function renderTeacherLessonCalendarView() {
+            const monthInput = document.getElementById('teacher-calendar-month');
+            const calendarGrid = document.getElementById('teacher-calendar-grid');
+            const lessonsContainer = document.getElementById('teacher-calendar-lessons');
+            if (!monthInput || !calendarGrid || !lessonsContainer) return;
+
+            const monthValue = selectedTeacherCalendarMonth || monthInput.value || toMonthValue(new Date().toISOString());
+            selectedTeacherCalendarMonth = monthValue;
+            monthInput.value = monthValue;
+
+            const visibleLessons = teacherCalendarLessons.filter(lesson => toMonthValue(lesson.date) === monthValue);
+            calendarGrid.innerHTML = buildTeacherCalendarGridMarkup(visibleLessons, monthValue);
+
+            if (!visibleLessons.length) {
+                lessonsContainer.innerHTML = '<p>Nenhuma aula cadastrada para este mês.</p>';
+                return;
+            }
+
+            lessonsContainer.innerHTML = visibleLessons.map(lesson => `
+                <div class="student-item">
+                    <div class="student-data">
+                        <strong>${escapeHtml(lesson.studentName)}</strong>
+                        <div class="student-meta">Data: ${escapeHtml(formatLocalDate(lesson.date))} | Tipo: ${escapeHtml(getCalendarTypeLabel(lesson.type))}</div>
+                        <div class="student-meta">Email: ${escapeHtml(lesson.studentEmail || 'Não informado')}</div>
+                        ${lesson.note ? `<div class="student-meta">Observação: ${escapeHtml(lesson.note)}</div>` : ''}
+                        <div class="attendance-status ${lesson.attendanceStatus}">${getAttendanceStatusLabel(lesson.attendanceStatus)}</div>
+                        <div class="attendance-actions">
+                            <button class="btn btn-outline" onclick="updateLessonAttendance('${lesson.profileId}', '${lesson.date}', 'present')">Registrar Presença</button>
+                            <button class="btn btn-danger" onclick="updateLessonAttendance('${lesson.profileId}', '${lesson.date}', 'absent')">Registrar Falta</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadTeacherLessonCalendar() {
+            const calendarGrid = document.getElementById('teacher-calendar-grid');
+            const lessonsContainer = document.getElementById('teacher-calendar-lessons');
+            if (!calendarGrid || !lessonsContainer || !currentUser) return;
+
+            calendarGrid.innerHTML = '<p>Carregando calendário...</p>';
+            lessonsContainer.innerHTML = '<p>Carregando aulas...</p>';
+
+            try {
+                const snapshot = await db.collection('studentProfiles')
+                    .where('createdBy', '==', currentUser.uid)
+                    .get();
+
+                if (snapshot.empty) {
+                    teacherCalendarLessons = [];
+                    calendarGrid.innerHTML = '<p>Você ainda não cadastrou aulas no perfil dos alunos.</p>';
+                    lessonsContainer.innerHTML = '<p>Nenhuma aula encontrada.</p>';
+                    return;
+                }
+
+                teacherCalendarLessons = flattenTeacherCalendarLessons(snapshot.docs);
+                if (!selectedTeacherCalendarMonth) {
+                    selectedTeacherCalendarMonth = toMonthValue(new Date().toISOString());
+                }
+                renderTeacherLessonCalendarView();
+            } catch (error) {
+                console.error('Erro ao carregar calendário de aulas:', error);
+                calendarGrid.innerHTML = '<p>Erro ao carregar calendário.</p>';
+                lessonsContainer.innerHTML = '<p>Erro ao carregar aulas.</p>';
+            }
+        }
+
+        async function updateLessonAttendance(profileId, lessonDate, status) {
+            if (!profileId || !lessonDate || !['present', 'absent'].includes(status)) return;
+
+            try {
+                const profileRef = db.collection('studentProfiles').doc(profileId);
+                const doc = await profileRef.get();
+                if (!doc.exists) {
+                    alert('Perfil do aluno não encontrado.');
+                    return;
+                }
+
+                const profile = doc.data();
+                if (profile.createdBy !== currentUser.uid) {
+                    alert('Você só pode atualizar chamadas dos seus alunos.');
+                    return;
+                }
+
+                const attendanceRecords = { ...(profile.attendanceRecords || {}) };
+                attendanceRecords[lessonDate] = status;
+
+                const uniqueDates = Array.from(new Set(
+                    (Array.isArray(profile.classCalendar) ? profile.classCalendar : [])
+                        .filter(entry => entry && entry.date)
+                        .map(entry => entry.date)
+                ));
+
+                let attendancePresentDays = 0;
+                let attendanceAbsences = 0;
+                uniqueDates.forEach(date => {
+                    if (attendanceRecords[date] === 'present') attendancePresentDays += 1;
+                    if (attendanceRecords[date] === 'absent') attendanceAbsences += 1;
+                });
+
+                await profileRef.update({
+                    attendanceRecords,
+                    attendancePresentDays,
+                    attendanceAbsences,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                teacherCalendarLessons = teacherCalendarLessons.map(lesson => {
+                    if (lesson.profileId === profileId && lesson.date === lessonDate) {
+                        return { ...lesson, attendanceStatus: status };
+                    }
+                    return lesson;
+                });
+
+                renderTeacherLessonCalendarView();
+                loadTeacherProfiles();
+                alert(status === 'present' ? 'Presença registrada com sucesso!' : 'Falta registrada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao atualizar chamada:', error);
+                alert('Erro ao atualizar chamada.');
+            }
+        }
+
 
         function editStudentProfile(profileId) {
             db.collection('studentProfiles').doc(profileId).get()
