@@ -783,6 +783,13 @@
             font-size: 30px;
         }
 
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
         .profile-banner-name {
             font-size: 32px;
             font-weight: 700;
@@ -1870,14 +1877,16 @@
                             studentItem.className = 'student-item';
                             studentItem.innerHTML = `
                                 <div class="student-data">
-                                    <strong>${student.name || 'Sem nome cadastrado'}</strong>
-                                    <div class="student-meta">Email: ${student.email}</div>
-                                    <div class="student-meta">Nível: ${student.level || 'Não informado'} | Matéria: ${student.subject || 'Não informada'}</div>
-                                    <div class="student-meta">Telefone: ${student.phone || 'Não informado'} | Nascimento: ${student.birthdate || 'Não informado'}</div>
-                                    <div class="student-meta">Responsável: ${student.guardian || 'Não informado'}</div>
-                                    <div class="student-meta">Observações: ${student.notes || 'Nenhuma'}</div>
+                                    <strong>${escapeHtml(student.name || 'Sem nome cadastrado')}</strong>
+                                    <div class="student-meta">Email: ${escapeHtml(student.email || 'Não informado')}</div>
+                                    <div class="student-meta">Nível: ${escapeHtml(student.level || 'Não informado')} | Matéria: ${escapeHtml(student.subject || 'Não informada')}</div>
+                                    <div class="student-meta">Telefone: ${escapeHtml(student.phone || 'Não informado')} | Nascimento: ${escapeHtml(student.birthdate || 'Não informado')}</div>
+                                    <div class="student-meta">Responsável: ${escapeHtml(student.guardian || 'Não informado')}</div>
+                                    <div class="student-meta">Observações: ${escapeHtml(student.notes || 'Nenhuma')}</div>
+                                    <div class="student-meta">Imagem de perfil: ${student.profileImageUrl ? `<a href="${escapeHtml(student.profileImageUrl)}" target="_blank" rel="noopener noreferrer">Ver imagem</a>` : 'Não definida'}</div>
                                 </div>
                                 <div>
+                                    <button class="btn btn-outline" onclick="editStudentProfileImage('${doc.id}', ${JSON.stringify(student.profileImageUrl || '')})">Editar imagem</button>
                                     <button class="btn btn-outline" onclick="editStudent('${doc.id}', '${student.email}')">Editar Email</button>
                                     <button class="btn btn-danger" style="margin-left:5px" onclick="deleteStudent('${doc.id}')">Excluir</button>
                                 </div>
@@ -1958,6 +1967,30 @@
                 .catch(error => {
                     console.error('Erro ao atualizar email:', error);
                     alert('Erro ao atualizar email.');
+                });
+        }
+
+        function editStudentProfileImage(uid, currentImageUrl) {
+            const newImageUrl = prompt('Novo link da imagem de perfil do aluno (deixe vazio para remover):', currentImageUrl || '');
+            if (newImageUrl === null) return;
+
+            const sanitizedUrl = newImageUrl.trim();
+            if (sanitizedUrl && !isValidHttpUrl(sanitizedUrl)) {
+                alert('Informe um link válido (http/https).');
+                return;
+            }
+
+            db.collection('users').doc(uid).update({ profileImageUrl: sanitizedUrl })
+                .then(() => {
+                    alert('Imagem de perfil atualizada com sucesso!');
+                    loadStudents();
+                    if (userRole === 'student' && currentUser && currentUser.uid === uid) {
+                        loadMyProfile();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar imagem de perfil:', error);
+                    alert('Erro ao atualizar imagem de perfil.');
                 });
         }
 
@@ -2307,6 +2340,10 @@
                 const profile = profileSnapshot.docs[0].data();
                 const userData = userDoc.exists ? userDoc.data() : {};
                 const studentName = userData.name || currentUser.email || 'Aluno';
+                const profileImageUrl = isValidHttpUrl(userData.profileImageUrl || '') ? userData.profileImageUrl : '';
+                const profileAvatarMarkup = profileImageUrl
+                    ? `<img src="${escapeHtml(profileImageUrl)}" alt="Foto de perfil de ${escapeHtml(studentName)}">`
+                    : '🧑';
                 const memberSince = profile.createdAt?.toDate ? profile.createdAt.toDate() : null;
                 const studyDays = memberSince
                     ? Math.max(1, Math.ceil((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24)))
@@ -2329,7 +2366,7 @@
                         <div>
                             <div class="profile-banner">
                                 <div class="profile-banner-top">
-                                    <div class="profile-avatar">🧑</div>
+                                    <div class="profile-avatar">${profileAvatarMarkup}</div>
                                     <div>
                                         <div class="profile-banner-name">${escapeHtml(studentName)}</div>
                                         <div class="profile-banner-level">Nível ${escapeHtml(currentLevel)}</div>
@@ -3411,6 +3448,15 @@
 
         function preserveText(text) {
             return escapeHtml(text || '');
+        }
+
+        function isValidHttpUrl(url) {
+            try {
+                const parsedUrl = new URL(String(url || '').trim());
+                return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+            } catch (error) {
+                return false;
+            }
         }
 
         function escapeHtml(value) {
