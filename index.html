@@ -1072,6 +1072,46 @@
             color: #7b5bb9;
         }
 
+
+        .reward-badge {
+            display: inline-flex;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            background: #ff7043;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+            padding: 0 7px;
+        }
+
+        .mascot-reward-card {
+            background: #fff7ed;
+            border: 1px solid #ffd7a8;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 12px 16px 0;
+        }
+
+        .mascot-reward-card img {
+            width: 100%;
+            max-height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .reward-request-item {
+            border: 1px solid #ebe2fb;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: #fcfaff;
+        }
+
         @media (max-width: 1000px) {
             .student-profile-layout {
                 grid-template-columns: 1fr;
@@ -1207,7 +1247,7 @@
                         <li><a href="#" class="nav-link" data-tab="tips">Dicas</a></li>
                         <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
                         <li id="nav-student-profile" class="hidden"><a href="#" class="nav-link" data-tab="my-profile">Meu Perfil</a></li>
-                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno</a></li>
+                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno <span id="teacher-reward-badge" class="reward-badge hidden">0</span></a></li>
                     </ul>
                 </nav>
                 <div class="user-info">
@@ -1606,6 +1646,13 @@
                     <p>Carregando perfis...</p>
                 </div>
             </div>
+
+            <div class="card" style="margin-top:25px;">
+                <div class="card-header">Resgates Pendentes do Mascote</div>
+                <div class="card-body" id="teacher-reward-requests-list">
+                    <p>Carregando resgates...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1663,6 +1710,7 @@
         let profileCalendarEntries = []; // Datas de aula/reposição do perfil
         let tipsCache = [];
         let selectedTipFilter = 'all';
+        let myProfileRewardMeta = null;
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -1690,6 +1738,8 @@
                         document.getElementById('nav-student-profile').classList.add('hidden');
                         loadStudents();
                         loadTeacherProfiles();
+                        loadTeacherRewardRequests();
+                        loadTeacherRewardBadge();
                         setActiveTab('users');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
@@ -1758,6 +1808,7 @@
 
                     if (tabId === 'profile-management' && userRole === 'teacher') {
                         loadTeacherProfiles();
+                        loadTeacherRewardRequests();
                     }
                 });
             });
@@ -2349,17 +2400,46 @@
                     ? Math.max(1, Math.ceil((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24)))
                     : 0;
                 const totalTasks = tasksSnapshot.size;
-                const completedTasks = responsesSnapshot.size;
+                const answeredTaskIds = new Set();
+                responsesSnapshot.forEach(doc => {
+                    const response = doc.data();
+                    if (response.taskId) answeredTaskIds.add(response.taskId);
+                });
+                const completedTasks = answeredTaskIds.size;
                 const weeklyGoal = 5;
                 const weeklyProgress = Math.min(100, Math.round((completedTasks / weeklyGoal) * 100));
                 const { currentLevel, progress } = parseLevelAndProgress(profile.englishLevel || '');
                 const attendancePresentDays = Number(profile.attendancePresentDays || 0);
                 const attendanceAbsences = Number(profile.attendanceAbsences || 0);
+                const pointsTotal = calculateMascotPoints(attendancePresentDays, completedTasks);
                 const classCalendar = Array.isArray(profile.classCalendar) ? profile.classCalendar : [];
                 const scheduledLessons = classCalendar.filter(item => item.type !== 'makeup').length;
                 const scheduledMakeups = classCalendar.filter(item => item.type === 'makeup').length;
+                const rewardRequestSnapshot = await db.collection('mascotRewardRequests')
+                    .where('studentId', '==', currentUser.uid)
+                    .orderBy('requestedAt', 'desc')
+                    .get();
+                const rewardRequests = rewardRequestSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const totalRewardRequests = rewardRequests.length;
+                const pendingRequest = rewardRequests.find(request => request.status === 'PENDENTE') || null;
+                const latestRequest = rewardRequests[0] || null;
+                const latestCompletedRequest = rewardRequests.find(request => request.status === 'CONCLUIDO' && isValidHttpUrl(request.imageUrl || '')) || null;
+                const mascotCurrentImageUrl = latestCompletedRequest?.imageUrl || '';
+                const resgatesTotal = Math.floor(pointsTotal / 500);
+                const resgatesDisponiveis = Math.max(0, resgatesTotal - totalRewardRequests);
+                const hasPendingRequest = Boolean(pendingRequest);
+                const canRedeem = resgatesDisponiveis > 0 && !hasPendingRequest;
+                const nextRewardIndex = totalRewardRequests + 1;
                 const nextLevelMap = { A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2', C2: 'Fluente' };
                 const nextLevel = nextLevelMap[currentLevel] || 'B2';
+
+                myProfileRewardMeta = {
+                    teacherId: profile.createdBy || '',
+                    pointsTotal,
+                    rewardIndex: nextRewardIndex,
+                    hasPendingRequest,
+                    resgatesDisponiveis
+                };
 
                 container.innerHTML = `
                     <div class="student-profile-layout">
@@ -2447,6 +2527,18 @@
                                         <div class="profile-stat-label">Reposições no calendário</div>
                                         <div class="profile-stat-value">${scheduledMakeups}</div>
                                     </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Pontos do mascote</div>
+                                        <div class="profile-stat-value">${pointsTotal}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Resgates totais</div>
+                                        <div class="profile-stat-value">${resgatesTotal}</div>
+                                    </div>
+                                    <div class="profile-stat-row">
+                                        <div class="profile-stat-label">Resgates disponíveis</div>
+                                        <div class="profile-stat-value">${resgatesDisponiveis}</div>
+                                    </div>
                                 </div>
                                 <div style="padding: 0 16px 16px;">
                                     <div class="profile-progress-track" style="height:10px;background:#e8ddf8;">
@@ -2463,7 +2555,12 @@
                                     <h4 style="color:#4b2f82;margin-bottom:10px;">Calendário de aulas e reposições</h4>
                                     ${buildClassCalendarMarkup(classCalendar)}
                                 </div>
-                                <div class="profile-cta">
+                                ${buildRewardStatusMarkup({ latestRequest, resgatesDisponiveis, hasPendingRequest, mascotCurrentImageUrl })}
+                                <div style="padding: 0 16px;">
+                                    ${mascotCurrentImageUrl ? `<p><strong>Mascote atual:</strong></p><img src="${escapeHtml(mascotCurrentImageUrl)}" alt="Mascote atual" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;">` : '<p><strong>Mascote atual:</strong> ainda sem imagem concluída.</p>'}
+                                </div>
+                                <div class="profile-cta" style="margin-top:12px;">
+                                    ${canRedeem ? '<button class="btn btn-accent" onclick="requestMascotEvolution()">Resgatar evolução</button>' : ''}
                                     <button class="btn btn-primary" onclick="setActiveTab('tips')">Ver Dicas</button>
                                     <button class="btn btn-outline" onclick="setActiveTab('tasks')">Ir para Tarefas</button>
                                 </div>
@@ -2477,6 +2574,180 @@
             }
         }
         
+
+        function calculateMascotPoints(attendancePresentDays = 0, completedTasks = 0) {
+            return (Number(attendancePresentDays || 0) * 100) + (Number(completedTasks || 0) * 10);
+        }
+
+        function buildRewardStatusMarkup({ latestRequest, resgatesDisponiveis, hasPendingRequest, mascotCurrentImageUrl }) {
+            if (!latestRequest) {
+                return '<div class="mascot-reward-card"><strong>🐾 Sistema Mascote Evolutivo</strong><p>Você ainda não fez nenhum resgate.</p></div>';
+            }
+
+            const requestedDate = latestRequest.requestedAt ? formatDate(latestRequest.requestedAt) : 'Data não informada';
+            const chosenPath = latestRequest.chosenPath ? `<p>Caminho escolhido: <strong>${escapeHtml(latestRequest.chosenPath)}</strong></p>` : '';
+
+            if (latestRequest.status === 'PENDENTE') {
+                return `
+                    <div class="mascot-reward-card">
+                        <strong>✅ Evolução resgatada!</strong>
+                        <p>Status: Aguardando o professor concluir.</p>
+                        <p>Data do resgate: ${requestedDate}</p>
+                        ${chosenPath}
+                        ${resgatesDisponiveis > 0 && hasPendingRequest ? '<p><em>Novo resgate liberado após conclusão deste pedido.</em></p>' : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="mascot-reward-card">
+                    <strong>✅ Evolução concluída</strong>
+                    <p>Concluída em: ${latestRequest.completedAt ? formatDate(latestRequest.completedAt) : requestedDate}</p>
+                    ${chosenPath}
+                    ${mascotCurrentImageUrl ? `<img src="${escapeHtml(mascotCurrentImageUrl)}" alt="Mascote evoluído">` : ''}
+                    ${latestRequest.imageUrl ? `<p><a href="${escapeHtml(latestRequest.imageUrl)}" target="_blank" rel="noopener noreferrer">Abrir imagem da evolução</a></p>` : ''}
+                </div>
+            `;
+        }
+
+        async function requestMascotEvolution() {
+            if (!currentUser || !myProfileRewardMeta) return;
+            const { teacherId, pointsTotal, rewardIndex, hasPendingRequest, resgatesDisponiveis } = myProfileRewardMeta;
+
+            if (!teacherId) {
+                alert('Não foi possível identificar o professor responsável por este perfil.');
+                return;
+            }
+
+            if (hasPendingRequest) {
+                alert('Você já possui um pedido pendente. Aguarde a conclusão do professor.');
+                return;
+            }
+
+            if (resgatesDisponiveis <= 0) {
+                alert('Você não possui resgates disponíveis no momento.');
+                return;
+            }
+
+            const chosenPathInput = prompt('Escolha opcional do caminho de evolução (ex: Fogo, Água, Ar).');
+            const chosenPath = chosenPathInput ? chosenPathInput.trim().slice(0, 60) : '';
+
+            try {
+                await db.collection('mascotRewardRequests').add({
+                    studentId: currentUser.uid,
+                    studentName: currentUser.email || 'Aluno',
+                    teacherId,
+                    status: 'PENDENTE',
+                    requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    pointsSnapshot: pointsTotal,
+                    chosenPath,
+                    rewardIndex,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('teacherNotifications').add({
+                    teacherId,
+                    type: 'MASCOT_REWARD_REQUEST',
+                    message: `${currentUser.email || 'Aluno'} resgatou uma evolução do mascote. Pendência: anexar imagem e concluir.`,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+
+                alert('Resgate solicitado com sucesso! Aguarde a conclusão do professor.');
+                loadMyProfile();
+            } catch (error) {
+                console.error('Erro ao criar pedido de resgate do mascote:', error);
+                alert('Erro ao solicitar resgate. Tente novamente.');
+            }
+        }
+
+        async function loadTeacherRewardBadge() {
+            if (!currentUser || userRole !== 'teacher') return;
+            const badge = document.getElementById('teacher-reward-badge');
+            if (!badge) return;
+
+            try {
+                const pendingSnapshot = await db.collection('mascotRewardRequests')
+                    .where('teacherId', '==', currentUser.uid)
+                    .where('status', '==', 'PENDENTE')
+                    .get();
+                const total = pendingSnapshot.size;
+                badge.textContent = String(total);
+                badge.classList.toggle('hidden', total === 0);
+            } catch (error) {
+                console.error('Erro ao atualizar badge de resgates:', error);
+            }
+        }
+
+        async function loadTeacherRewardRequests() {
+            const container = document.getElementById('teacher-reward-requests-list');
+            if (!container || !currentUser || userRole !== 'teacher') return;
+
+            container.innerHTML = '<p>Carregando resgates...</p>';
+
+            try {
+                const snapshot = await db.collection('mascotRewardRequests')
+                    .where('teacherId', '==', currentUser.uid)
+                    .where('status', '==', 'PENDENTE')
+                    .orderBy('requestedAt', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<p>Nenhum resgate pendente no momento.</p>';
+                    loadTeacherRewardBadge();
+                    return;
+                }
+
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const request = doc.data();
+                    return `
+                        <div class="reward-request-item">
+                            <p><strong>Aluno:</strong> ${escapeHtml(request.studentName || 'Aluno')}</p>
+                            <p><strong>Data:</strong> ${request.requestedAt ? formatDate(request.requestedAt) : 'Aguardando data'}</p>
+                            <p><strong>Pontos no resgate:</strong> ${Number(request.pointsSnapshot || 0)}</p>
+                            ${request.chosenPath ? `<p><strong>Caminho:</strong> ${escapeHtml(request.chosenPath)}</p>` : ''}
+                            <div class="form-group" style="margin-top:10px;">
+                                <label for="reward-image-${doc.id}">Link da imagem (URL)</label>
+                                <input id="reward-image-${doc.id}" class="form-control" type="url" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-accent" onclick="completeMascotRewardRequest('${doc.id}')">Concluir</button>
+                        </div>
+                    `;
+                }).join('');
+
+                loadTeacherRewardBadge();
+            } catch (error) {
+                console.error('Erro ao carregar resgates pendentes:', error);
+                container.innerHTML = '<p>Erro ao carregar resgates pendentes.</p>';
+            }
+        }
+
+        async function completeMascotRewardRequest(requestId) {
+            if (!currentUser || userRole !== 'teacher') return;
+            const imageInput = document.getElementById(`reward-image-${requestId}`);
+            const imageUrl = imageInput ? imageInput.value.trim() : '';
+
+            if (!isValidHttpUrl(imageUrl)) {
+                alert('Informe uma URL válida para a imagem da evolução.');
+                return;
+            }
+
+            try {
+                await db.collection('mascotRewardRequests').doc(requestId).update({
+                    status: 'CONCLUIDO',
+                    imageUrl,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    completedBy: currentUser.uid
+                });
+                alert('Resgate concluído com sucesso!');
+                loadTeacherRewardRequests();
+                loadTeacherRewardBadge();
+            } catch (error) {
+                console.error('Erro ao concluir resgate do mascote:', error);
+                alert('Erro ao concluir resgate.');
+            }
+        }
+
         // Função para autenticar o usuário
         async function signIn() {
             const email = loginEmail.value;
