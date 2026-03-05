@@ -96,6 +96,20 @@
             align-items: center;
             gap: 15px;
         }
+
+        .language-select {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .language-select option {
+            color: var(--dark);
+        }
         
         .user-info span {
             font-weight: 500;
@@ -1366,6 +1380,10 @@
                     </ul>
                 </nav>
                 <div class="user-info">
+                    <select id="language-selector" class="language-select" aria-label="Idioma">
+                        <option value="pt">Português</option>
+                        <option value="en">English</option>
+                    </select>
                     <span id="user-email">usuário@exemplo.com</span>
                     <button id="logout-btn" class="btn btn-outline">Sair</button>
                 </div>
@@ -1847,6 +1865,111 @@
         const tabContainers = document.querySelectorAll('.tab-container');
         const responseModal = document.getElementById('response-modal');
         const closeModalBtn = document.querySelector('.close-modal');
+        const languageSelector = document.getElementById('language-selector');
+
+        const LANGUAGE_STORAGE_KEY = 'ae-system-language';
+        let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'pt';
+        const translations = {
+            'Português': 'Portuguese',
+            'Tarefas': 'Tasks',
+            'Dicas': 'Tips',
+            'Cadastro de Aluno': 'Student Register',
+            'Meu Perfil': 'My Profile',
+            'Perfil do Aluno': 'Student Profile',
+            'Calendário de Aulas': 'Class Calendar',
+            'Sair': 'Sign out',
+            'Aluno': 'Student',
+            'Professor': 'Teacher',
+            'Acessar tarefas e responder atividades': 'Access tasks and submit activities',
+            'Criar tarefas e gerenciar conteúdo': 'Create tasks and manage content',
+            'Senha': 'Password',
+            'Sua senha': 'Your password',
+            'Entrar': 'Sign in',
+            'Criar Nova Tarefa': 'Create New Task',
+            'Título da Tarefa': 'Task Title',
+            'Descrição': 'Description',
+            'Tipo de Tarefa': 'Task Type',
+            'Texto Escrito': 'Written Text',
+            'Resposta em Áudio': 'Audio Response',
+            'Múltipla Escolha': 'Multiple Choice',
+            'Adicionar': 'Add',
+            'Salvar': 'Save',
+            'Limpar': 'Clear',
+            'Carregando...': 'Loading...',
+            'Nenhuma tarefa encontrada.': 'No tasks found.',
+            'Nenhuma dica encontrada para este filtro.': 'No tips found for this filter.',
+            'Nenhuma dúvida encontrada.': 'No questions found.',
+            'Responder Tarefa': 'Answer Task',
+            'Carregando perfil...': 'Loading profile...',
+            'Carregando alunos...': 'Loading students...',
+            'Carregando perfis...': 'Loading profiles...',
+            'Carregando calendário...': 'Loading calendar...',
+            'Carregando aulas...': 'Loading classes...',
+            'Atualizar': 'Refresh',
+            'Mês': 'Month',
+            'Data de nascimento': 'Birth date',
+            'Responsável': 'Guardian',
+            'Observações': 'Notes',
+            'Cadastrar Aluno': 'Register Student',
+            'Perfis Cadastrados por Você': 'Profiles Created by You',
+            'Aulas Cadastradas e Chamada': 'Registered Lessons and Attendance',
+            'Não foi possível carregar o Firebase. Desative extensões do navegador que bloqueiam scripts e atualize a página.': 'Could not load Firebase. Disable browser extensions that block scripts and refresh the page.',
+            'Por favor, preencha todos os campos': 'Please fill in all fields',
+            'Tipo de usuário incorreto.': 'Incorrect user type.',
+            'Entrando...': 'Signing in...',
+            'Erro ao fazer login.': 'Login error.',
+            'Usuário não encontrado.': 'User not found.',
+            'Senha incorreta.': 'Incorrect password.',
+            'Email inválido.': 'Invalid email.',
+            'Muitas tentativas de login. Tente novamente em alguns minutos.': 'Too many login attempts. Try again in a few minutes.',
+            'Falha de conexão. Verifique sua internet e tente novamente.': 'Connection failed. Check your internet and try again.',
+            'Por favor, preencha título e descrição': 'Please fill in title and description',
+            'Selecione pelo menos um aluno destinatário': 'Select at least one recipient student',
+            'Tarefa criada com sucesso!': 'Task created successfully!',
+            'Erro ao criar tarefa. Tente novamente.': 'Error creating task. Try again.',
+            'Dica adicionada com sucesso!': 'Tip added successfully!',
+            'Erro ao adicionar dica. Tente novamente.': 'Error adding tip. Try again.',
+            'Dúvida enviada com sucesso!': 'Question sent successfully!',
+            'Resposta enviada com sucesso! (+10 pontos no mascote)': 'Answer sent successfully! (+10 mascot points)',
+            'Você já concluiu essa tarefa.': 'You have already completed this task.'
+        };
+        const reverseTranslations = Object.fromEntries(Object.entries(translations).map(([pt, en]) => [en, pt]));
+
+        function translateText(text) {
+            const sourceMap = currentLanguage === 'en' ? translations : reverseTranslations;
+            let translated = text;
+            Object.entries(sourceMap)
+                .sort((a, b) => b[0].length - a[0].length)
+                .forEach(([source, target]) => {
+                    translated = translated.split(source).join(target);
+                });
+            return translated;
+        }
+
+        function translatePage() {
+            document.body.dataset.translating = '1';
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                if (!node.nodeValue || !node.nodeValue.trim()) continue;
+                node.nodeValue = translateText(node.nodeValue);
+            }
+
+            document.querySelectorAll('input[placeholder], textarea[placeholder], select option').forEach(element => {
+                if (element.placeholder) element.placeholder = translateText(element.placeholder);
+                if (element.tagName === 'OPTION') element.textContent = translateText(element.textContent);
+            });
+
+            document.documentElement.lang = currentLanguage === 'en' ? 'en-US' : 'pt-BR';
+            delete document.body.dataset.translating;
+        }
+
+        function applyLanguage(language) {
+            currentLanguage = language;
+            localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+            languageSelector.value = language;
+            translatePage();
+        }
         
         // Variáveis de estado
         let currentUser = null;
@@ -1859,6 +1982,9 @@
         let teacherCalendarLessons = [];
         let selectedTeacherCalendarMonth = '';
         let teacherRewardRequestsCache = [];
+
+        const defaultAlert = window.alert.bind(window);
+        window.alert = message => defaultAlert(translateText(String(message)));
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -1928,6 +2054,15 @@
             // Event Listeners
             logoutBtn.addEventListener('click', signOut);
             loginBtn.addEventListener('click', signIn);
+            languageSelector.addEventListener('change', event => applyLanguage(event.target.value));
+            applyLanguage(currentLanguage);
+
+            const observer = new MutationObserver(() => {
+                if (document.body.dataset.translating !== '1') {
+                    translatePage();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
             closeModalBtn.addEventListener('click', () => responseModal.style.display = 'none');
             
             // Fechar modal ao clicar fora do conteúdo
@@ -3203,7 +3338,7 @@
                 return;
             }
 
-            loginBtn.innerHTML = '<div class="loader"></div> Entrando...';
+            loginBtn.innerHTML = `<div class="loader"></div> ${translateText('Entrando...')}`;
             loginBtn.disabled = true;
 
             try {
@@ -3219,12 +3354,12 @@
                     showAlert('Tipo de usuário incorreto.', 'error');
                 }
 
-                loginBtn.innerHTML = 'Entrar';
+                loginBtn.innerHTML = translateText('Entrar');
                 loginBtn.disabled = false;
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
                 showAlert(mapAuthError(error), 'error');
-                loginBtn.innerHTML = 'Entrar';
+                loginBtn.innerHTML = translateText('Entrar');
                 loginBtn.disabled = false;
             }
         }
@@ -3253,7 +3388,7 @@
 
         // Função para mostrar alertas
         function showAlert(message, type) {
-            loginAlert.textContent = message;
+            loginAlert.textContent = translateText(message);
             loginAlert.className = `alert alert-${type}`;
             loginAlert.classList.remove('hidden');
             
@@ -4207,7 +4342,8 @@
         function formatDate(timestamp) {
             if (!timestamp) return '';
             const date = timestamp.toDate();
-            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+            const locale = currentLanguage === 'en' ? 'en-US' : 'pt-BR';
+            return date.toLocaleDateString(locale) + ' ' + date.toLocaleTimeString(locale);
         }
 
         function preserveText(text) {
