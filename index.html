@@ -1853,6 +1853,7 @@
         let userRole = 'student'; // 'student' ou 'teacher'
         let studentsList = []; // Lista de alunos para seleção
         let currentTaskId = null; // ID da tarefa sendo respondida
+        let editingTaskId = null; // ID da tarefa em edição
         let profileCalendarEntries = []; // Datas de aula/reposição do perfil
         let tipsCache = [];
         let selectedTipFilter = 'all';
@@ -3280,8 +3281,7 @@
             }
         }
         
-        // Função para criar uma nova tarefa
-        function createTask() {
+        function collectTaskFormData() {
             const title = document.getElementById('task-title').value;
             const description = document.getElementById('task-description').value;
             const type = document.querySelector('input[name="task-type"]:checked').value;
@@ -3306,10 +3306,7 @@
                 title,
                 description,
                 type,
-                recipients,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                createdBy: currentUser.uid,
-                createdByName: currentUser.email
+                recipients
             };
             
             // Adiciona opções para tarefas de múltipla escolha
@@ -3333,45 +3330,142 @@
                 // Aqui você faria o upload para o Firebase Storage
                 // E adicionaria a URL ao taskData
             }
+
+            return taskData;
+        }
+
+        function resetTaskForm() {
+            editingTaskId = null;
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-description').value = '';
+            document.getElementById('audio-file').value = '';
+            document.getElementById('audio-preview').style.display = 'none';
+            document.getElementById('type-text').checked = true;
+            document.getElementById('multiple-options-container').classList.add('hidden');
+            document.getElementById('audio-upload-container').classList.add('hidden');
+
+            const optionsList = document.getElementById('options-list');
+            optionsList.innerHTML = `
+                <div class="option-item" style="display:flex;margin-bottom:8px">
+                    <input type="text" class="form-control option-input" placeholder="Opção 1">
+                    <button class="btn btn-outline" style="margin-left:10px" onclick="removeOption(this)">Remover</button>
+                </div>
+            `;
+
+            document.querySelectorAll('#task-recipients input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            const createTaskBtn = document.getElementById('create-task-btn');
+            if (createTaskBtn) createTaskBtn.textContent = 'Criar Tarefa';
+        }
+
+        async function syncTaskCopies(taskId, taskData) {
+            const recipients = taskData.recipients || [];
+
+            const usersSnapshot = await db.collection('users').where('role', '==', 'student').get();
+            const recipientSet = new Set(recipients);
+            const syncPromises = [];
+
+            usersSnapshot.forEach(userDoc => {
+                const userData = userDoc.data() || {};
+                const taskDoc = db.collection('users').doc(userDoc.id).collection('tasks').doc(taskId);
+                if (recipientSet.has(userData.email)) {
+                    syncPromises.push(taskDoc.set(taskData));
+                } else {
+                    syncPromises.push(taskDoc.delete().catch(() => null));
+                }
+            });
+
+            await Promise.all(syncPromises);
+        }
+
+        // Função para criar/atualizar tarefa
+        function createTask() {
+            const taskData = collectTaskFormData();
+            if (!taskData) return;
+
+            const finalTaskData = {
+                ...taskData,
+                createdBy: currentUser.uid,
+                createdByName: currentUser.email
+            };
+
+            const isEditing = Boolean(editingTaskId);
+            if (!isEditing) {
+                finalTaskData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
             
             // Salva no Firestore
-            db.collection('tasks').add(taskData)
-                .then(docRef => {
-  // Salva uma cópia para cada aluno selecionado
-                    const savePromises = recipients.map(email => {
-                        return db.collection('users')
-                            .where('email', '==', email)
-                            .get()
-                            .then(qs => {
-                                const userPromises = [];
-                                qs.forEach(userDoc => {
-                                    userPromises.push(
-                                        db.collection('users')
-                                            .doc(userDoc.id)
-                                            .collection('tasks')
-                                            .doc(docRef.id)
-                                            .set(taskData)
-                                    );
-                                });
-                                return Promise.all(userPromises);
-                            });
-                    });
+            const taskPromise = isEditing
+                ? db.collection('tasks').doc(editingTaskId).get().then(doc => {
+                    const existingTaskData = doc.exists ? doc.data() : {};
+                    const updatedTaskData = { ...existingTaskData, ...finalTaskData };
+                    return db.collection('tasks').doc(editingTaskId).update(updatedTaskData)
+                        .then(() => ({ taskId: editingTaskId, taskData: updatedTaskData }));
+                })
+                : db.collection('tasks').add(finalTaskData)
+                    .then(docRef => ({ taskId: docRef.id, taskData: finalTaskData }));
 
-                    Promise.all(savePromises).then(() => {
-                        alert('Tarefa criada com sucesso!');
-                        // Limpa o formulário
-                        document.getElementById('task-title').value = '';
-                        document.getElementById('task-description').value = '';
-                        document.getElementById('audio-file').value = '';
-                        document.getElementById('audio-preview').style.display = 'none';
-
-                        // Recarrega as tarefas
+            taskPromise.then(({ taskId, taskData }) => {
+                    return syncTaskCopies(taskId, taskData).then(() => {
+                        alert(isEditing ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!');
+                        resetTaskForm();
                         loadTasks();
                     });
                 })
                 .catch(error => {
-                    console.error('Erro ao criar tarefa:', error);
-                    alert('Erro ao criar tarefa. Tente novamente.');
+                    console.error('Erro ao salvar tarefa:', error);
+                    alert('Erro ao salvar tarefa. Tente novamente.');
+                });
+        }
+
+        function editTask(taskId) {
+            db.collection('tasks').doc(taskId).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        alert('Tarefa não encontrada.');
+                        return;
+                    }
+
+                    const task = doc.data();
+                    editingTaskId = taskId;
+                    document.getElementById('task-title').value = task.title || '';
+                    document.getElementById('task-description').value = task.description || '';
+
+                    const selectedType = task.type || 'text';
+                    const typeRadio = document.querySelector(`input[name="task-type"][value="${selectedType}"]`);
+                    if (typeRadio) typeRadio.checked = true;
+                    document.getElementById('multiple-options-container').classList.toggle('hidden', selectedType !== 'multiple');
+                    document.getElementById('audio-upload-container').classList.toggle('hidden', selectedType !== 'audio');
+
+                    const optionsList = document.getElementById('options-list');
+                    optionsList.innerHTML = '';
+                    const taskOptions = Array.isArray(task.options) && task.options.length ? task.options : [''];
+                    taskOptions.forEach((option, index) => {
+                        const optionItem = document.createElement('div');
+                        optionItem.className = 'option-item';
+                        optionItem.style = 'display:flex;margin-bottom:8px';
+                        optionItem.innerHTML = `
+                            <input type="text" class="form-control option-input" placeholder="Opção ${index + 1}" value="${option}">
+                            <button class="btn btn-outline" style="margin-left:10px" onclick="removeOption(this)">Remover</button>
+                        `;
+                        optionsList.appendChild(optionItem);
+                    });
+
+                    const recipientsSet = new Set(task.recipients || []);
+                    document.querySelectorAll('#task-recipients input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = recipientsSet.has(checkbox.value);
+                    });
+
+                    const createTaskBtn = document.getElementById('create-task-btn');
+                    if (createTaskBtn) createTaskBtn.textContent = 'Salvar Alterações';
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar tarefa para edição:', error);
+                    alert('Erro ao carregar tarefa. Tente novamente.');
                 });
         }
         
@@ -3723,7 +3817,8 @@
                 <div class="task-actions">
                     ${userRole === 'student'
                         ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">${status === 'completed' ? 'Responder Novamente' : 'Responder'}</button>`
-                        : `<button class="btn btn-danger" onclick="deleteTask('${taskId}', ${JSON.stringify(task.recipients || [])})">Excluir Tarefa</button>`}
+                        : `<button class="btn btn-outline" onclick="editTask('${taskId}')">Corrigir Tarefa</button>
+                           <button class="btn btn-danger" onclick='deleteTask("${taskId}", ${JSON.stringify(task.recipients || [])})'>Excluir Tarefa</button>`}
                 </div>
             `;
 
