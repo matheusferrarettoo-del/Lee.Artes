@@ -1875,14 +1875,9 @@
         };
 
         function getLanguageFromPath() {
-            const [firstSegment] = window.location.pathname.split('/').filter(Boolean);
-            return firstSegment === 'en' ? 'en' : firstSegment === 'br' ? 'br' : null;
-        }
-
-        function getLocalizedUrl(language) {
             const parts = window.location.pathname.split('/').filter(Boolean);
-            const cleaned = ['br', 'en'].includes(parts[0]) ? parts.slice(1) : parts;
-            return `/${LANGUAGE_CONFIG[language].prefix}/${cleaned.join('/')}`.replace(/\/$/, '') || `/${LANGUAGE_CONFIG[language].prefix}`;
+            const matchedLanguage = parts.find((part) => ['br', 'en'].includes(part));
+            return matchedLanguage || null;
         }
 
         function t(key, vars = {}) {
@@ -1945,14 +1940,8 @@
                 switcher.addEventListener('change', async (event) => {
                     const nextLanguage = event.target.value;
                     localStorage.setItem('preferredLanguage', nextLanguage);
-                    const targetUrl = getLocalizedUrl(nextLanguage);
-                    window.history.replaceState({}, '', targetUrl);
                     window.location.reload();
                 });
-            }
-
-            if (!pathLanguage) {
-                window.history.replaceState({}, '', getLocalizedUrl(currentLanguage));
             }
         }
 
