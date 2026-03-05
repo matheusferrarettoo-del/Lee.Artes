@@ -406,14 +406,6 @@
         .task-status.pending { background: #34c38f; }
         .task-status.completed { background: #7c4dff; }
         .task-status.overdue { background: #f06292; }
-
-        .teacher-response-card {
-            margin-top: 12px;
-            padding: 12px;
-            background: #f7f1ff;
-            border: 1px solid #e2d1f7;
-            border-radius: 10px;
-        }
         
         .tips-layout {
             background: linear-gradient(160deg, #f8f1ff 0%, #f3e8ff 45%, #efe1ff 100%);
@@ -3489,66 +3481,22 @@
 
                 if (userRole === 'teacher') {
                     const tasksByStudent = {};
-                    const taskIds = [];
+                    let totalRecipients = 0;
 
                     querySnapshot.forEach(doc => {
                         const task = doc.data();
-                        taskIds.push(doc.id);
                         const recipients = task.recipients || [];
+                        totalRecipients += recipients.length;
                         recipients.forEach(student => {
                             if (!tasksByStudent[student]) tasksByStudent[student] = [];
                             tasksByStudent[student].push({ task, id: doc.id, status: 'pending' });
                         });
                     });
 
-                    const responsesByTaskAndStudent = new Map();
-                    const responseChunks = [];
-                    for (let i = 0; i < taskIds.length; i += 10) {
-                        responseChunks.push(taskIds.slice(i, i + 10));
-                    }
-
-                    const responseSnapshots = await Promise.all(
-                        responseChunks.map(chunk =>
-                            db.collection('responses')
-                                .where('taskId', 'in', chunk)
-                                .get()
-                        )
-                    );
-
-                    responseSnapshots.forEach(snapshot => {
-                        snapshot.forEach(doc => {
-                            const responseData = doc.data();
-                            const responseKey = `${responseData.taskId}::${responseData.studentName}`;
-                            responsesByTaskAndStudent.set(responseKey, responseData);
-                        });
-                    });
-
-                    let completedCount = 0;
-                    let pendingCount = 0;
-
-                    Object.keys(tasksByStudent).forEach(student => {
-                        tasksByStudent[student] = tasksByStudent[student].map(taskEntry => {
-                            const responseKey = `${taskEntry.id}::${student}`;
-                            const responseData = responsesByTaskAndStudent.get(responseKey);
-                            const status = responseData ? 'completed' : 'pending';
-                            if (status === 'completed') {
-                                completedCount += 1;
-                            } else {
-                                pendingCount += 1;
-                            }
-
-                            return {
-                                ...taskEntry,
-                                status,
-                                responseData
-                            };
-                        });
-                    });
-
                     updateTaskSummary({
                         total: querySnapshot.size,
-                        completed: completedCount,
-                        pending: pendingCount,
+                        completed: 0,
+                        pending: totalRecipients,
                         overdue: 0
                     });
 
@@ -3559,8 +3507,8 @@
                         header.textContent = student;
                         group.appendChild(header);
 
-                        tasksByStudent[student].forEach(({ task, id, status, responseData }) => {
-                            const taskElement = createTaskElement(task, id, status, responseData);
+                        tasksByStudent[student].forEach(({ task, id, status }) => {
+                            const taskElement = createTaskElement(task, id, status);
                             group.appendChild(taskElement);
                         });
 
@@ -3635,7 +3583,7 @@
             return 'Pendente';
         }
 
-        function createTaskElement(task, taskId, status = 'pending', responseData = null) {
+        function createTaskElement(task, taskId, status = 'pending') {
             const taskElement = document.createElement('div');
             taskElement.className = 'task-item';
 
@@ -3647,16 +3595,6 @@
                 });
                 optionsHtml += '</ul></div>';
             }
-
-            const responseHtml = userRole === 'teacher' && responseData
-                ? `
-                    <div class="teacher-response-card">
-                        <strong>Resposta do aluno:</strong>
-                        <p class="preserved-text" style="margin-top:6px">${preserveText(responseData.response || '')}</p>
-                        <small style="color:#6f5a98;display:block;margin-top:8px">Enviada em: ${formatDate(responseData.submittedAt)}</small>
-                    </div>
-                `
-                : '';
 
             taskElement.innerHTML = `
                 <div class="task-header">
@@ -3670,7 +3608,6 @@
                 </div>
                 <p class="preserved-text">${preserveText(task.description)}</p>
                 ${optionsHtml}
-                ${responseHtml}
                 <div class="task-actions">
                     ${userRole === 'student'
                         ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">${status === 'completed' ? 'Responder Novamente' : 'Responder'}</button>`
