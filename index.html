@@ -1808,10 +1808,16 @@
         };
         
         // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        const firebaseReady = typeof firebase !== 'undefined' && typeof firebase.initializeApp === 'function';
+        if (firebaseReady) {
+            firebase.initializeApp(firebaseConfig);
+        } else {
+            console.error('Firebase não carregado. Verifique extensões/CSP do navegador.');
+        }
+
+        const auth = firebaseReady ? firebase.auth() : null;
+        const db = firebaseReady ? firebase.firestore() : null;
+        const storage = firebaseReady ? firebase.storage() : null;
         
         // Referências aos elementos da interface
         const loginScreen = document.getElementById('login-screen');
@@ -1842,6 +1848,14 @@
         
         // Função para inicializar a aplicação
         function initApp() {
+            if (!firebaseReady || !auth || !db) {
+                showAlert(
+                    'Não foi possível carregar o Firebase. Desative extensões do navegador que bloqueiam scripts e atualize a página.',
+                    'error'
+                );
+                return;
+            }
+
             // Verifica estado de autenticação
             auth.onAuthStateChanged(async user => {
                 if (user) {
@@ -3124,9 +3138,42 @@
         }
 
 
+        function mapAuthError(error) {
+            switch (error?.code) {
+                case 'auth/user-not-found':
+                    return 'Usuário não encontrado.';
+                case 'auth/wrong-password':
+                    return 'Senha incorreta.';
+                case 'auth/invalid-email':
+                    return 'Email inválido.';
+                case 'auth/too-many-requests':
+                    return 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+                case 'auth/network-request-failed':
+                    return 'Falha de conexão. Verifique sua internet e tente novamente.';
+                default:
+                    return 'Erro ao fazer login.';
+            }
+        }
+
+        function verifyFirebaseLoaded() {
+            if (typeof firebase !== 'undefined' && auth && db) {
+                return true;
+            }
+
+            showAlert(
+                'Não foi possível carregar os scripts necessários para login. Desative extensões do navegador e tente novamente.',
+                'error'
+            );
+            return false;
+        }
+
         // Função para autenticar o usuário
         async function signIn() {
-            const email = loginEmail.value;
+            if (!verifyFirebaseLoaded()) {
+                return;
+            }
+
+            const email = loginEmail.value.trim().toLowerCase();
             const password = loginPassword.value;
 
             if (!email || !password) {
@@ -3153,21 +3200,8 @@
                 loginBtn.innerHTML = 'Entrar';
                 loginBtn.disabled = false;
             } catch (error) {
-                let errorMessage = 'Erro ao fazer login.';
-
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'Usuário não encontrado.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Senha incorreta.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'Email inválido.';
-                        break;
-                }
-
-                showAlert(errorMessage, 'error');
+                console.error('Erro ao fazer login:', error);
+                showAlert(mapAuthError(error), 'error');
                 loginBtn.innerHTML = 'Entrar';
                 loginBtn.disabled = false;
             }
