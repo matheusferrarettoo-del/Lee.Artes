@@ -406,6 +406,28 @@
         .task-status.pending { background: #34c38f; }
         .task-status.completed { background: #7c4dff; }
         .task-status.overdue { background: #f06292; }
+
+        .task-response {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f4ebff;
+            border: 1px solid #dec7ff;
+        }
+
+        .task-response-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #5e2a9f;
+            margin-bottom: 6px;
+        }
+
+        .task-response-meta {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6f5d86;
+        }
         
         .tips-layout {
             background: linear-gradient(160deg, #f8f1ff 0%, #f3e8ff 45%, #efe1ff 100%);
@@ -3482,16 +3504,21 @@
                 if (userRole === 'teacher') {
                     const tasksByStudent = {};
                     let totalRecipients = 0;
+                    const taskIds = [];
 
                     querySnapshot.forEach(doc => {
                         const task = doc.data();
+                        taskIds.push(doc.id);
                         const recipients = task.recipients || [];
                         totalRecipients += recipients.length;
                         recipients.forEach(student => {
                             if (!tasksByStudent[student]) tasksByStudent[student] = [];
-                            tasksByStudent[student].push({ task, id: doc.id, status: 'pending' });
+                            tasksByStudent[student].push({ task, id: doc.id });
                         });
                     });
+
+                    const responsesByTaskAndStudent = await fetchResponsesByTaskAndStudent(taskIds);
+                    let completed = 0;
 
                     updateTaskSummary({
                         total: querySnapshot.size,
@@ -3507,12 +3534,22 @@
                         header.textContent = student;
                         group.appendChild(header);
 
-                        tasksByStudent[student].forEach(({ task, id, status }) => {
-                            const taskElement = createTaskElement(task, id, status);
+                        tasksByStudent[student].forEach(({ task, id }) => {
+                            const response = responsesByTaskAndStudent[`${id}::${student.toLowerCase()}`] || null;
+                            const status = response ? 'completed' : 'pending';
+                            if (response) completed += 1;
+                            const taskElement = createTaskElement(task, id, status, response);
                             group.appendChild(taskElement);
                         });
 
                         container.appendChild(group);
+                    });
+
+                    updateTaskSummary({
+                        total: querySnapshot.size,
+                        completed,
+                        pending: Math.max(totalRecipients - completed, 0),
+                        overdue: 0
                     });
                 } else {
                     const responsesSnapshot = await db.collection('responses')
@@ -3583,7 +3620,28 @@
             return 'Pendente';
         }
 
-        function createTaskElement(task, taskId, status = 'pending') {
+        async function fetchResponsesByTaskAndStudent(taskIds = []) {
+            if (!taskIds.length) return {};
+
+            const responsesMap = {};
+            for (let i = 0; i < taskIds.length; i += 10) {
+                const chunk = taskIds.slice(i, i + 10);
+                const snapshot = await db.collection('responses')
+                    .where('taskId', 'in', chunk)
+                    .get();
+
+                snapshot.forEach(doc => {
+                    const response = doc.data();
+                    const studentName = (response.studentName || '').toLowerCase();
+                    if (!response.taskId || !studentName) return;
+                    responsesMap[`${response.taskId}::${studentName}`] = response;
+                });
+            }
+
+            return responsesMap;
+        }
+
+        function createTaskElement(task, taskId, status = 'pending', response = null) {
             const taskElement = document.createElement('div');
             taskElement.className = 'task-item';
 
@@ -3594,6 +3652,17 @@
                     optionsHtml += `<li>${option}</li>`;
                 });
                 optionsHtml += '</ul></div>';
+            }
+
+            let responseHtml = '';
+            if (userRole === 'teacher' && response) {
+                responseHtml = `
+                    <div class="task-response">
+                        <span class="task-response-label">Resposta do aluno</span>
+                        <p class="preserved-text">${preserveText(response.response || 'Sem conteúdo')}</p>
+                        <div class="task-response-meta">Enviada em: ${formatDate(response.submittedAt)}</div>
+                    </div>
+                `;
             }
 
             taskElement.innerHTML = `
@@ -3608,6 +3677,7 @@
                 </div>
                 <p class="preserved-text">${preserveText(task.description)}</p>
                 ${optionsHtml}
+                ${responseHtml}
                 <div class="task-actions">
                     ${userRole === 'student'
                         ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">${status === 'completed' ? 'Responder Novamente' : 'Responder'}</button>`
