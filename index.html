@@ -1366,6 +1366,10 @@
                     </ul>
                 </nav>
                 <div class="user-info">
+                    <select id="language-switcher" class="form-control" style="max-width:90px; padding:8px 10px;">
+                        <option value="br">PT</option>
+                        <option value="en">EN</option>
+                    </select>
                     <span id="user-email">usuário@exemplo.com</span>
                     <button id="logout-btn" class="btn btn-outline">Sair</button>
                 </div>
@@ -1859,6 +1863,104 @@
         let teacherCalendarLessons = [];
         let selectedTeacherCalendarMonth = '';
         let teacherRewardRequestsCache = [];
+        let currentLanguage = 'br';
+        let currentLocale = 'pt-BR';
+        let currentCurrency = 'BRL';
+        let i18nDict = {};
+
+        const LANGUAGE_CONFIG = {
+            br: { locale: 'pt-BR', currency: 'BRL', file: 'i18n/pt-BR.json', prefix: 'br' },
+            en: { locale: 'en-US', currency: 'USD', file: 'i18n/en.json', prefix: 'en' }
+        };
+
+        function getLanguageFromPath() {
+            const [firstSegment] = window.location.pathname.split('/').filter(Boolean);
+            return firstSegment === 'en' ? 'en' : firstSegment === 'br' ? 'br' : null;
+        }
+
+        function getLocalizedUrl(language) {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const cleaned = ['br', 'en'].includes(parts[0]) ? parts.slice(1) : parts;
+            return `/${LANGUAGE_CONFIG[language].prefix}/${cleaned.join('/')}`.replace(/\/$/, '') || `/${LANGUAGE_CONFIG[language].prefix}`;
+        }
+
+        function t(key, vars = {}) {
+            const template = i18nDict[key] || key;
+            return Object.entries(vars).reduce(
+                (acc, [name, value]) => acc.replaceAll(`{${name}}`, value),
+                template
+            );
+        }
+
+        function applyI18n() {
+            document.documentElement.lang = currentLocale;
+            document.title = t('meta.title');
+
+            const translationMap = [
+                ['.logo i', 'brand.name'],
+                ['a[data-tab="tasks"]', 'nav.tasks'],
+                ['a[data-tab="tips"]', 'nav.tips'],
+                ['a[data-tab="users"]', 'nav.users'],
+                ['a[data-tab="my-profile"]', 'nav.myProfile'],
+                ['a[data-tab="profile-management"]', 'nav.studentProfile'],
+                ['a[data-tab="teacher-calendar"]', 'nav.teacherCalendar'],
+                ['#logout-btn', 'actions.logout'],
+                ['.login-title', 'brand.name'],
+                ['.role-option[data-role="student"] h3', 'roles.student.title'],
+                ['.role-option[data-role="student"] p', 'roles.student.description'],
+                ['.role-option[data-role="teacher"] h3', 'roles.teacher.title'],
+                ['.role-option[data-role="teacher"] p', 'roles.teacher.description'],
+                ['label[for="login-email"]', 'forms.email'],
+                ['label[for="login-password"]', 'forms.password'],
+                ['#login-btn', 'actions.login']
+            ];
+
+            translationMap.forEach(([selector, key]) => {
+                const element = document.querySelector(selector);
+                if (element) element.textContent = t(key);
+            });
+
+            const emailInput = document.getElementById('login-email');
+            const passwordInput = document.getElementById('login-password');
+            if (emailInput) emailInput.placeholder = t('forms.emailPlaceholder');
+            if (passwordInput) passwordInput.placeholder = t('forms.passwordPlaceholder');
+        }
+
+        async function setupI18n() {
+            const savedLanguage = localStorage.getItem('preferredLanguage');
+            const pathLanguage = getLanguageFromPath();
+            currentLanguage = pathLanguage || savedLanguage || 'br';
+            const config = LANGUAGE_CONFIG[currentLanguage] || LANGUAGE_CONFIG.br;
+            currentLocale = config.locale;
+            currentCurrency = config.currency;
+
+            const response = await fetch(config.file);
+            i18nDict = await response.json();
+            applyI18n();
+
+            const switcher = document.getElementById('language-switcher');
+            if (switcher) {
+                switcher.value = currentLanguage;
+                switcher.addEventListener('change', async (event) => {
+                    const nextLanguage = event.target.value;
+                    localStorage.setItem('preferredLanguage', nextLanguage);
+                    const targetUrl = getLocalizedUrl(nextLanguage);
+                    window.history.replaceState({}, '', targetUrl);
+                    window.location.reload();
+                });
+            }
+
+            if (!pathLanguage) {
+                window.history.replaceState({}, '', getLocalizedUrl(currentLanguage));
+            }
+        }
+
+        function formatPrice(value) {
+            return new Intl.NumberFormat(currentLocale, {
+                style: 'currency',
+                currency: currentCurrency
+            }).format(Number(value || 0));
+        }
         
         // Função para inicializar a aplicação
         function initApp() {
@@ -2455,7 +2557,7 @@
             const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
             const firstDay = new Date(year, month - 1, 1).getDay();
             const totalDays = new Date(year, month, 0).getDate();
-            const monthName = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const monthName = new Date(year, month - 1, 1).toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' });
 
             let cells = weekDays.map(day => `<div class="calendar-cell header">${day}</div>`).join('');
             for (let i = 0; i < firstDay; i += 1) {
@@ -2677,7 +2779,7 @@
             if (!dateText) return 'Data não informada';
             const [year, month, day] = String(dateText).split('-').map(Number);
             if (!year || !month || !day) return dateText;
-            return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+            return new Date(year, month - 1, day).toLocaleDateString(currentLocale);
         }
 
         function buildClassCalendarMarkup(entries = []) {
@@ -2704,7 +2806,7 @@
             const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
             return Object.keys(byMonth).sort().map(monthKey => {
                 const [year, month] = monthKey.split('-').map(Number);
-                const monthName = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                const monthName = new Date(year, month - 1, 1).toLocaleDateString(currentLocale, { month: 'long', year: 'numeric' });
                 const firstDay = new Date(year, month - 1, 1).getDay();
                 const totalDays = new Date(year, month, 0).getDate();
                 const mapByDate = byMonth[monthKey].reduce((acc, entry) => {
@@ -2855,8 +2957,8 @@
                 const canRedeemNow = rewardMetrics.rescuesAvailable > 0 && !pendingRequest;
                 const chosenPath = pendingRequest?.chosenPath || latestCompletedRequest?.chosenPath || '';
                 const mascotCurrentImage = latestCompletedRequest?.imageUrl || '';
-                const pendingDate = pendingRequest?.requestedAt?.toDate ? pendingRequest.requestedAt.toDate().toLocaleDateString('pt-BR') : '';
-                const completedDate = latestCompletedRequest?.completedAt?.toDate ? latestCompletedRequest.completedAt.toDate().toLocaleDateString('pt-BR') : '';
+                const pendingDate = pendingRequest?.requestedAt?.toDate ? pendingRequest.requestedAt.toDate().toLocaleDateString(currentLocale) : '';
+                const completedDate = latestCompletedRequest?.completedAt?.toDate ? latestCompletedRequest.completedAt.toDate().toLocaleDateString(currentLocale) : '';
 
                 container.innerHTML = `
                     <div class="student-profile-layout">
@@ -3094,7 +3196,7 @@
                 }, {});
 
                 container.innerHTML = pending.map(item => {
-                    const dateText = item.requestedAt?.toDate ? item.requestedAt.toDate().toLocaleDateString('pt-BR') : 'Data não informada';
+                    const dateText = item.requestedAt?.toDate ? item.requestedAt.toDate().toLocaleDateString(currentLocale) : t('messages.dateUnavailable');
                     const studentName = studentMap[item.studentId] || 'Aluno';
                     return `
                         <div class="reward-request-item">
@@ -3163,17 +3265,17 @@
         function mapAuthError(error) {
             switch (error?.code) {
                 case 'auth/user-not-found':
-                    return 'Usuário não encontrado.';
+                    return t('auth.userNotFound');
                 case 'auth/wrong-password':
-                    return 'Senha incorreta.';
+                    return t('auth.wrongPassword');
                 case 'auth/invalid-email':
-                    return 'Email inválido.';
+                    return t('auth.invalidEmail');
                 case 'auth/too-many-requests':
-                    return 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+                    return t('auth.tooManyRequests');
                 case 'auth/network-request-failed':
-                    return 'Falha de conexão. Verifique sua internet e tente novamente.';
+                    return t('auth.networkFailed');
                 default:
-                    return 'Erro ao fazer login.';
+                    return t('auth.genericLoginError');
             }
         }
 
@@ -3183,7 +3285,7 @@
             }
 
             showAlert(
-                'Não foi possível carregar os scripts necessários para login. Desative extensões do navegador e tente novamente.',
+                t('messages.firebaseScriptsError'),
                 'error'
             );
             return false;
@@ -3199,11 +3301,11 @@
             const password = loginPassword.value;
 
             if (!email || !password) {
-                showAlert('Por favor, preencha todos os campos', 'error');
+                showAlert(t('messages.fillAllFields'), 'error');
                 return;
             }
 
-            loginBtn.innerHTML = '<div class="loader"></div> Entrando...';
+            loginBtn.innerHTML = `<div class="loader"></div> ${t('actions.signingIn')}`;
             loginBtn.disabled = true;
 
             try {
@@ -3216,15 +3318,15 @@
 
                 if (selectedRole && selectedRole !== userRole) {
                     await auth.signOut();
-                    showAlert('Tipo de usuário incorreto.', 'error');
+                    showAlert(t('messages.wrongRole'), 'error');
                 }
 
-                loginBtn.innerHTML = 'Entrar';
+                loginBtn.innerHTML = t('actions.login');
                 loginBtn.disabled = false;
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
                 showAlert(mapAuthError(error), 'error');
-                loginBtn.innerHTML = 'Entrar';
+                loginBtn.innerHTML = t('actions.login');
                 loginBtn.disabled = false;
             }
         }
@@ -4207,7 +4309,7 @@
         function formatDate(timestamp) {
             if (!timestamp) return '';
             const date = timestamp.toDate();
-            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+            return date.toLocaleDateString(currentLocale) + ' ' + date.toLocaleTimeString(currentLocale);
         }
 
         function preserveText(text) {
@@ -4233,7 +4335,10 @@
         }
         
         // Inicializa a aplicação quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await setupI18n();
+            initApp();
+        });
     </script>
 </body>
 </html>
