@@ -2814,6 +2814,10 @@
                 }
 
                 const profile = profileSnapshot.docs[0].data();
+                const profileGoal = profile.goal || profile.objective || '';
+                const profilePersonalInfo = profile.personalInfo || profile.personal || '';
+                const profileContactInfo = profile.contactInfo || profile.contact || '';
+                const profileFolderLink = profile.contentFolderLink || profile.folderLink || '';
                 const userData = userDoc.exists ? userDoc.data() : {};
                 const studentName = userData.name || currentUser.email || 'Aluno';
                 const profileImageUrl = isValidHttpUrl(userData.profileImageUrl || '') ? userData.profileImageUrl : '';
@@ -2875,15 +2879,19 @@
                                 <div class="profile-grid">
                                     <div class="profile-tile full">
                                         <h4>🎯 Objetivo</h4>
-                                        <p class="preserved-text">${preserveText(profile.goal || 'Não informado')}</p>
+                                        <p class="preserved-text">${preserveText(profileGoal || 'Não informado')}</p>
                                     </div>
                                     <div class="profile-tile">
                                         <h4>📒 Dados pessoais</h4>
-                                        <p class="preserved-text">${preserveText(profile.personal || 'Não informado')}</p>
+                                        <p class="preserved-text">${preserveText(profilePersonalInfo || 'Não informado')}</p>
+                                    </div>
+                                    <div class="profile-tile">
+                                        <h4>📞 Informações de contato</h4>
+                                        <p class="preserved-text">${preserveText(profileContactInfo || 'Não informado')}</p>
                                     </div>
                                     <div class="profile-tile">
                                         <h4>🗂️ Pasta da estudante</h4>
-                                        <p>${profile.folderLink ? `<a href="${escapeHtml(profile.folderLink)}" target="_blank" rel="noopener noreferrer">Abrir pasta</a>` : 'Não informado'}</p>
+                                        <p>${profileFolderLink ? `<a href="${escapeHtml(profileFolderLink)}" target="_blank" rel="noopener noreferrer">Abrir pasta</a>` : 'Não informado'}</p>
                                     </div>
                                     <div class="profile-tile">
                                         <h4>🇬🇧 Nível de inglês</h4>
