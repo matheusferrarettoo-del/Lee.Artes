@@ -1874,15 +1874,26 @@
             en: { locale: 'en-US', currency: 'USD', file: 'i18n/en.json', prefix: 'en' }
         };
 
-        function getLanguageFromPath() {
+        function getLanguageFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const queryLanguage = params.get('lang');
+            if (queryLanguage === 'en' || queryLanguage === 'br') {
+                return queryLanguage;
+            }
+
             const [firstSegment] = window.location.pathname.split('/').filter(Boolean);
             return firstSegment === 'en' ? 'en' : firstSegment === 'br' ? 'br' : null;
         }
 
         function getLocalizedUrl(language) {
-            const parts = window.location.pathname.split('/').filter(Boolean);
+            const url = new URL(window.location.href);
+            const parts = url.pathname.split('/').filter(Boolean);
             const cleaned = ['br', 'en'].includes(parts[0]) ? parts.slice(1) : parts;
-            return `/${LANGUAGE_CONFIG[language].prefix}/${cleaned.join('/')}`.replace(/\/$/, '') || `/${LANGUAGE_CONFIG[language].prefix}`;
+
+            url.pathname = cleaned.length ? `/${cleaned.join('/')}` : '/';
+            url.searchParams.set('lang', language);
+
+            return `${url.pathname}${url.search}${url.hash}`;
         }
 
         function t(key, vars = {}) {
@@ -1929,7 +1940,7 @@
 
         async function setupI18n() {
             const savedLanguage = localStorage.getItem('preferredLanguage');
-            const pathLanguage = getLanguageFromPath();
+            const pathLanguage = getLanguageFromUrl();
             currentLanguage = pathLanguage || savedLanguage || 'br';
             const config = LANGUAGE_CONFIG[currentLanguage] || LANGUAGE_CONFIG.br;
             currentLocale = config.locale;
@@ -1945,14 +1956,14 @@
                 switcher.addEventListener('change', async (event) => {
                     const nextLanguage = event.target.value;
                     localStorage.setItem('preferredLanguage', nextLanguage);
-                    const targetUrl = getLocalizedUrl(nextLanguage);
-                    window.history.replaceState({}, '', targetUrl);
-                    window.location.reload();
+                    window.location.href = getLocalizedUrl(nextLanguage);
                 });
             }
 
-            if (!pathLanguage) {
-                window.history.replaceState({}, '', getLocalizedUrl(currentLanguage));
+            const normalizedUrl = getLocalizedUrl(currentLanguage);
+            const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            if (currentUrl !== normalizedUrl) {
+                window.history.replaceState({}, '', normalizedUrl);
             }
         }
 
