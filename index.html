@@ -1908,18 +1908,186 @@
                 ['.role-option[data-role="teacher"] p', 'roles.teacher.description'],
                 ['label[for="login-email"]', 'forms.email'],
                 ['label[for="login-password"]', 'forms.password'],
-                ['#login-btn', 'actions.login']
+                ['#login-btn', 'actions.login'],
+                ['#teacher-tasks .card-header', 'tasks.createNewTask'],
+                ['label[for="task-title"]', 'tasks.taskTitle'],
+                ['label[for="task-description"]', 'forms.description'],
+                ['label[for="type-text"]', 'tasks.type.text'],
+                ['label[for="type-audio"]', 'tasks.type.audio'],
+                ['label[for="type-multiple"]', 'tasks.type.multiple'],
+                ['#multiple-options-container > label', 'tasks.answerOptions'],
+                ['#multiple-options-container .option-item button', 'actions.remove'],
+                ['#multiple-options-container > button', 'actions.addOption'],
+                ['#audio-upload-container > label', 'tasks.referenceAudioOptional'],
+                ['#audio-upload-area span', 'tasks.dragAudio']
             ];
+
+            translationMap.push(
+                ['#create-task-btn', 'tasks.createTask'],
+                ['#teacher-tasks .tasks-title', 'tasks.yourTasks'],
+                ['#student-tasks .tasks-title', 'tasks.yourTasks'],
+                ['.tips-heading', 'tips.heading'],
+                ['.tips-subheading', 'tips.subheading'],
+                ['#teacher-tips .card-header', 'tips.addNewTip'],
+                ['label[for="tip-title"]', 'forms.title'],
+                ['label[for="tip-type"]', 'forms.type'],
+                ['label[for="tip-content"]', 'tips.descriptionRecommendation'],
+                ['#add-tip-btn', 'tips.addTip'],
+                ['#teacher-questions .card-header', 'help.studentQuestions'],
+                ['#student-questions .card-header', 'help.sendNewQuestion'],
+                ['label[for="question-title"]', 'help.subject'],
+                ['label[for="question-content"]', 'help.questionDescription'],
+                ['#send-question-btn', 'help.sendQuestion'],
+                ['#student-questions > .card:nth-of-type(2) .card-header', 'help.yourQuestions'],
+                ['#users-tab .card-header', 'users.fullStudentRegistration'],
+                ['label[for="new-student-name"]', 'users.fullName'],
+                ['label[for="new-student-email"]', 'users.studentEmail'],
+                ['label[for="new-student-password"]', 'users.initialPassword'],
+                ['label[for="new-student-level"]', 'users.level'],
+                ['label[for="new-student-subject"]', 'users.subject'],
+                ['label[for="new-student-phone"]', 'users.phone'],
+                ['label[for="new-student-birthdate"]', 'users.birthdate'],
+                ['label[for="new-student-guardian"]', 'users.guardian'],
+                ['label[for="new-student-notes"]', 'users.notes'],
+                ['#register-student-btn', 'users.registerStudent'],
+                ['#users-tab .card:nth-of-type(2) .card-header', 'users.registeredStudents'],
+                ['#my-profile-tab .card-header', 'profile.myProfile'],
+                ['#profile-management-tab .card-header', 'profile.studentProfileRegistration'],
+                ['label[for="profile-student-id"]', 'roles.student.title'],
+                ['label[for="profile-contact"]', 'profile.contactInfo'],
+                ['label[for="profile-personal"]', 'profile.personalInfo'],
+                ['label[for="profile-folder-link"]', 'profile.contentFolderLink'],
+                ['label[for="profile-english-level"]', 'profile.englishLevel'],
+                ['label[for="profile-evolution"]', 'profile.evolution'],
+                ['label[for="profile-consistency"]', 'profile.consistency'],
+                ['label[for="profile-present-days"]', 'profile.presentDays'],
+                ['label[for="profile-absences"]', 'profile.absences'],
+                ['#add-calendar-entry-btn', 'actions.add'],
+                ['#clear-profile-form-btn', 'actions.clear'],
+                ['#save-profile-btn', 'profile.saveProfile'],
+                ['#profile-management-tab .card:nth-of-type(2) .card-header', 'profile.profilesRegisteredByYou'],
+                ['#profile-management-tab .card:nth-of-type(3) .card-header', 'profile.pendingMascotRewards'],
+                ['#teacher-calendar-tab .card-header', 'nav.teacherCalendar'],
+                ['label[for="teacher-calendar-month"]', 'calendar.month'],
+                ['#teacher-calendar-refresh-btn', 'actions.refresh'],
+                ['#teacher-calendar-tab .card:nth-of-type(2) .card-header', 'calendar.registeredLessonsAttendance'],
+                ['#modal-task-title', 'tasks.answerTask']
+            );
 
             translationMap.forEach(([selector, key]) => {
                 const element = document.querySelector(selector);
                 if (element) element.textContent = t(key);
             });
 
+            const taskTypeLabel = document.querySelector('label[for="type-text"]')?.closest('.form-group')?.querySelector('label:not([for])');
+            if (taskTypeLabel) taskTypeLabel.textContent = t('tasks.taskType');
+
+            const taskRecipientsLabel = document.querySelector('#task-recipients')?.closest('.form-group')?.querySelector('label:not([for])');
+            if (taskRecipientsLabel) taskRecipientsLabel.textContent = t('tasks.selectRecipients');
+
+            const tipRecipientsLabel = document.querySelector('#tip-recipients')?.closest('.form-group')?.querySelector('label:not([for])');
+            if (tipRecipientsLabel) tipRecipientsLabel.textContent = t('tasks.selectRecipients');
+
+            const profileCalendarLabel = document.querySelector('#profile-calendar-date')?.closest('.form-group')?.querySelector('label:not([for])');
+            if (profileCalendarLabel) profileCalendarLabel.textContent = t('profile.classAndMakeupCalendar');
+
             const emailInput = document.getElementById('login-email');
             const passwordInput = document.getElementById('login-password');
             if (emailInput) emailInput.placeholder = t('forms.emailPlaceholder');
             if (passwordInput) passwordInput.placeholder = t('forms.passwordPlaceholder');
+
+            const placeholders = [
+                ['#task-title', 'tasks.taskTitlePlaceholder'],
+                ['#task-description', 'tasks.taskDescriptionPlaceholder'],
+                ['#teacher-task-search', 'tasks.searchTask'],
+                ['#student-task-search', 'tasks.searchTask'],
+                ['#tip-title', 'tips.tipTitlePlaceholder'],
+                ['#tip-content', 'tips.tipDescriptionPlaceholder'],
+                ['#question-title', 'help.questionSummaryPlaceholder'],
+                ['#question-content', 'help.questionDetailsPlaceholder'],
+                ['#new-student-name', 'users.studentNamePlaceholder'],
+                ['#new-student-email', 'users.studentEmailPlaceholder'],
+                ['#new-student-password', 'users.initialPasswordPlaceholder'],
+                ['#new-student-guardian', 'users.guardianPlaceholder'],
+                ['#new-student-notes', 'users.additionalInfoPlaceholder'],
+                ['#profile-contact', 'profile.contactPlaceholder'],
+                ['#profile-personal', 'profile.personalPlaceholder'],
+                ['#profile-english-level', 'profile.englishLevelPlaceholder'],
+                ['#profile-evolution', 'profile.evolutionPlaceholder'],
+                ['#profile-consistency', 'profile.consistencyPlaceholder'],
+                ['#profile-calendar-note', 'profile.calendarNotePlaceholder']
+            ];
+
+            placeholders.forEach(([selector, key]) => {
+                const element = document.querySelector(selector);
+                if (element) element.placeholder = t(key);
+            });
+
+            const summaryLabels = ['tasks.summary.total', 'tasks.summary.completed', 'tasks.summary.pending', 'tasks.summary.overdue'];
+            ['#teacher-task-summary', '#student-task-summary'].forEach((selector) => {
+                const labels = document.querySelectorAll(`${selector} .summary-card-label`);
+                labels.forEach((el, index) => {
+                    if (summaryLabels[index]) el.textContent = t(summaryLabels[index]);
+                });
+            });
+
+            const profileCalendarType = document.getElementById('profile-calendar-type');
+            if (profileCalendarType) {
+                const classOption = profileCalendarType.querySelector('option[value="class"]');
+                const makeupOption = profileCalendarType.querySelector('option[value="makeup"]');
+                if (classOption) classOption.textContent = t('calendar.classDay');
+                if (makeupOption) makeupOption.textContent = t('calendar.makeup');
+            }
+
+            const tipType = document.getElementById('tip-type');
+            if (tipType) {
+                const tipTypeMap = {
+                    reading: 'tips.type.reading',
+                    movie: 'tips.type.movie',
+                    music: 'tips.type.music',
+                    other: 'tips.type.other'
+                };
+                Object.entries(tipTypeMap).forEach(([value, key]) => {
+                    const option = tipType.querySelector(`option[value="${value}"]`);
+                    if (option) option.textContent = t(key);
+                });
+            }
+
+            const studentLevel = document.getElementById('new-student-level');
+            if (studentLevel) {
+                const levelMap = {
+                    '': 'users.selectLevel',
+                    Iniciante: 'users.level.beginner',
+                    Intermediário: 'users.level.intermediate',
+                    Avançado: 'users.level.advanced'
+                };
+                Object.entries(levelMap).forEach(([value, key]) => {
+                    const selector = value ? `option[value="${value}"]` : 'option[value=""]';
+                    const option = studentLevel.querySelector(selector);
+                    if (option) option.textContent = t(key);
+                });
+            }
+
+            const studentSubject = document.getElementById('new-student-subject');
+            if (studentSubject) {
+                const subjectMap = {
+                    '': 'users.selectSubject',
+                    Inglês: 'users.subject.english',
+                    Artes: 'users.subject.arts',
+                    'Inglês e Artes': 'users.subject.englishArts'
+                };
+                Object.entries(subjectMap).forEach(([value, key]) => {
+                    const selector = value ? `option[value="${value}"]` : 'option[value=""]';
+                    const option = studentSubject.querySelector(selector);
+                    if (option) option.textContent = t(key);
+                });
+            }
+
+            const profileStudentSelect = document.getElementById('profile-student-id');
+            if (profileStudentSelect) {
+                const defaultOption = profileStudentSelect.querySelector('option[value=""]');
+                if (defaultOption) defaultOption.textContent = t('profile.selectStudent');
+            }
         }
 
         async function setupI18n() {
