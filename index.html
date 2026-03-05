@@ -8,7 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-    <script defer src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
         :root {
             --primary: #6a1b9a;
@@ -96,44 +95,6 @@
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .language-switcher {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.18);
-            border-radius: 999px;
-            padding: 6px 10px;
-        }
-
-        .language-switcher label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .language-switcher select {
-            border: 0;
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-weight: 600;
-            color: var(--primary);
-            background: #fff;
-            cursor: pointer;
-            outline: none;
-        }
-
-        #google_translate_element,
-        .goog-te-banner-frame.skiptranslate,
-        .goog-logo-link,
-        .goog-te-gadget span,
-        .goog-te-gadget-simple {
-            display: none !important;
-        }
-
-        body {
-            top: 0 !important;
         }
         
         .user-info span {
@@ -1405,20 +1366,12 @@
                     </ul>
                 </nav>
                 <div class="user-info">
-                    <div class="language-switcher">
-                        <label for="language-select">Idioma</label>
-                        <select id="language-select" aria-label="Selecionar idioma do sistema">
-                            <option value="pt">Português</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
                     <span id="user-email">usuário@exemplo.com</span>
                     <button id="logout-btn" class="btn btn-outline">Sair</button>
                 </div>
             </div>
         </div>
     </header>
-    <div id="google_translate_element"></div>
     
     <div class="container">
         <!-- Tela de Login -->
@@ -1894,62 +1847,6 @@
         const tabContainers = document.querySelectorAll('.tab-container');
         const responseModal = document.getElementById('response-modal');
         const closeModalBtn = document.querySelector('.close-modal');
-        const languageSelect = document.getElementById('language-select');
-
-        const LANGUAGE_STORAGE_KEY = 'ae-system-language';
-        const DEFAULT_LANGUAGE = 'pt';
-        let pendingLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || DEFAULT_LANGUAGE;
-
-        window.googleTranslateElementInit = function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'pt',
-                includedLanguages: 'pt,en',
-                autoDisplay: false,
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
-
-            setTimeout(() => {
-                applyLanguage(pendingLanguage, false);
-            }, 300);
-        };
-
-        function setGoogTransCookie(lang) {
-            const value = `/pt/${lang}`;
-            const expires = 'Fri, 31 Dec 9999 23:59:59 GMT';
-            const host = window.location.hostname;
-
-            document.cookie = `googtrans=${value}; expires=${expires}; path=/`;
-            if (host) {
-                document.cookie = `googtrans=${value}; expires=${expires}; path=/; domain=.${host}`;
-            }
-        }
-
-        function applyLanguage(lang, persist = true) {
-            const resolvedLang = lang === 'en' ? 'en' : 'pt';
-            const combo = document.querySelector('.goog-te-combo');
-
-            if (!combo) {
-                pendingLanguage = resolvedLang;
-                return;
-            }
-
-            pendingLanguage = resolvedLang;
-            setGoogTransCookie(resolvedLang);
-
-            if (combo.value !== resolvedLang) {
-                combo.value = resolvedLang;
-                combo.dispatchEvent(new Event('change'));
-            }
-
-            document.documentElement.lang = resolvedLang === 'en' ? 'en' : 'pt-BR';
-            if (languageSelect) {
-                languageSelect.value = resolvedLang;
-            }
-
-            if (persist) {
-                localStorage.setItem(LANGUAGE_STORAGE_KEY, resolvedLang);
-            }
-        }
         
         // Variáveis de estado
         let currentUser = null;
@@ -1965,15 +1862,6 @@
         
         // Função para inicializar a aplicação
         function initApp() {
-            if (languageSelect) {
-                languageSelect.value = pendingLanguage;
-                languageSelect.addEventListener('change', (event) => {
-                    applyLanguage(event.target.value);
-                });
-            }
-
-            applyLanguage(pendingLanguage, false);
-
             if (!firebaseReady || !auth || !db) {
                 showAlert(
                     'Não foi possível carregar o Firebase. Desative extensões do navegador que bloqueiam scripts e atualize a página.',
