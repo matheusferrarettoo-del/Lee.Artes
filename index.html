@@ -391,6 +391,80 @@
         .teacher-dashboard-footer .task-meta { margin: 0; }
         .teacher-task-creator { scroll-margin-top: 20px; }
 
+        .teacher-attention {
+            border: 1px solid #eadcf8;
+            background: #fff;
+        }
+
+        .teacher-attention-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 24px 0;
+        }
+
+        .teacher-attention-header h3 {
+            color: #3f1f64;
+            font-size: 22px;
+        }
+
+        .teacher-attention-list {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .attention-item {
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid #eee;
+        }
+
+        .attention-item h4 { margin: 0 0 7px; color: #44275d; }
+        .attention-item p { color: #6e5b7d; font-size: 14px; margin-bottom: 14px; }
+        .attention-item.questions { background: #fff3f6; border-color: #f5d2dc; }
+        .attention-item.pending { background: #fff8eb; border-color: #f4dfb0; }
+        .attention-item.absences { background: #fff3f0; border-color: #f4d0c5; }
+        .attention-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            color: #5b6f60;
+            background: #eff9f2;
+            border: 1px solid #ccebd4;
+            border-radius: 14px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: grid;
+            gap: 10px;
+            width: min(380px, calc(100vw - 40px));
+            pointer-events: none;
+        }
+
+        .toast {
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 14px 32px rgba(40, 22, 67, 0.22);
+            animation: toast-in 0.25s ease-out;
+        }
+
+        .toast.info { background: #5f3b91; }
+        .toast.success { background: #2d8a57; }
+        .toast.error { background: #c33b58; }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .tasks-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -1205,6 +1279,7 @@
 
         @media (max-width: 1100px) {
             .teacher-dashboard-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+            .teacher-attention-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 1000px) {
@@ -1226,6 +1301,8 @@
             .dashboard-metric-value { font-size: 32px; }
             .teacher-dashboard-grid .dashboard-metric:last-child { grid-column: 1 / -1; }
             .teacher-dashboard-header .btn { width: 100%; }
+            .teacher-attention-list { grid-template-columns: 1fr; }
+            .toast-container { top: 12px; right: 12px; width: calc(100vw - 24px); }
 
             .profile-grid {
                 grid-template-columns: 1fr;
@@ -1451,6 +1528,8 @@
             </div>
         </div>
     </header>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
     
     <div class="container">
         <!-- Tela de Login -->
@@ -1510,6 +1589,15 @@
                                 <p id="teacher-dashboard-period" class="task-meta">Carregando indicadores...</p>
                                 <p id="teacher-dashboard-weekly-detail" class="task-meta">Respostas concluídas nos últimos 7 dias.</p>
                             </div>
+                        </div>
+                    </section>
+                    <section class="card teacher-attention" aria-live="polite">
+                        <div class="teacher-attention-header">
+                            <h3>⚡ Atenção necessária</h3>
+                            <span class="task-meta">Prioridades da turma</span>
+                        </div>
+                        <div id="teacher-attention-list" class="card-body teacher-attention-list">
+                            <p class="attention-empty">Carregando prioridades...</p>
                         </div>
                     </section>
                     <div id="teacher-task-creator" class="card teacher-task-creator hidden">
@@ -2209,6 +2297,23 @@
                 });
             }
         }
+
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container || !message) return;
+
+            const normalized = String(message).toLowerCase();
+            const inferredType = type || (normalized.includes('erro') ? 'error' : normalized.includes('sucesso') ? 'success' : 'info');
+            const toast = document.createElement('div');
+            toast.className = `toast ${inferredType}`;
+            toast.setAttribute('role', 'status');
+            toast.textContent = String(message);
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4200);
+        }
+
+        // Mantém os fluxos existentes, mas apresenta mensagens sem interromper a tela.
+        window.alert = (message) => showToast(message);
 
         function formatPrice(value) {
             return new Intl.NumberFormat(currentLocale, {
@@ -4025,6 +4130,12 @@
                     return total + Number(doc.data().attendanceAbsences || 0);
                 }, 0);
 
+                renderTeacherAttention({
+                    questions: questionsSnapshot.docs.map(doc => doc.data()).slice(0, 1),
+                    pendingTasks,
+                    absences
+                });
+
                 const metrics = {
                     'dashboard-active-students': studentsSnapshot.size,
                     'dashboard-pending-tasks': pendingTasks,
@@ -4045,6 +4156,27 @@
                 console.error('Erro ao carregar dashboard do professor:', error);
                 if (period) period.textContent = 'Não foi possível atualizar os indicadores agora.';
             }
+        }
+
+        function renderTeacherAttention({ questions = [], pendingTasks = 0, absences = 0 }) {
+            const container = document.getElementById('teacher-attention-list');
+            if (!container) return;
+
+            const items = [];
+            if (questions.length) {
+                const question = questions[0];
+                items.push(`<article class="attention-item questions"><h4>💬 Dúvida aguardando resposta</h4><p>${escapeHtml(question.title || 'Aluno aguardando retorno')} — ${escapeHtml(question.studentName || 'Aluno')}</p><button type="button" class="btn btn-outline" onclick="setActiveTab('help')">Ver dúvidas</button></article>`);
+            }
+            if (pendingTasks > 0) {
+                items.push(`<article class="attention-item pending"><h4>⏳ Tarefas pendentes</h4><p>${pendingTasks} resposta(s) ainda são esperadas dos alunos.</p><button type="button" class="btn btn-outline" onclick="setActiveTab('tasks')">Ver tarefas</button></article>`);
+            }
+            if (absences > 0) {
+                items.push(`<article class="attention-item absences"><h4>📅 Faltas registradas</h4><p>Há ${absences} falta(s) acumulada(s) nos perfis da turma.</p><button type="button" class="btn btn-outline" onclick="setActiveTab('teacher-calendar')">Ver calendário</button></article>`);
+            }
+
+            container.innerHTML = items.length
+                ? items.join('')
+                : '<p class="attention-empty">✅ Tudo em dia! Não há pendências que exijam sua atenção.</p>';
         }
 
         // Funções para carregar dados
