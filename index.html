@@ -329,6 +329,68 @@
             margin-bottom: 14px;
         }
 
+        .teacher-dashboard {
+            border: 1px solid #e1cff5;
+            background: linear-gradient(135deg, #fcfaff 0%, #f4edff 100%);
+            box-shadow: 0 12px 28px rgba(93, 54, 151, 0.13);
+        }
+
+        .teacher-dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px 24px 10px;
+        }
+
+        .teacher-dashboard-header h2 {
+            color: #3f1f64;
+            font-size: 30px;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .teacher-dashboard-header p { color: #725a91; }
+
+        .teacher-dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .dashboard-metric {
+            min-height: 132px;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 6px 14px rgba(73, 45, 115, 0.08);
+        }
+
+        .dashboard-metric-icon { font-size: 24px; line-height: 1; }
+        .dashboard-metric-label { color: #5d4b72; font-size: 14px; font-weight: 700; margin-top: 8px; }
+        .dashboard-metric-value { color: #382151; font-size: 38px; font-weight: 800; line-height: 1; margin-top: 12px; }
+        .dashboard-metric.active { background: #f1eaff; border-color: #d9c4f7; }
+        .dashboard-metric.pending { background: #fff6e4; border-color: #f7dea8; }
+        .dashboard-metric.questions { background: #ffeef2; border-color: #f5c9d5; }
+        .dashboard-metric.absences { background: #fff0ed; border-color: #f6c9bf; }
+        .dashboard-metric.progress { background: #eaf8ef; border-color: #bfe7cc; }
+
+        .teacher-dashboard-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #e7daf6;
+        }
+
+        .teacher-dashboard-footer .task-meta { margin: 0; }
+        .teacher-task-creator { scroll-margin-top: 20px; }
+
         .tasks-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -1141,6 +1203,10 @@
             flex-wrap: wrap;
         }
 
+        @media (max-width: 1100px) {
+            .teacher-dashboard-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+        }
+
         @media (max-width: 1000px) {
             .student-profile-layout {
                 grid-template-columns: 1fr;
@@ -1152,6 +1218,15 @@
         }
 
         @media (max-width: 680px) {
+            .teacher-dashboard-header,
+            .teacher-dashboard-footer { align-items: stretch; flex-direction: column; }
+            .teacher-dashboard-header h2 { font-size: 25px; }
+            .teacher-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .dashboard-metric { min-height: 118px; padding: 14px; }
+            .dashboard-metric-value { font-size: 32px; }
+            .teacher-dashboard-grid .dashboard-metric:last-child { grid-column: 1 / -1; }
+            .teacher-dashboard-header .btn { width: 100%; }
+
             .profile-grid {
                 grid-template-columns: 1fr;
             }
@@ -1415,21 +1490,29 @@
             <div id="tasks-tab" class="tab-container active">
                 <!-- Painel do Professor -->
                 <div id="teacher-tasks" class="hidden">
-                    <section id="teacher-dashboard" class="card" aria-live="polite">
-                        <div class="card-header">Resumo da Turma</div>
-                        <div class="card-body">
-                            <p id="teacher-dashboard-period" class="task-meta">Carregando indicadores...</p>
-                            <div class="tasks-summary">
-                                <div class="summary-card"><span class="summary-card-label">Alunos ativos</span><span class="summary-card-value" id="dashboard-active-students">0</span></div>
-                                <div class="summary-card"><span class="summary-card-label">Tarefas pendentes</span><span class="summary-card-value" id="dashboard-pending-tasks">0</span></div>
-                                <div class="summary-card"><span class="summary-card-label">Dúvidas sem resposta</span><span class="summary-card-value" id="dashboard-unanswered-questions">0</span></div>
-                                <div class="summary-card"><span class="summary-card-label">Faltas acumuladas</span><span class="summary-card-value" id="dashboard-absences">0</span></div>
-                                <div class="summary-card"><span class="summary-card-label">Evolução semanal</span><span class="summary-card-value" id="dashboard-weekly-progress">0</span></div>
+                    <section id="teacher-dashboard" class="card teacher-dashboard" aria-live="polite">
+                        <div class="teacher-dashboard-header">
+                            <div>
+                                <h2>Visão geral da turma</h2>
+                                <p>Veja rapidamente o que precisa da sua atenção.</p>
                             </div>
-                            <p id="teacher-dashboard-weekly-detail" class="task-meta">Respostas concluídas nos últimos 7 dias.</p>
+                            <button id="toggle-task-creator-btn" class="btn btn-primary" type="button" aria-expanded="false">＋ Nova tarefa</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="teacher-dashboard-grid">
+                                <article class="dashboard-metric active"><span class="dashboard-metric-icon">👥</span><span class="dashboard-metric-label">Alunos ativos</span><span class="dashboard-metric-value" id="dashboard-active-students">0</span></article>
+                                <article class="dashboard-metric pending"><span class="dashboard-metric-icon">⏳</span><span class="dashboard-metric-label">Tarefas pendentes</span><span class="dashboard-metric-value" id="dashboard-pending-tasks">0</span></article>
+                                <article class="dashboard-metric questions"><span class="dashboard-metric-icon">💬</span><span class="dashboard-metric-label">Dúvidas sem resposta</span><span class="dashboard-metric-value" id="dashboard-unanswered-questions">0</span></article>
+                                <article class="dashboard-metric absences"><span class="dashboard-metric-icon">📅</span><span class="dashboard-metric-label">Faltas acumuladas</span><span class="dashboard-metric-value" id="dashboard-absences">0</span></article>
+                                <article class="dashboard-metric progress"><span class="dashboard-metric-icon">📈</span><span class="dashboard-metric-label">Evolução semanal</span><span class="dashboard-metric-value" id="dashboard-weekly-progress">0</span></article>
+                            </div>
+                            <div class="teacher-dashboard-footer">
+                                <p id="teacher-dashboard-period" class="task-meta">Carregando indicadores...</p>
+                                <p id="teacher-dashboard-weekly-detail" class="task-meta">Respostas concluídas nos últimos 7 dias.</p>
+                            </div>
                         </div>
                     </section>
-                    <div class="card">
+                    <div id="teacher-task-creator" class="card teacher-task-creator hidden">
                         <div class="card-header">Criar Nova Tarefa</div>
                         <div class="card-body">
                             <div class="form-group">
@@ -2256,6 +2339,10 @@
             // Configurações específicas para professores
             if (document.getElementById('create-task-btn')) {
                 document.getElementById('create-task-btn').addEventListener('click', createTask);
+            }
+
+            if (document.getElementById('toggle-task-creator-btn')) {
+                document.getElementById('toggle-task-creator-btn').addEventListener('click', () => toggleTaskCreator());
             }
             
             if (document.getElementById('add-tip-btn')) {
@@ -3558,6 +3645,24 @@
             }
         }
         
+        function toggleTaskCreator(forceOpen) {
+            const creator = document.getElementById('teacher-task-creator');
+            const button = document.getElementById('toggle-task-creator-btn');
+            if (!creator || !button) return;
+
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : creator.classList.contains('hidden');
+            creator.classList.toggle('hidden', !shouldOpen);
+            button.setAttribute('aria-expanded', String(shouldOpen));
+            button.textContent = shouldOpen ? 'Fechar formulário' : '＋ Nova tarefa';
+
+            if (shouldOpen) {
+                setTimeout(() => {
+                    document.getElementById('task-title')?.focus();
+                    creator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 0);
+            }
+        }
+
         function collectTaskFormData() {
             const title = document.getElementById('task-title').value;
             const description = document.getElementById('task-description').value;
@@ -3688,6 +3793,7 @@
                     return syncTaskCopies(taskId, taskData).then(() => {
                         alert(isEditing ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!');
                         resetTaskForm();
+                        toggleTaskCreator(false);
                         loadTasks();
                     });
                 })
