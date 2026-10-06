@@ -1,0 +1,3 @@
+# Ignorar configurações locais
+.env
+.DS_Store
