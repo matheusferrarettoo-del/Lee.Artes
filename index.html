@@ -2791,17 +2791,32 @@
             }
         }
 
+
+        function enforceSidebarByRole() {
+            const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
+            const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
+            const isTeacher = userRole === 'teacher';
+            teacherOnlyIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.toggle('hidden', !isTeacher);
+                    el.style.display = isTeacher ? '' : 'none';
+                }
+            });
+            studentOnlyIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.toggle('hidden', isTeacher);
+                    el.style.display = isTeacher ? 'none' : '';
+                }
+            });
+            if (sidebarTeacherSection) sidebarTeacherSection.style.display = isTeacher ? '' : 'none';
+            if (sidebarStudentSection) sidebarStudentSection.style.display = isTeacher ? 'none' : '';
+        }
+
         function updateRoleUI() {
             const teacher = userRole === 'teacher';
-            if (sidebarTeacherSection) sidebarTeacherSection.style.display = teacher ? 'block' : 'none';
-            if (sidebarStudentSection) sidebarStudentSection.style.display = teacher ? 'none' : 'block';
-            if (navStudentCalendar) navStudentCalendar.classList.toggle('hidden', teacher);
-            const navUsers = document.getElementById('nav-users');
-            const navTeacherProfile = document.getElementById('nav-teacher-profile');
-            const navTeacherCalendar = document.getElementById('nav-teacher-calendar');
-            if (navUsers) navUsers.classList.toggle('hidden', !teacher);
-            if (navTeacherProfile) navTeacherProfile.classList.toggle('hidden', !teacher);
-            if (navTeacherCalendar) navTeacherCalendar.classList.toggle('hidden', !teacher);
+            enforceSidebarByRole();
             const roleLabel = document.getElementById('user-role-label');
             if (roleLabel) roleLabel.textContent = teacher ? 'Professor' : 'Aluno';
             const avatar = document.getElementById('profile-avatar-small');
@@ -2856,6 +2871,7 @@
                         loadTeacherRewardRequests();
                         setActiveTab('users');
                         updateRoleUI();
+                        enforceSidebarByRole();
                         updateAppHeader('users');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
@@ -2866,6 +2882,7 @@
                         loadMyProfile();
                         setActiveTab('tasks');
                         updateRoleUI();
+                        enforceSidebarByRole();
                         updateAppHeader('tasks');
                     }
 
@@ -2885,6 +2902,8 @@
                     document.getElementById('nav-teacher-profile').classList.add('hidden');
                     document.getElementById('nav-teacher-calendar').classList.add('hidden');
                     document.getElementById('nav-student-profile').classList.add('hidden');
+                    if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
+                    enforceSidebarByRole();
                 }
             });
             
@@ -2892,6 +2911,7 @@
             if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
             if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
             if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', e => { e.preventDefault(); signOut(); });
+            enforceSidebarByRole();
             if (headerPrimaryAction) headerPrimaryAction.addEventListener('click', () => toggleTaskCreator());
 
             if (logoutBtn) logoutBtn.addEventListener('click', signOut);
@@ -2924,6 +2944,12 @@
                     navLinks.forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
                     if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
+                    if ((userRole !== 'teacher' && ['users', 'profile-management', 'teacher-calendar'].includes(tabId)) ||
+                        (userRole !== 'student' && tabId === 'student-calendar')) {
+                        const safeTab = userRole === 'teacher' ? 'tasks' : 'tasks';
+                        setActiveTab(safeTab);
+                        return;
+                    }
                     updateAppHeader(tabId);
                     
                     // Mostra a aba selecionada
