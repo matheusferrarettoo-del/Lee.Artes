@@ -4681,6 +4681,23 @@
                 }
             });
             
+            // Login
+            if (loginBtn) {
+                loginBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    signIn();
+                });
+            }
+
+            if (loginPassword) {
+                loginPassword.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        signIn();
+                    }
+                });
+            }
+
             // Seleção de papel (aluno/professor)
             roleOptions.forEach(option => {
                 option.addEventListener('click', () => {
