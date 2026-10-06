@@ -5841,7 +5841,7 @@
                                 <p>Você está avançando para <strong>${escapeHtml(nextLevel)}</strong>.</p>
                                 <div class="journey-progress"><span style="width:${nextLevelPercent}%"></span></div>
                                 <div class="journey-level-track">
-                                    ${levelNames.map(levelName => `<span class="${levelName === currentLevel ? 'active' : ''}">${levelName}</span>`).join('')}
+                                    ${levelNames.map(levelName => '<span class="' + (levelName === currentLevel ? 'active' : '') + '">' + levelName + '</span>').join('')}
                                 </div>
                             </article>
 
