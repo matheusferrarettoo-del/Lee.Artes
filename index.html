@@ -1855,6 +1855,21 @@
             .app-header .header-actions { gap: 4px; }
         }
 
+
+        /* Controle de acesso visual por perfil: regras fortes para evitar flash do menu */
+        body[data-user-role="student"] #nav-users,
+        body[data-user-role="student"] #nav-teacher-profile,
+        body[data-user-role="student"] #nav-teacher-calendar,
+        body[data-user-role="student"] #sidebar-teacher-section-label {
+            display: none !important;
+        }
+
+        body[data-user-role="teacher"] #nav-student-profile,
+        body[data-user-role="teacher"] #nav-student-calendar,
+        body[data-user-role="teacher"] #sidebar-student-section-label {
+            display: none !important;
+        }
+
         /* Calendário do aluno: somente leitura */
         #student-calendar-tab .calendar-readonly-list {
             display: grid;
@@ -2796,22 +2811,26 @@
             const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
             const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
             const isTeacher = userRole === 'teacher';
+            document.body.dataset.userRole = isTeacher ? 'teacher' : 'student';
+
             teacherOnlyIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.classList.toggle('hidden', !isTeacher);
-                    el.style.display = isTeacher ? '' : 'none';
+                    el.style.setProperty('display', isTeacher ? 'flex' : 'none', 'important');
                 }
             });
+
             studentOnlyIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.classList.toggle('hidden', isTeacher);
-                    el.style.display = isTeacher ? 'none' : '';
+                    el.style.setProperty('display', isTeacher ? 'none' : 'flex', 'important');
                 }
             });
-            if (sidebarTeacherSection) sidebarTeacherSection.style.display = isTeacher ? '' : 'none';
-            if (sidebarStudentSection) sidebarStudentSection.style.display = isTeacher ? 'none' : '';
+
+            if (sidebarTeacherSection) sidebarTeacherSection.style.setProperty('display', isTeacher ? 'block' : 'none', 'important');
+            if (sidebarStudentSection) sidebarStudentSection.style.setProperty('display', isTeacher ? 'none' : 'block', 'important');
         }
 
         function updateRoleUI() {
@@ -2854,10 +2873,12 @@
                     try {
                         const doc = await db.collection('users').doc(user.uid).get();
                         userRole = doc.exists ? doc.data().role : 'student';
+                        document.body.dataset.userRole = userRole === 'teacher' ? 'teacher' : 'student';
                     } catch (err) {
                         console.error('Erro ao carregar dados do usuário:', err);
                         userRole = 'student';
                     }
+                    document.body.dataset.userRole = userRole === 'teacher' ? 'teacher' : 'student';
 
                     if (userRole === 'teacher') {
                         document.getElementById('nav-users').classList.remove('hidden');
@@ -2903,6 +2924,7 @@
                     document.getElementById('nav-teacher-calendar').classList.add('hidden');
                     document.getElementById('nav-student-profile').classList.add('hidden');
                     if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
+                    document.body.dataset.userRole = 'guest';
                     enforceSidebarByRole();
                 }
             });
