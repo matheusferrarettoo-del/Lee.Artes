@@ -5969,7 +5969,9 @@
                 const responsesByTaskAndStudent = await fetchResponsesByTaskAndStudent(taskEntries.map(task => task.id));
                 const responses = Object.values(responsesByTaskAndStudent);
                 const pendingTasks = taskEntries.reduce((total, task) => {
-                    return total + (task.recipients || []).filter(email => !responsesByTaskAndStudent[`${task.id}::${String(email).toLowerCase()}`]).length;
+                    return total + (task.recipients || []).filter(email =>
+                        !findResponseForTaskRecipient(responsesByTaskAndStudent, task.id, email, { email })
+                    ).length;
                 }, 0);
 
                 const weekStart = Date.now() - (7 * 24 * 60 * 60 * 1000);
@@ -6067,10 +6069,15 @@
 
                         effectiveRecipients.forEach(recipient => {
                             const recipientEmail = String(recipient || '').trim();
-                            const lookup = studentDirectory[recipientEmail.toLowerCase()] || {};
+                            const normalizedRecipientEmail = normalizeTaskIdentity(recipientEmail);
+                            const lookup = studentDirectory[normalizedRecipientEmail] || {};
                             const studentName = lookup.name || recipientEmail || 'Aluno';
-                            const responseKey = doc.id + '::' + recipientEmail.toLowerCase();
-                            const response = responsesByTaskAndStudent[responseKey] || null;
+                            const response = findResponseForTaskRecipient(
+                                responsesByTaskAndStudent,
+                                doc.id,
+                                recipientEmail,
+                                lookup
+                            );
 
                             const dueDate = getTaskDueDate(task);
                             const isOverdue = Boolean(
@@ -6392,10 +6399,36 @@
             return 'Pendente';
         }
 
+        function normalizeTaskIdentity(value) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, ' ');
+        }
+
+        function findResponseForTaskRecipient(responsesMap, taskId, recipient, studentData = {}) {
+            const aliases = [
+                recipient,
+                studentData.email,
+                studentData.id,
+                studentData.name
+            ]
+                .map(normalizeTaskIdentity)
+                .filter(Boolean);
+
+            for (const alias of aliases) {
+                const response = responsesMap[taskId + '::' + alias];
+                if (response) return response;
+            }
+
+            return null;
+        }
+
         async function fetchResponsesByTaskAndStudent(taskIds = []) {
             if (!taskIds.length) return {};
 
             const responsesMap = {};
+
             for (let i = 0; i < taskIds.length; i += 10) {
                 const chunk = taskIds.slice(i, i + 10);
                 const snapshot = await db.collection('responses')
@@ -6403,10 +6436,23 @@
                     .get();
 
                 snapshot.forEach(doc => {
-                    const response = doc.data();
-                    const studentName = (response.studentName || '').toLowerCase();
-                    if (!response.taskId || !studentName) return;
-                    responsesMap[`${response.taskId}::${studentName}`] = response;
+                    const response = doc.data() || {};
+                    const taskId = response.taskId;
+                    if (!taskId) return;
+
+                    const identities = [
+                        response.studentEmail,
+                        response.email,
+                        response.studentId,
+                        response.studentName,
+                        response.userEmail
+                    ]
+                        .map(normalizeTaskIdentity)
+                        .filter(Boolean);
+
+                    identities.forEach(identity => {
+                        responsesMap[taskId + '::' + identity] = response;
+                    });
                 });
             }
 
