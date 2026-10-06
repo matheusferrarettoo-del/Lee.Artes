@@ -1855,6 +1855,67 @@
             .app-header .header-actions { gap: 4px; }
         }
 
+        /* Calendário do aluno: somente leitura */
+        #student-calendar-tab .calendar-readonly-list {
+            display: grid;
+            gap: 10px;
+        }
+        #student-calendar-tab .calendar-readonly-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            background: #fff;
+        }
+        #student-calendar-tab .calendar-readonly-date {
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        #student-calendar-tab .calendar-readonly-type {
+            display: inline-flex;
+            margin-left: 8px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        #student-calendar-tab .calendar-readonly-type.class-day {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        #student-calendar-tab .calendar-readonly-type.makeup-day {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        #student-calendar-tab .calendar-readonly-note {
+            margin-top: 5px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        #student-calendar-tab .calendar-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        #student-calendar-tab .calendar-summary-card {
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            background: #fbfaff;
+            padding: 14px;
+        }
+        #student-calendar-tab .calendar-summary-card strong {
+            display: block;
+            font-size: 25px;
+            color: var(--primary);
+        }
+        @media (max-width: 640px) {
+            #student-calendar-tab .calendar-summary { grid-template-columns: 1fr; }
+        }
+
     </style>
 </head>
 <body>
@@ -1881,6 +1942,7 @@
             <div class="sidebar-section-label" id="sidebar-student-section-label">Aluno</div>
             <nav class="sidebar-nav">
                 <a href="#" id="nav-student-profile" class="nav-link hidden" data-tab="my-profile"><span class="nav-icon">◯</span><span>Meu Perfil</span></a>
+                <a href="#" id="nav-student-calendar" class="nav-link hidden" data-tab="student-calendar"><span class="nav-icon">□</span><span>Meu Calendário</span></a>
             </nav>
 
             <div class="sidebar-spacer"></div>
@@ -2344,6 +2406,18 @@
             </div>
         </div>
 
+        <div id="student-calendar-tab" class="tab-container">
+            <div class="card">
+                <div class="card-header">Meu Calendário de Aulas</div>
+                <div class="card-body">
+                    <div id="student-calendar-summary" class="calendar-summary"></div>
+                    <div id="student-calendar-list" class="calendar-readonly-list">
+                        <p>Carregando calendário...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="teacher-calendar-tab" class="tab-container">
             <div class="card">
                 <div class="card-header">Calendário de Aulas</div>
@@ -2418,6 +2492,7 @@
         const sidebarLogoutLink = document.getElementById('sidebar-logout-link');
         const sidebarTeacherSection = document.getElementById('sidebar-teacher-section-label');
         const sidebarStudentSection = document.getElementById('sidebar-student-section-label');
+        const navStudentCalendar = document.getElementById('nav-student-calendar');
 
         // Referências aos elementos da interface
         const loginScreen = document.getElementById('login-screen');
@@ -2483,6 +2558,7 @@
                 ['a[data-tab="profile-management"]', 'nav.studentProfile'],
                 ['a[data-tab="teacher-calendar"]', 'nav.teacherCalendar'],
                 ['#sidebar-logout-link', 'actions.logout'],
+                ['#nav-student-calendar', 'nav.teacherCalendar'],
 
                 ['.login-title', 'brand.name'],
                 ['.role-option[data-role="student"] h3', 'roles.student.title'],
@@ -2704,7 +2780,8 @@
                 users: ['Cadastro de Aluno', 'Gerencie alunos e seus dados.'],
                 'my-profile': ['Meu Perfil', 'Consulte seu progresso e informações.'],
                 'profile-management': ['Perfil do Aluno', 'Gerencie acompanhamento, frequência e evolução.'],
-                'teacher-calendar': ['Calendário de Aulas', 'Organize aulas, reposições e chamada.']
+                'teacher-calendar': ['Calendário de Aulas', 'Organize aulas, reposições e chamada.'],
+                'student-calendar': ['Meu Calendário', 'Consulte suas aulas e reposições.']
             };
             const [title, subtitle] = labels[tabId] || labels.tasks;
             if (pageTitle) pageTitle.textContent = title;
@@ -2718,6 +2795,13 @@
             const teacher = userRole === 'teacher';
             if (sidebarTeacherSection) sidebarTeacherSection.style.display = teacher ? 'block' : 'none';
             if (sidebarStudentSection) sidebarStudentSection.style.display = teacher ? 'none' : 'block';
+            if (navStudentCalendar) navStudentCalendar.classList.toggle('hidden', teacher);
+            const navUsers = document.getElementById('nav-users');
+            const navTeacherProfile = document.getElementById('nav-teacher-profile');
+            const navTeacherCalendar = document.getElementById('nav-teacher-calendar');
+            if (navUsers) navUsers.classList.toggle('hidden', !teacher);
+            if (navTeacherProfile) navTeacherProfile.classList.toggle('hidden', !teacher);
+            if (navTeacherCalendar) navTeacherCalendar.classList.toggle('hidden', !teacher);
             const roleLabel = document.getElementById('user-role-label');
             if (roleLabel) roleLabel.textContent = teacher ? 'Professor' : 'Aluno';
             const avatar = document.getElementById('profile-avatar-small');
@@ -2765,6 +2849,8 @@
                         document.getElementById('nav-teacher-profile').classList.remove('hidden');
                         document.getElementById('nav-teacher-calendar').classList.remove('hidden');
                         document.getElementById('nav-student-profile').classList.add('hidden');
+                    if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
+                        if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
                         loadStudents();
                         loadTeacherProfiles();
                         loadTeacherRewardRequests();
@@ -2776,6 +2862,7 @@
                         document.getElementById('nav-teacher-profile').classList.add('hidden');
                         document.getElementById('nav-teacher-calendar').classList.add('hidden');
                         document.getElementById('nav-student-profile').classList.remove('hidden');
+                        if (navStudentCalendar) navStudentCalendar.classList.remove('hidden');
                         loadMyProfile();
                         setActiveTab('tasks');
                         updateRoleUI();
@@ -2854,6 +2941,10 @@
 
                     if (tabId === 'teacher-calendar' && userRole === 'teacher') {
                         loadTeacherLessonCalendar();
+                    }
+                    
+                    if (tabId === 'student-calendar' && userRole === 'student') {
+                        loadStudentLessonCalendar();
                     }
 
                     if (tabId === 'tasks' && userRole === 'teacher') {
@@ -3304,6 +3395,88 @@
             return 'Pendente';
         }
 
+        async function loadStudentLessonCalendar() {
+            const list = document.getElementById('student-calendar-list');
+            const summary = document.getElementById('student-calendar-summary');
+            if (!list || !summary || !currentUser || userRole !== 'student') return;
+
+            list.innerHTML = '<p>Carregando calendário...</p>';
+            summary.innerHTML = '';
+
+            try {
+                const snapshot = await db.collection('studentProfiles')
+                    .where('studentId', '==', currentUser.uid)
+                    .limit(1)
+                    .get();
+
+                if (snapshot.empty) {
+                    list.innerHTML = '<p>Seu calendário ainda não foi cadastrado pela professora.</p>';
+                    return;
+                }
+
+                const profile = snapshot.docs[0].data();
+                const entries = Array.isArray(profile.classCalendar)
+                    ? profile.classCalendar
+                        .filter(entry => entry && entry.date)
+                        .map(entry => ({
+                            date: entry.date,
+                            type: entry.type === 'makeup' ? 'makeup' : 'class',
+                            note: entry.note || ''
+                        }))
+                        .sort((a, b) => a.date.localeCompare(b.date))
+                    : [];
+
+                const totalClasses = entries.filter(entry => entry.type === 'class').length;
+                const totalMakeups = entries.filter(entry => entry.type === 'makeup').length;
+                const present = Number(profile.attendancePresentDays || 0);
+                const absences = Number(profile.attendanceAbsences || 0);
+
+                summary.innerHTML = `
+                    <div class="calendar-summary-card">
+                        <span>Aulas agendadas</span>
+                        <strong>${totalClasses}</strong>
+                    </div>
+                    <div class="calendar-summary-card">
+                        <span>Reposições</span>
+                        <strong>${totalMakeups}</strong>
+                    </div>
+                    <div class="calendar-summary-card">
+                        <span>Presenças</span>
+                        <strong>${present}</strong>
+                    </div>
+                    <div class="calendar-summary-card">
+                        <span>Faltas</span>
+                        <strong>${absences}</strong>
+                    </div>
+                `;
+
+                if (!entries.length) {
+                    list.innerHTML = '<p>Nenhuma aula ou reposição cadastrada.</p>';
+                    return;
+                }
+
+                list.innerHTML = entries.map(entry => `
+                    <div class="calendar-readonly-item">
+                        <div>
+                            <div class="calendar-readonly-date">
+                                ${escapeHtml(formatLocalDate(entry.date))}
+                                <span class="calendar-readonly-type ${entry.type === 'makeup' ? 'makeup-day' : 'class-day'}">
+                                    ${escapeHtml(getCalendarTypeLabel(entry.type))}
+                                </span>
+                            </div>
+                            ${entry.note ? `<div class="calendar-readonly-note">${escapeHtml(entry.note)}</div>` : ''}
+                        </div>
+                        <span class="attendance-status ${profile.attendanceRecords?.[entry.date] || 'pending'}">
+                            ${escapeHtml(getAttendanceStatusLabel(profile.attendanceRecords?.[entry.date] || 'pending'))}
+                        </span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar calendário do aluno:', error);
+                list.innerHTML = '<p>Erro ao carregar seu calendário.</p>';
+            }
+        }
+
         function flattenTeacherCalendarLessons(profileDocs = []) {
             return profileDocs.flatMap(profileDoc => {
                 const profile = profileDoc.data();
@@ -3562,6 +3735,21 @@
                 console.error('Erro ao excluir perfil:', error);
                 alert('Erro ao excluir perfil.');
             }
+        }
+
+        function setActiveTab(tabId) {
+            const targetLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+            if (!targetLink) return;
+            navLinks.forEach(l => l.classList.remove('active'));
+            targetLink.classList.add('active');
+            tabContainers.forEach(tab => tab.classList.remove('active'));
+            const targetTab = document.getElementById(`${tabId}-tab`);
+            if (targetTab) targetTab.classList.add('active');
+            if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
+            updateAppHeader(tabId);
+            if (tabId === 'student-calendar' && userRole === 'student') loadStudentLessonCalendar();
+            if (tabId === 'teacher-calendar' && userRole === 'teacher') loadTeacherLessonCalendar();
+            if (tabId === 'tasks' && userRole === 'teacher') loadTeacherDashboard();
         }
 
         function formatLocalDate(dateText) {
