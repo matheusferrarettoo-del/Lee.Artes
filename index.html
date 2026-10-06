@@ -2007,6 +2007,16 @@
 
 
         /* Controle de acesso visual por perfil: regras fortes para evitar flash do menu */
+        body[data-user-role="guest"] .app-sidebar { display:none !important; }
+        body[data-user-role="guest"] #nav-student-home,
+        body[data-user-role="guest"] #nav-users,
+        body[data-user-role="guest"] #nav-teacher-profile,
+        body[data-user-role="guest"] #nav-teacher-calendar,
+        body[data-user-role="guest"] #nav-student-profile,
+        body[data-user-role="guest"] #nav-student-calendar,
+        body[data-user-role="guest"] #sidebar-teacher-section-label,
+        body[data-user-role="guest"] #sidebar-student-section-label { display:none !important; }
+
         body[data-user-role="teacher"] #nav-student-home { display:none !important; }
         body[data-user-role="student"] #nav-student-home { display:flex !important; }
 
@@ -4443,11 +4453,13 @@
 
         function enforceSidebarByRole() {
             const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
+            const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
+            const isGuest = !userRole || userRole === 'guest';
+            const isTeacher = userRole === 'teacher';
+            document.body.dataset.userRole = isGuest ? 'guest' : (isTeacher ? 'teacher' : 'student');
+
             const studentHome = document.getElementById('nav-student-home');
             if (studentHome) studentHome.style.setProperty('display', isTeacher ? 'none' : 'flex', 'important');
-            const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
-            const isTeacher = userRole === 'teacher';
-            document.body.dataset.userRole = isTeacher ? 'teacher' : 'student';
 
             teacherOnlyIds.forEach(id => {
                 const el = document.getElementById(id);
