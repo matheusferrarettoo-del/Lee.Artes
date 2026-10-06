@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AE - Art and English</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50' font-size='50' text-anchor='middle' dominant-baseline='middle'>🎨</text></svg>">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -125,6 +126,8 @@
         <div id="loginScreen" class="login-container">
             <h1 class="login-title">🎨 AE - Art and English</h1>
             
+            <div id="loginError" class="alert alert-error" style="display: none;"></div>
+            
             <div class="role-selector" style="margin-bottom: 30px;">
                 <div class="role-option" data-role="student">
                     <i class="fas fa-user-graduate"></i>
@@ -140,24 +143,30 @@
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" class="form-control" placeholder="seu@email.com" required>
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="seu@email.com" autocomplete="email" required>
                 </div>
                 <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="loginPassword" class="form-control" placeholder="Digite sua senha" required>
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
                     <i class="fas fa-sign-in-alt"></i> Entrar
                 </button>
-                <p style="text-align: center; margin-top: 15px; color: #8b6fa3;">
-                    Não tem conta? <a href="#" style="color: var(--primary); font-weight: 600;">Criar uma</a>
+                <p style="text-align: center; margin-top: 15px; color: #8b6fa3; font-size: 14px;">
+                    Não tem conta? Fale com seu professor para se registrar.
                 </p>
             </form>
+
+            <div style="background: #eaf8ef; border: 1px solid #c8e6c9; border-radius: 8px; padding: 16px; margin-top: 24px; font-size: 13px; color: #2e7d32;">
+                <strong>📝 Credenciais de Teste:</strong><br>
+                Email: demo@example.com<br>
+                Senha: demo123456
+            </div>
         </div>
 
         <!-- ===== DASHBOARD TAB ===== -->
-        <div id="dashboardTab" class="tab-container active">
+        <div id="dashboardTab" class="tab-container active" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">📊</span>
@@ -226,7 +235,7 @@
         </div>
 
         <!-- ===== TASKS TAB ===== -->
-        <div id="tasksTab" class="tab-container">
+        <div id="tasksTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">📝</span>
@@ -288,7 +297,7 @@
         </div>
 
         <!-- ===== TIPS TAB ===== -->
-        <div id="tipsTab" class="tab-container">
+        <div id="tipsTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">💡</span>
@@ -354,7 +363,7 @@
         </div>
 
         <!-- ===== QUESTIONS TAB ===== -->
-        <div id="questionsTab" class="tab-container">
+        <div id="questionsTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">❓</span>
@@ -406,7 +415,6 @@
             <div class="card">
                 <div class="card-body">
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                        <!-- Aluno Card -->
                         <div style="border: 1px solid #e9def8; border-radius: 8px; padding: 16px;">
                             <div style="display: flex; gap: 12px; margin-bottom: 12px;">
                                 <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">JS</div>
@@ -440,7 +448,7 @@
         </div>
 
         <!-- ===== PROFILE TAB ===== -->
-        <div id="profileTab" class="tab-container">
+        <div id="profileTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">👤</span>
@@ -453,18 +461,18 @@
                     <div class="card-body">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; margin: 0 auto 16px;">👤</div>
-                            <div style="font-size: 20px; font-weight: 700; color: #2d1f3d;">Nome do Usuário</div>
-                            <div style="font-size: 14px; color: #8b6fa3; margin-top: 4px;">Aluno</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #2d1f3d;" id="profileName">Nome do Usuário</div>
+                            <div style="font-size: 14px; color: #8b6fa3; margin-top: 4px;" id="profileRole">Aluno</div>
                         </div>
 
                         <div style="border-top: 1px solid #e9def8; padding-top: 20px;">
                             <div style="margin-bottom: 16px;">
                                 <div style="font-size: 12px; font-weight: 600; color: #5d4589; margin-bottom: 6px;">Email</div>
-                                <div style="font-size: 14px; color: #2d1f3d;">usuario@email.com</div>
+                                <div style="font-size: 14px; color: #2d1f3d;" id="profileEmail">usuario@email.com</div>
                             </div>
                             <div style="margin-bottom: 16px;">
                                 <div style="font-size: 12px; font-weight: 600; color: #5d4589; margin-bottom: 6px;">Membro desde</div>
-                                <div style="font-size: 14px; color: #2d1f3d;">15 de Julho de 2026</div>
+                                <div style="font-size: 14px; color: #2d1f3d;" id="profileJoined">15 de Julho de 2026</div>
                             </div>
                         </div>
                     </div>
@@ -499,7 +507,7 @@
         </div>
 
         <!-- ===== SETTINGS TAB ===== -->
-        <div id="settingsTab" class="tab-container">
+        <div id="settingsTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">⚙️</span>
@@ -566,12 +574,12 @@ document.querySelectorAll('[data-tab]').forEach(link => {
         link.classList.add('active');
         
         // Hide all tab containers
-        document.querySelectorAll('.tab-container').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-container').forEach(tab => tab.style.display = 'none');
         
         // Show selected tab
         const selectedTab = document.getElementById(tabName + 'Tab');
         if (selectedTab) {
-            selectedTab.classList.add('active');
+            selectedTab.style.display = 'block';
         }
         
         // Close mobile sidebar
@@ -590,22 +598,25 @@ document.querySelectorAll('[data-role]').forEach(option => {
 
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-app.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-storage.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBMvZmDr_PLACEHOLDER_REPLACE_WITH_REAL_KEY",
+    authDomain: "seu-projeto.firebaseapp.com",
+    projectId: "seu-projeto-id",
+    storageBucket: "seu-projeto.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef1234567890"
 };
 
-// Initialize Firebase (only if not already initialized)
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+try {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+} catch (error) {
+    console.warn('Firebase não configurado. Use credenciais válidas.');
 }
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
 
 // ===== LOGIN HANDLING =====
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
@@ -613,37 +624,53 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
     
     try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
         console.log('Usuário logado:', userCredential.user);
         
         // Hide login screen
         document.getElementById('loginScreen').style.display = 'none';
         
         // Update user info
-        document.getElementById('userNameHeader').textContent = userCredential.user.email.split('@')[0];
+        const userName = userCredential.user.email.split('@')[0];
+        document.getElementById('userNameHeader').textContent = userName;
         document.getElementById('userRoleHeader').textContent = 'Aluno';
+        document.getElementById('profileName').textContent = userCredential.user.displayName || userName;
+        document.getElementById('profileEmail').textContent = userCredential.user.email;
+        
+        // Show dashboard
+        document.getElementById('dashboardTab').style.display = 'block';
+        errorDiv.style.display = 'none';
+        
     } catch (error) {
-        alert('Erro ao fazer login: ' + error.message);
+        console.error('Erro ao fazer login:', error);
+        errorDiv.textContent = '❌ ' + error.message;
+        errorDiv.style.display = 'block';
     }
 });
 
 // ===== LOGOUT =====
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    auth.signOut().then(() => {
+    firebase.auth().signOut().then(() => {
         document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('dashboardTab').style.display = 'none';
         console.log('Usuário desconectado');
     });
 });
 
-// Check if user is already logged in
-auth.onAuthStateChanged((user) => {
+// ===== CHECK AUTH STATE =====
+firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardTab').style.display = 'block';
         document.getElementById('userNameHeader').textContent = user.email.split('@')[0];
+        document.getElementById('profileName').textContent = user.displayName || user.email.split('@')[0];
+        document.getElementById('profileEmail').textContent = user.email;
     } else {
         document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('dashboardTab').style.display = 'none';
     }
 });
 </script>
