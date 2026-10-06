@@ -127,9 +127,10 @@
             <h1 class="login-title">🎨 AE - Art and English</h1>
             
             <div id="loginError" class="alert alert-error" style="display: none;"></div>
+            <div id="loginSuccess" class="alert alert-success" style="display: none;"></div>
             
             <div class="role-selector" style="margin-bottom: 30px;">
-                <div class="role-option" data-role="student">
+                <div class="role-option active" data-role="student">
                     <i class="fas fa-user-graduate"></i>
                     <h3>Aluno</h3>
                     <p>Responder tarefas e acessar conteúdo</p>
@@ -154,7 +155,7 @@
                     <i class="fas fa-sign-in-alt"></i> Entrar
                 </button>
                 <p style="text-align: center; margin-top: 15px; color: #8b6fa3; font-size: 14px;">
-                    Não tem conta? Fale com seu professor para se registrar.
+                    Não tem conta? <a href="#" style="color: var(--primary); font-weight: 600;">Fale com seu professor</a>
                 </p>
             </form>
 
@@ -166,7 +167,7 @@
         </div>
 
         <!-- ===== DASHBOARD TAB ===== -->
-        <div id="dashboardTab" class="tab-container active" style="display: none;">
+        <div id="dashboardTab" class="tab-container" style="display: none;">
             <div class="page-header">
                 <div class="page-title">
                     <span class="page-title-icon">📊</span>
@@ -545,6 +546,27 @@
 <div class="sidebar-overlay" id="sidebarOverlay" style="display: none; position: fixed; top: var(--header-height, 70px); left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 998;"></div>
 
 <script>
+// ===== FIREBASE INITIALIZATION =====
+const firebaseConfig = {
+    apiKey: "AIzaSyAItHbdcrBMFjh2BO_txtZfLvAkcyJTcII",
+    authDomain: "leticia-55e10.firebaseapp.com",
+    projectId: "leticia-55e10",
+    storageBucket: "leticia-55e10.firebasestorage.app",
+    messagingSenderId: "346405997128",
+    appId: "1:346405997128:web:ef2c6c04d682e5fa31667d"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+console.log('🔥 Firebase conectado com sucesso!');
+
 // ===== SIDEBAR TOGGLE (Mobile) =====
 const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.getElementById('sidebar');
@@ -596,28 +618,6 @@ document.querySelectorAll('[data-role]').forEach(option => {
     });
 });
 
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBMvZmDr_PLACEHOLDER_REPLACE_WITH_REAL_KEY",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto-id",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef1234567890"
-};
-
-// Initialize Firebase
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-} catch (error) {
-    console.warn('Firebase não configurado. Use credenciais válidas.');
-}
-
 // ===== LOGIN HANDLING =====
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -625,10 +625,16 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const errorDiv = document.getElementById('loginError');
+    const successDiv = document.getElementById('loginSuccess');
+    const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loader"></span> Conectando...';
     
     try {
-        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-        console.log('Usuário logado:', userCredential.user);
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        console.log('✅ Usuário logado:', userCredential.user.email);
         
         // Hide login screen
         document.getElementById('loginScreen').style.display = 'none';
@@ -642,33 +648,45 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         
         // Show dashboard
         document.getElementById('dashboardTab').style.display = 'block';
+        document.querySelector('[data-tab="dashboard"]').classList.add('active');
+        
         errorDiv.style.display = 'none';
         
     } catch (error) {
-        console.error('Erro ao fazer login:', error);
-        errorDiv.textContent = '❌ ' + error.message;
+        console.error('❌ Erro ao fazer login:', error.message);
+        errorDiv.textContent = '❌ Erro: ' + (error.message.includes('user-not-found') ? 'Usuário não encontrado' : error.message);
         errorDiv.style.display = 'block';
+    } finally {
+        // Remove loading state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
     }
 });
 
 // ===== LOGOUT =====
-document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    firebase.auth().signOut().then(() => {
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+        await auth.signOut();
+        console.log('👋 Usuário desconectado');
         document.getElementById('loginScreen').style.display = 'block';
         document.getElementById('dashboardTab').style.display = 'none';
-        console.log('Usuário desconectado');
-    });
+        document.getElementById('loginForm').reset();
+    } catch (error) {
+        console.error('Erro ao desconectar:', error);
+    }
 });
 
 // ===== CHECK AUTH STATE =====
-firebase.auth().onAuthStateChanged((user) => {
+auth.onAuthStateChanged((user) => {
     if (user) {
+        console.log('👤 Usuário autenticado:', user.email);
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardTab').style.display = 'block';
         document.getElementById('userNameHeader').textContent = user.email.split('@')[0];
         document.getElementById('profileName').textContent = user.displayName || user.email.split('@')[0];
         document.getElementById('profileEmail').textContent = user.email;
     } else {
+        console.log('🚪 Nenhum usuário autenticado');
         document.getElementById('loginScreen').style.display = 'block';
         document.getElementById('dashboardTab').style.display = 'none';
     }
