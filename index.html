@@ -2007,6 +2007,9 @@
 
 
         /* Controle de acesso visual por perfil: regras fortes para evitar flash do menu */
+        body[data-user-role="teacher"] #nav-student-home { display:none !important; }
+        body[data-user-role="student"] #nav-student-home { display:flex !important; }
+
         body[data-user-role="student"] #nav-users,
         body[data-user-role="student"] #nav-teacher-profile,
         body[data-user-role="student"] #nav-teacher-calendar,
@@ -2545,6 +2548,58 @@
             }
         }
 
+        /* ===== Home do aluno ===== */
+        .student-home { max-width:1180px; margin:0 auto; padding:28px 34px 42px; }
+        .student-home-welcome {
+            display:flex; align-items:center; justify-content:space-between; gap:20px;
+            padding:26px 28px; border:1px solid #eadff1; border-radius:20px;
+            background:linear-gradient(135deg,#fff 0%,#faf4ff 100%);
+            box-shadow:0 8px 28px rgba(73,39,96,.045);
+        }
+        .student-home-eyebrow { font-size:10px; font-weight:900; letter-spacing:.12em; color:#8b52b9; }
+        .student-home-welcome h2 { margin:7px 0 5px; color:#2b1742; font-size:29px; letter-spacing:-.035em; }
+        .student-home-welcome p { margin:0; color:#766a82; font-size:13px; }
+        .student-home-avatar {
+            width:68px; height:68px; flex:0 0 68px; display:grid; place-items:center;
+            border-radius:20px; background:#efe1f8; font-size:34px;
+        }
+        .student-home-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px; }
+        .student-home-card {
+            min-height:245px; padding:20px; border:1px solid var(--border-soft); border-radius:18px;
+            background:#fff; box-shadow:0 6px 22px rgba(45,28,66,.04); display:flex; flex-direction:column;
+        }
+        .student-home-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+        .student-home-card-kicker { color:#927f9f; font-size:9px; font-weight:900; letter-spacing:.09em; }
+        .student-home-card h3 { margin:5px 0 0; color:#30203e; font-size:18px; }
+        .student-home-card-icon { width:38px; height:38px; display:grid; place-items:center; border-radius:11px; background:#f5ecfa; font-size:19px; }
+        .student-home-task-count { margin-top:27px; color:#7126a4; font-size:42px; line-height:1; font-weight:900; letter-spacing:-.05em; }
+        .student-home-card p { color:#81758a; font-size:11px; }
+        .student-home-progress { height:8px; overflow:hidden; margin-top:13px; border-radius:999px; background:#eee8f1; }
+        .student-home-progress span { display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8b38c7,#b66ce1); transition:width .35s ease; }
+        .student-home-card-foot { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:18px; color:#8a7e92; font-size:10px; }
+        .student-home-link { border:0; background:transparent; padding:0; color:#7629a8; font-weight:800; font-size:10px; cursor:pointer; }
+        .student-home-link:hover { text-decoration:underline; }
+        .student-home-next-lesson { min-height:108px; display:flex; flex-direction:column; justify-content:center; margin-top:8px; }
+        .student-home-next-lesson strong { color:#2f2040; font-size:19px; line-height:1.3; }
+        .student-home-next-lesson span { margin-top:6px; color:#776a83; font-size:11px; }
+        .student-home-level-row { display:flex; align-items:flex-end; justify-content:space-between; margin-top:25px; }
+        .student-home-level-label { display:block; color:#887c90; font-size:10px; }
+        .student-home-level-row strong { color:#7026a3; font-size:27px; }
+        .student-home-progress.level { margin-top:9px; }
+        .student-home-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px; }
+        .student-home-stats div { padding:10px; border-radius:11px; background:#faf8fb; }
+        .student-home-stats strong { display:block; color:#352243; font-size:17px; }
+        .student-home-stats span { display:block; margin-top:2px; color:#8a7e91; font-size:9px; }
+        .student-home-progress-link { margin-top:14px; text-align:left; }
+        .student-home-tip {
+            display:flex; align-items:center; gap:12px; margin-top:16px; padding:15px 18px;
+            border:1px solid #e9dff1; border-radius:14px; background:#fbf7fd;
+        }
+        .student-home-tip > span { font-size:23px; }
+        .student-home-tip strong { color:#4b3559; font-size:11px; }
+        .student-home-tip p { margin:3px 0 0; color:#83778b; font-size:10px; }
+        @media(max-width:900px){ .student-home-grid{grid-template-columns:1fr;} .student-home{padding:20px 16px 32px;} }
+        @media(max-width:520px){ .student-home-welcome{padding:20px;} .student-home-avatar{width:54px;height:54px;flex-basis:54px;font-size:27px;} .student-home-welcome h2{font-size:24px;} }
         /* Calendário do aluno: somente leitura */
         #student-calendar-tab .calendar-readonly-list {
             display: grid;
@@ -3253,6 +3308,7 @@
 
             <div class="sidebar-section-label">Principal</div>
             <nav class="sidebar-nav">
+                <a href="#" id="nav-student-home" class="nav-link hidden" data-tab="student-home"><span class="nav-icon">⌂</span><span>Início</span></a>
                 <a href="#" class="nav-link active" data-tab="tasks"><span class="nav-icon">✓</span><span>Tarefas</span></a>
                 <a href="#" class="nav-link" data-tab="tips"><span class="nav-icon">✦</span><span>Dicas</span></a>
             </nav>
@@ -3442,6 +3498,87 @@
         <!-- Conteúdo Principal (após login) -->
         <div id="main-content" class="hidden">
             <div class="page-grid">
+            <!-- Tela inicial do aluno -->
+            <div id="student-home-tab" class="tab-container">
+                <div class="student-home">
+                    <section class="student-home-welcome">
+                        <div>
+                            <span class="student-home-eyebrow">SUA JORNADA</span>
+                            <h2 id="student-home-greeting">Olá! 👋</h2>
+                            <p>Veja o que você precisa fazer, sua próxima aula e como está evoluindo.</p>
+                        </div>
+                        <div class="student-home-avatar" id="student-home-avatar">🧑</div>
+                    </section>
+
+                    <section class="student-home-grid">
+                        <article class="student-home-card student-home-tasks-card">
+                            <div class="student-home-card-head">
+                                <div>
+                                    <span class="student-home-card-kicker">O QUE TENHO PARA FAZER?</span>
+                                    <h3>Minhas tarefas</h3>
+                                </div>
+                                <span class="student-home-card-icon">🎯</span>
+                            </div>
+                            <div class="student-home-task-count" id="student-home-pending-count">0</div>
+                            <p id="student-home-task-label">tarefas pendentes</p>
+                            <div class="student-home-progress"><span id="student-home-task-progress"></span></div>
+                            <div class="student-home-card-foot">
+                                <span id="student-home-task-completed">0 concluídas</span>
+                                <button type="button" class="student-home-link" id="student-home-go-tasks">Ver tarefas →</button>
+                            </div>
+                        </article>
+
+                        <article class="student-home-card student-home-next-card">
+                            <div class="student-home-card-head">
+                                <div>
+                                    <span class="student-home-card-kicker">QUANDO É MINHA PRÓXIMA AULA?</span>
+                                    <h3>Próxima aula</h3>
+                                </div>
+                                <span class="student-home-card-icon">📅</span>
+                            </div>
+                            <div id="student-home-next-lesson" class="student-home-next-lesson">
+                                <strong>Carregando...</strong>
+                            </div>
+                            <div class="student-home-card-foot">
+                                <span id="student-home-lesson-note">Consulte seu calendário</span>
+                                <button type="button" class="student-home-link" id="student-home-go-calendar">Ver calendário →</button>
+                            </div>
+                        </article>
+
+                        <article class="student-home-card student-home-progress-card">
+                            <div class="student-home-card-head">
+                                <div>
+                                    <span class="student-home-card-kicker">COMO ESTOU EVOLUINDO?</span>
+                                    <h3>Meu progresso</h3>
+                                </div>
+                                <span class="student-home-card-icon">📈</span>
+                            </div>
+                            <div class="student-home-level-row">
+                                <div>
+                                    <span class="student-home-level-label">Nível atual</span>
+                                    <strong id="student-home-level">—</strong>
+                                </div>
+                                <strong id="student-home-level-progress">0%</strong>
+                            </div>
+                            <div class="student-home-progress level"><span id="student-home-level-bar"></span></div>
+                            <div class="student-home-stats">
+                                <div><strong id="student-home-stat-completed">0</strong><span>tarefas concluídas</span></div>
+                                <div><strong id="student-home-stat-attendance">0</strong><span>presenças</span></div>
+                            </div>
+                            <button type="button" class="student-home-link student-home-progress-link" id="student-home-go-profile">Ver minha evolução →</button>
+                        </article>
+                    </section>
+
+                    <section class="student-home-tip">
+                        <span>💡</span>
+                        <div>
+                            <strong>Um passo de cada vez</strong>
+                            <p>Comece pela tarefa pendente mais próxima da data. Pequenos avanços constroem uma grande evolução.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
             <!-- Aba de Tarefas -->
             <div id="tasks-tab" class="tab-container active">
                 <!-- Painel do Professor -->
@@ -4236,6 +4373,7 @@
 
         function updateAppHeader(tabId) {
             const labels = {
+                'student-home': ['Início', 'Tudo o que você precisa para sua jornada de aprendizado.'],
                 tasks: ['Tarefas', 'Acompanhe atividades, pendências e evolução.'],
                 tips: ['Dicas', 'Conteúdos rápidos para apoiar seu aprendizado.'],
                 users: ['Cadastro de Aluno', 'Gerencie alunos e seus dados.'],
@@ -4255,6 +4393,8 @@
 
         function enforceSidebarByRole() {
             const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
+            const studentHome = document.getElementById('nav-student-home');
+            if (studentHome) studentHome.style.setProperty('display', isTeacher ? 'none' : 'flex', 'important');
             const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
             const isTeacher = userRole === 'teacher';
             document.body.dataset.userRole = isTeacher ? 'teacher' : 'student';
@@ -4350,7 +4490,8 @@
                         document.getElementById('nav-student-profile').classList.remove('hidden');
                         if (navStudentCalendar) navStudentCalendar.classList.remove('hidden');
                         loadMyProfile();
-                        setActiveTab('tasks');
+                        setActiveTab('student-home');
+                        loadStudentHome();
                         updateRoleUI();
                         enforceSidebarByRole();
                         updateAppHeader('tasks');
@@ -4449,7 +4590,7 @@
                     link.classList.add('active');
                     if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
                     if ((userRole !== 'teacher' && ['users', 'profile-management', 'teacher-calendar'].includes(tabId)) ||
-                        (userRole !== 'student' && tabId === 'student-calendar')) {
+                        (userRole !== 'student' && ['student-calendar', 'student-home'].includes(tabId))) {
                         const safeTab = userRole === 'teacher' ? 'tasks' : 'tasks';
                         setActiveTab(safeTab);
                         return;
@@ -4477,12 +4618,20 @@
                         loadStudentLessonCalendar();
                     }
 
+                    if (tabId === 'student-home' && userRole === 'student') {
+                        loadStudentHome();
+                    }
+
                     if (tabId === 'tasks' && userRole === 'teacher') {
                         loadTeacherDashboard();
                     }
                 });
             });
             
+            document.getElementById('student-home-go-tasks')?.addEventListener('click', () => setActiveTab('tasks'));
+            document.getElementById('student-home-go-calendar')?.addEventListener('click', () => setActiveTab('student-calendar'));
+            document.getElementById('student-home-go-profile')?.addEventListener('click', () => setActiveTab('my-profile'));
+
             const teacherTaskSearch = document.getElementById('teacher-task-search');
             const teacherTaskSubjectFilter = document.getElementById('teacher-task-subject-filter');
             const teacherTaskFilters = document.getElementById('teacher-task-filters');
@@ -5306,6 +5455,7 @@
             if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
             updateAppHeader(tabId);
             if (tabId === 'student-calendar' && userRole === 'student') loadStudentLessonCalendar();
+            if (tabId === 'student-home' && userRole === 'student') loadStudentHome();
             if (tabId === 'teacher-calendar' && userRole === 'teacher') loadTeacherLessonCalendar();
             if (tabId === 'tasks' && userRole === 'teacher') loadTeacherDashboard();
         }
@@ -5428,6 +5578,105 @@
                 hasPending,
                 requests
             };
+        }
+
+        async function loadStudentHome() {
+            if (!currentUser || userRole !== 'student') return;
+
+            const greeting = document.getElementById('student-home-greeting');
+            const avatar = document.getElementById('student-home-avatar');
+            const pendingCount = document.getElementById('student-home-pending-count');
+            const taskLabel = document.getElementById('student-home-task-label');
+            const completedLabel = document.getElementById('student-home-task-completed');
+            const taskProgress = document.getElementById('student-home-task-progress');
+            const nextLesson = document.getElementById('student-home-next-lesson');
+            const lessonNote = document.getElementById('student-home-lesson-note');
+            const level = document.getElementById('student-home-level');
+            const levelProgress = document.getElementById('student-home-level-progress');
+            const levelBar = document.getElementById('student-home-level-bar');
+            const statCompleted = document.getElementById('student-home-stat-completed');
+            const statAttendance = document.getElementById('student-home-stat-attendance');
+
+            try {
+                const [userDoc, profileSnapshot, taskSnapshot, responseSnapshot] = await Promise.all([
+                    db.collection('users').doc(currentUser.uid).get(),
+                    db.collection('studentProfiles').where('studentId', '==', currentUser.uid).limit(1).get(),
+                    db.collection('users').doc(currentUser.uid).collection('tasks').get(),
+                    db.collection('responses').where('studentId', '==', currentUser.uid).get()
+                ]);
+
+                const userData = userDoc.exists ? userDoc.data() : {};
+                const studentName = userData.name || currentUser.displayName || currentUser.email?.split('@')[0] || 'Aluno';
+
+                if (greeting) greeting.textContent = 'Olá, ' + studentName.split(' ')[0] + '! 👋';
+
+                if (avatar) {
+                    const image = userData.profileImageUrl;
+                    avatar.innerHTML = isValidHttpUrl(image || '')
+                        ? '<img src="' + escapeHtml(image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">'
+                        : '🧑';
+                }
+
+                const profile = profileSnapshot.empty ? {} : profileSnapshot.docs[0].data();
+                const tasks = taskSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const responseIds = new Set(
+                    responseSnapshot.docs
+                        .map(doc => doc.data()?.taskId)
+                        .filter(Boolean)
+                );
+
+                const completed = tasks.filter(task => responseIds.has(task.id)).length;
+                const pending = Math.max(tasks.length - completed, 0);
+                const percentage = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+
+                if (pendingCount) pendingCount.textContent = pending;
+                if (taskLabel) taskLabel.textContent = pending === 1 ? 'tarefa pendente' : 'tarefas pendentes';
+                if (completedLabel) completedLabel.textContent = completed + (completed === 1 ? ' concluída' : ' concluídas');
+                if (taskProgress) taskProgress.style.width = percentage + '%';
+
+                const calendar = Array.isArray(profile.classCalendar) ? profile.classCalendar : [];
+                const today = new Date();
+                today.setHours(0,0,0,0);
+
+                const upcoming = calendar
+                    .filter(entry => entry && entry.date)
+                    .map(entry => ({
+                        ...entry,
+                        parsed: new Date(String(entry.date) + 'T00:00:00')
+                    }))
+                    .filter(entry => !Number.isNaN(entry.parsed.getTime()) && entry.parsed >= today)
+                    .sort((a,b) => a.parsed - b.parsed)[0];
+
+                if (nextLesson) {
+                    if (upcoming) {
+                        const dateLabel = upcoming.parsed.toLocaleDateString(currentLocale || 'pt-BR', {
+                            weekday:'long', day:'2-digit', month:'long'
+                        });
+                        const typeLabel = upcoming.type === 'makeup' ? 'Reposição' : 'Aula';
+                        nextLesson.innerHTML =
+                            '<strong>' + escapeHtml(dateLabel) + '</strong>' +
+                            '<span>📚 ' + typeLabel + (upcoming.note ? ' · ' + escapeHtml(upcoming.note) : '') + '</span>';
+                        if (lessonNote) lessonNote.textContent = 'Sua próxima aula cadastrada';
+                    } else {
+                        nextLesson.innerHTML = '<strong>Nenhuma aula próxima</strong><span>Seu calendário está em dia.</span>';
+                        if (lessonNote) lessonNote.textContent = 'Nenhuma aula futura cadastrada';
+                    }
+                }
+
+                const parsedLevel = parseLevelAndProgress(profile.englishLevel || '');
+                const currentLevel = parsedLevel.currentLevel || 'A1';
+                const progress = Math.max(0, Math.min(100, Number(parsedLevel.progress) || 0));
+
+                if (level) level.textContent = currentLevel;
+                if (levelProgress) levelProgress.textContent = progress + '%';
+                if (levelBar) levelBar.style.width = progress + '%';
+                if (statCompleted) statCompleted.textContent = completed;
+                if (statAttendance) statAttendance.textContent = Number(profile.attendancePresentDays || 0);
+
+            } catch (error) {
+                console.error('Erro ao carregar início do aluno:', error);
+                if (nextLesson) nextLesson.innerHTML = '<strong>Não foi possível carregar</strong><span>Tente atualizar a página.</span>';
+            }
         }
 
         async function loadMyProfile() {
