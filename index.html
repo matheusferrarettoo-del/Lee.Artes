@@ -4452,33 +4452,42 @@
 
 
         function enforceSidebarByRole() {
-            const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
-            const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
-            const isGuest = !userRole || userRole === 'guest';
-            const isTeacher = userRole === 'teacher';
-            document.body.dataset.userRole = isGuest ? 'guest' : (isTeacher ? 'teacher' : 'student');
+            try {
+                const role = userRole === 'teacher' ? 'teacher' : (userRole === 'student' ? 'student' : 'guest');
+                const isTeacher = role === 'teacher';
+                document.body.dataset.userRole = role;
 
-            const studentHome = document.getElementById('nav-student-home');
-            if (studentHome) studentHome.style.setProperty('display', isTeacher ? 'none' : 'flex', 'important');
+                const teacherOnlyIds = ['nav-users', 'nav-teacher-profile', 'nav-teacher-calendar'];
+                const studentOnlyIds = ['nav-student-profile', 'nav-student-calendar'];
+                const studentHome = document.getElementById('nav-student-home');
 
-            teacherOnlyIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
+                if (studentHome) {
+                    studentHome.style.setProperty('display', role === 'student' ? 'flex' : 'none', 'important');
+                }
+
+                teacherOnlyIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
                     el.classList.toggle('hidden', !isTeacher);
                     el.style.setProperty('display', isTeacher ? 'flex' : 'none', 'important');
-                }
-            });
+                });
 
-            studentOnlyIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.toggle('hidden', isTeacher);
-                    el.style.setProperty('display', isTeacher ? 'none' : 'flex', 'important');
-                }
-            });
+                studentOnlyIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.classList.toggle('hidden', role !== 'student');
+                    el.style.setProperty('display', role === 'student' ? 'flex' : 'none', 'important');
+                });
 
-            if (sidebarTeacherSection) sidebarTeacherSection.style.setProperty('display', isTeacher ? 'block' : 'none', 'important');
-            if (sidebarStudentSection) sidebarStudentSection.style.setProperty('display', isTeacher ? 'none' : 'block', 'important');
+                if (sidebarTeacherSection) {
+                    sidebarTeacherSection.style.setProperty('display', isTeacher ? 'block' : 'none', 'important');
+                }
+                if (sidebarStudentSection) {
+                    sidebarStudentSection.style.setProperty('display', role === 'student' ? 'block' : 'none', 'important');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar sidebar por perfil:', error);
+            }
         }
 
         function updateRoleUI() {
@@ -4593,6 +4602,43 @@
             });
             
             // Event Listeners
+            navLinks.forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const tabId = link.dataset.tab;
+                    if ((userRole !== 'teacher' && ['users', 'profile-management', 'teacher-calendar'].includes(tabId)) ||
+                        (userRole !== 'student' && ['student-calendar', 'student-home'].includes(tabId))) {
+                        return;
+                    }
+
+                    navLinks.forEach(item => item.classList.remove('active'));
+                    link.classList.add('active');
+                    tabContainers.forEach(tab => tab.classList.remove('active'));
+
+                    const targetTab = document.getElementById(tabId + '-tab');
+                    if (targetTab) targetTab.classList.add('active');
+                    if (document.body.classList.contains('sidebar-open')) {
+                        document.body.classList.remove('sidebar-open');
+                    }
+
+                    updateAppHeader(tabId);
+
+                    if (tabId === 'my-profile' && userRole === 'student') loadMyProfile();
+                    if (tabId === 'profile-management' && userRole === 'teacher') {
+                        loadTeacherProfiles();
+                        loadTeacherRewardRequests();
+                    }
+                    if (tabId === 'teacher-calendar' && userRole === 'teacher') loadTeacherLessonCalendar();
+                    if (tabId === 'student-calendar' && userRole === 'student') loadStudentLessonCalendar();
+                    if (tabId === 'student-home' && userRole === 'student') loadStudentHome();
+                    if (tabId === 'tips' && userRole === 'teacher') {
+                        document.getElementById('teacher-tips')?.classList.remove('hidden');
+                        populateTipStudentSelect();
+                    }
+                    if (tabId === 'tasks' && userRole === 'teacher') loadTeacherDashboard();
+                });
+            });
+
             if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
             if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
             if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', e => { e.preventDefault(); signOut(); });
@@ -4645,57 +4691,6 @@
             });
             
             // Navegação entre abas
-            navLinks.forEach(link => {
-                link.addEventListener('click', e => {
-                    e.preventDefault();
-                    const tabId = link.dataset.tab;
-                    
-                    // Atualiza a navegação
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
-                    if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
-                    if ((userRole !== 'teacher' && ['users', 'profile-management', 'teacher-calendar'].includes(tabId)) ||
-                        (userRole !== 'student' && ['student-calendar', 'student-home'].includes(tabId))) {
-                        const safeTab = userRole === 'teacher' ? 'tasks' : 'tasks';
-                        setActiveTab(safeTab);
-                        return;
-                    }
-                    updateAppHeader(tabId);
-                    
-                    // Mostra a aba selecionada
-                    tabContainers.forEach(tab => tab.classList.remove('active'));
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-
-                    if (tabId === 'my-profile' && userRole === 'student') {
-                        loadMyProfile();
-                    }
-
-                    if (tabId === 'profile-management' && userRole === 'teacher') {
-                        loadTeacherProfiles();
-                        loadTeacherRewardRequests();
-                    }
-
-                    if (tabId === 'teacher-calendar' && userRole === 'teacher') {
-                        loadTeacherLessonCalendar();
-                    }
-                    
-                    if (tabId === 'student-calendar' && userRole === 'student') {
-                        loadStudentLessonCalendar();
-                    }
-
-                    if (tabId === 'student-home' && userRole === 'student') {
-                        loadStudentHome();
-                    }
-
-                    if (tabId === 'tips' && userRole === 'teacher') {
-                        document.getElementById('teacher-tips')?.classList.remove('hidden');
-                        populateTipStudentSelect();
-                    }
-
-                    if (tabId === 'tasks' && userRole === 'teacher') {
-                        loadTeacherDashboard();
-                    }
-                });
             });
             
             document.getElementById('student-home-go-tasks')?.addEventListener('click', () => setActiveTab('tasks'));
