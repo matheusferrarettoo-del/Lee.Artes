@@ -2020,6 +2020,191 @@
             display: none !important;
         }
 
+        /* ===== Workspace de tarefas do professor ===== */
+        .teacher-task-workspace { margin-top: 4px; }
+        .task-page-heading {
+            display:flex;
+            align-items:flex-end;
+            justify-content:space-between;
+            gap:20px;
+            margin-bottom:18px;
+        }
+        .task-page-description {
+            margin-top:-5px;
+            color:var(--text-muted);
+            font-size:13px;
+        }
+        .task-heading-action { min-width:150px; }
+        .teacher-task-toolbar {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:14px;
+        }
+        .global-task-search {
+            flex:1;
+            position:relative;
+        }
+        .global-task-search .tasks-search {
+            width:100%;
+            min-width:0;
+            padding:13px 16px 13px 40px;
+            background:#fff;
+            border:1px solid var(--border-soft);
+            border-radius:12px;
+        }
+        .global-task-search-icon {
+            position:absolute;
+            left:14px;
+            top:50%;
+            transform:translateY(-50%);
+            color:var(--text-muted);
+            font-size:18px;
+            pointer-events:none;
+        }
+        .compact-select {
+            min-width:190px;
+            padding:11px 13px !important;
+            background:#fff !important;
+            border-radius:12px !important;
+        }
+        .task-filter-tabs {
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-bottom:14px;
+        }
+        .task-filter-tab {
+            border:1px solid var(--border-soft);
+            background:#fff;
+            color:var(--text-muted);
+            border-radius:999px;
+            padding:9px 13px;
+            font-size:13px;
+            font-weight:700;
+            cursor:pointer;
+            transition:.15s ease;
+        }
+        .task-filter-tab:hover { border-color:#d0b8de; color:var(--text-main); }
+        .task-filter-tab.active {
+            background:#f3eaf8;
+            color:var(--primary);
+            border-color:#d9c1e6;
+        }
+        .task-filter-tab span {
+            display:inline-flex;
+            min-width:20px;
+            justify-content:center;
+            margin-left:4px;
+            font-size:12px;
+            color:inherit;
+        }
+        .task-list-panel {
+            background:#fff;
+            border:1px solid var(--border-soft);
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 6px 24px rgba(45,28,66,.035);
+        }
+        .task-list-header,
+        .teacher-task-row {
+            display:grid;
+            grid-template-columns:110px minmax(240px,2.2fr) minmax(150px,1.1fr) 130px 110px 40px;
+            align-items:center;
+            column-gap:14px;
+        }
+        .task-list-header {
+            min-height:44px;
+            padding:0 16px;
+            background:#faf9fc;
+            border-bottom:1px solid var(--border-soft);
+            color:#8b8196;
+            text-transform:uppercase;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.08em;
+        }
+        .teacher-task-row {
+            min-height:74px;
+            padding:10px 16px;
+            border-bottom:1px solid #f0ecf3;
+            transition:background .15s ease;
+        }
+        .teacher-task-row:hover { background:#fcfbfd; }
+        .teacher-task-row:last-child { border-bottom:0; }
+        .teacher-task-status {
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            font-size:12px;
+            font-weight:800;
+        }
+        .teacher-task-status .status-dot {
+            width:9px;
+            height:9px;
+            border-radius:50%;
+            flex:0 0 9px;
+        }
+        .teacher-task-status.pending { color:#a46600; }
+        .teacher-task-status.pending .status-dot { background:#f0b429; }
+        .teacher-task-status.completed { color:#278043; }
+        .teacher-task-status.completed .status-dot { background:#35a95a; }
+        .teacher-task-status.overdue { color:#c63c3c; }
+        .teacher-task-status.overdue .status-dot { background:#db4b4b; }
+        .teacher-task-main strong {
+            display:block;
+            font-size:13px;
+            line-height:1.35;
+            color:var(--text-main);
+        }
+        .teacher-task-main small {
+            display:block;
+            margin-top:3px;
+            color:var(--text-muted);
+            font-size:11px;
+        }
+        .teacher-task-cell {
+            color:#5f5668;
+            font-size:12px;
+        }
+        .teacher-task-menu {
+            border:0;
+            background:transparent;
+            color:#8b8196;
+            font-size:19px;
+            cursor:pointer;
+            width:32px;
+            height:32px;
+            border-radius:8px;
+        }
+        .teacher-task-menu:hover { background:#f1edf4; color:var(--text-main); }
+        .teacher-task-empty {
+            padding:34px 20px;
+            text-align:center;
+            color:var(--text-muted);
+        }
+        @media (max-width: 900px) {
+            .task-page-heading { align-items:flex-start; }
+            .teacher-task-toolbar { flex-direction:column; align-items:stretch; }
+            .compact-select { width:100%; min-width:0; }
+            .task-list-header { display:none; }
+            .teacher-task-row {
+                grid-template-columns:1fr auto;
+                gap:9px 12px;
+                padding:14px;
+            }
+            .teacher-task-row > .teacher-task-status { grid-column:1; }
+            .teacher-task-row > .teacher-task-menu { grid-column:2; grid-row:1 / span 2; }
+            .teacher-task-main,
+            .teacher-task-cell { grid-column:1; }
+            .teacher-task-cell.meta-date { margin-top:-4px; }
+        }
+        @media (max-width: 640px) {
+            .task-page-heading { flex-direction:column; }
+            .task-heading-action { width:100%; }
+            .task-filter-tabs { overflow:auto; flex-wrap:nowrap; padding-bottom:3px; }
+        }
+
         /* Calendário do aluno: somente leitura */
         #student-calendar-tab .calendar-readonly-list {
             display: grid;
@@ -2277,21 +2462,48 @@
                         </div>
                     </div>
                     
-                    <div class="tasks-layout">
-                        <h2 class="tasks-title">Suas Tarefas</h2>
-                        <div class="tasks-summary" id="teacher-task-summary">
-                            <div class="summary-card"><span class="summary-card-label">Total</span><span class="summary-card-value" id="teacher-total-count">0</span></div>
-                            <div class="summary-card"><span class="summary-card-label">Concluídas</span><span class="summary-card-value" id="teacher-completed-count">0</span></div>
-                            <div class="summary-card"><span class="summary-card-label">Pendentes</span><span class="summary-card-value" id="teacher-pending-count">0</span></div>
-                            <div class="summary-card"><span class="summary-card-label">Atrasadas</span><span class="summary-card-value" id="teacher-overdue-count">0</span></div>
+                    <div class="tasks-layout teacher-task-workspace">
+                        <div class="task-page-heading">
+                            <div>
+                                <h2 class="tasks-title">Tarefas</h2>
+                                <p class="task-page-description">Acompanhe, pesquise e gerencie todas as tarefas da turma.</p>
+                            </div>
+                            <button id="toggle-task-creator-btn" class="btn btn-primary task-heading-action" type="button" aria-expanded="false">＋ Nova tarefa</button>
                         </div>
-                        <div class="tasks-controls">
-                            <input id="teacher-task-search" class="tasks-search" type="search" placeholder="Buscar tarefa">
+
+                        <div class="teacher-task-toolbar">
+                            <div class="global-task-search">
+                                <span class="global-task-search-icon">⌕</span>
+                                <input id="teacher-task-search" class="tasks-search" type="search" placeholder="Buscar por tarefa, aluno ou disciplina">
+                            </div>
+                            <div class="teacher-toolbar-actions">
+                                <select class="form-control compact-select" id="teacher-task-subject-filter" aria-label="Filtrar por disciplina">
+                                    <option value="all">Todas as disciplinas</option>
+                                </select>
+                            </div>
                         </div>
-                        <div id="tasks-list">
-                            <!-- Tarefas serão carregadas aqui -->
+
+                        <div class="task-filter-tabs" id="teacher-task-filters">
+                            <button type="button" class="task-filter-tab active" data-status="all">Todas <span id="teacher-filter-all-count">0</span></button>
+                            <button type="button" class="task-filter-tab" data-status="pending">🟡 Pendentes <span id="teacher-filter-pending-count">0</span></button>
+                            <button type="button" class="task-filter-tab" data-status="completed">🟢 Concluídas <span id="teacher-filter-completed-count">0</span></button>
+                            <button type="button" class="task-filter-tab" data-status="overdue">🔴 Atrasadas <span id="teacher-filter-overdue-count">0</span></button>
                         </div>
-                    </div>
+
+                        <div class="task-list-panel">
+                            <div class="task-list-header">
+                                <span>Status</span>
+                                <span>Tarefa</span>
+                                <span>Aluno</span>
+                                <span>Disciplina</span>
+                                <span>Data</span>
+                                <span></span>
+                            </div>
+                            <div id="tasks-list">
+                                <!-- Tarefas serão carregadas aqui -->
+                            </div>
+                        </div>
+                    </div>                    </div>
                 </div>
                 
                 <!-- Painel do Aluno -->
