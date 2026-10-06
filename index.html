@@ -27,6 +27,401 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+
+        /* ===== Shell moderno: sidebar + header clean ===== */
+        :root {
+            --app-bg: #f7f7fb;
+            --surface: #ffffff;
+            --surface-soft: #fbfaff;
+            --border-soft: #ece8f3;
+            --text-main: #241f2f;
+            --text-muted: #746c82;
+            --sidebar-bg: #1f1730;
+            --sidebar-text: #eee8f8;
+            --sidebar-muted: #afa3c2;
+            --sidebar-active: rgba(255,255,255,.11);
+            --primary: #6a1b9a;
+            --secondary: #8e44ad;
+        }
+
+        body {
+            background: var(--app-bg);
+            color: var(--text-main);
+        }
+
+        body.app-ready {
+            overflow-x: hidden;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+        }
+
+        .app-sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 248px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 18px 14px;
+            z-index: 300;
+            border-right: 1px solid rgba(255,255,255,.06);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px 18px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .sidebar-brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #9c59c9, #5a287f);
+            box-shadow: 0 8px 18px rgba(0,0,0,.22);
+            font-size: 19px;
+        }
+
+        .sidebar-section-label {
+            padding: 14px 12px 7px;
+            color: var(--sidebar-muted);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-nav a {
+            color: var(--sidebar-muted);
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .18s ease;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            color: #fff;
+            background: var(--sidebar-active);
+        }
+
+        .sidebar-nav a.active {
+            box-shadow: inset 3px 0 0 #c07be7;
+        }
+
+        .sidebar-nav .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+            flex: 0 0 22px;
+        }
+
+        .sidebar-spacer {
+            flex: 1;
+        }
+
+        .sidebar-bottom {
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+
+        .app-main {
+            margin-left: 248px;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: 72px;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .app-header-inner {
+            height: 100%;
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-context {
+            min-width: 0;
+        }
+
+        .header-context h1 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 18px;
+            line-height: 1.1;
+            font-weight: 800;
+        }
+
+        .header-context p {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-primary-action {
+            display: none;
+        }
+
+        .profile-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 8px 5px 6px;
+            border: 1px solid var(--border-soft);
+            border-radius: 999px;
+            background: #fff;
+        }
+
+        .profile-avatar-small {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #f0e7f6;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .profile-chip-text {
+            min-width: 0;
+        }
+
+        .profile-chip-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-main);
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-chip-role {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .header-language {
+            width: auto !important;
+            max-width: 66px !important;
+            padding: 8px 9px !important;
+            border-radius: 10px !important;
+        }
+
+        .header-logout {
+            border-color: var(--border-soft) !important;
+            color: var(--text-main) !important;
+            background: #fff !important;
+            padding: 9px 13px !important;
+        }
+
+        .app-content {
+            padding: 28px;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .app-content .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(45, 28, 66, .045);
+            margin-bottom: 18px;
+        }
+
+        .card-header {
+            background: #fff;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-soft);
+            padding: 17px 20px;
+            font-size: 16px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-footer {
+            background: var(--surface-soft);
+            border-top: 1px solid var(--border-soft);
+            padding: 15px 20px;
+        }
+
+        .tasks-title {
+            font-size: 30px;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            letter-spacing: -.03em;
+        }
+
+        .tasks-summary,
+        .teacher-dashboard-grid {
+            gap: 14px;
+        }
+
+        .summary-card {
+            box-shadow: none;
+            border: 1px solid var(--border-soft);
+        }
+
+        .btn {
+            border-radius: 10px;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-soft);
+            background: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .app-sidebar {
+                width: 230px;
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+            }
+
+            body.sidebar-open .app-sidebar {
+                transform: translateX(0);
+            }
+
+            .app-main {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: inline-grid;
+                place-items: center;
+            }
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(22, 12, 31, .45);
+                z-index: 250;
+            }
+
+            body.sidebar-open .sidebar-backdrop {
+                display: block;
+            }
+
+            .app-content {
+                padding: 20px 16px;
+            }
+
+            .header-primary-action {
+                display: inline-flex;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app-header {
+                height: 64px;
+            }
+
+            .app-header-inner {
+                padding: 0 14px;
+            }
+
+            .header-context p {
+                display: none;
+            }
+
+            .profile-chip-text,
+            .header-logout {
+                display: none;
+            }
+
+            .profile-chip {
+                padding: 4px;
+                border: none;
+            }
+
+            .profile-avatar-small {
+                width: 36px;
+                height: 36px;
+            }
+
+            .app-content {
+                padding: 16px 12px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .page-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
         body {
             background: linear-gradient(135deg, #f5f0ff, #ede7f6);
             color: var(--dark);
@@ -1424,35 +1819,72 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i>🎨 AE - Art and English</i>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="#" class="nav-link active" data-tab="tasks">Tarefas</a></li>
-                        <li><a href="#" class="nav-link" data-tab="tips">Dicas</a></li>
-                        <li id="nav-users" class="hidden"><a href="#" class="nav-link" data-tab="users">Cadastro de Aluno</a></li>
-                        <li id="nav-student-profile" class="hidden"><a href="#" class="nav-link" data-tab="my-profile">Meu Perfil</a></li>
-                        <li id="nav-teacher-profile" class="hidden"><a href="#" class="nav-link" data-tab="profile-management">Perfil do Aluno <span id="teacher-reward-badge" class="pending-badge hidden">0</span></a></li>
-                        <li id="nav-teacher-calendar" class="hidden"><a href="#" class="nav-link" data-tab="teacher-calendar">Calendário de Aulas</a></li>
-                    </ul>
-                </nav>
-                <div class="user-info">
-                    <select id="language-switcher" class="form-control" style="max-width:90px; padding:8px 10px;">
-                        <option value="br">PT</option>
-                        <option value="en">EN</option>
-                    </select>
-                    <span id="user-email">usuário@exemplo.com</span>
-                    <button id="logout-btn" class="btn btn-outline">Sair</button>
+    <div class="app-shell">
+        <aside class="app-sidebar" aria-label="Navegação principal">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-mark">🎨</div>
+                <span>AE · Art & English</span>
+            </div>
+
+            <div class="sidebar-section-label">Principal</div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-tab="tasks"><span class="nav-icon">✓</span><span>Tarefas</span></a>
+                <a href="#" class="nav-link" data-tab="tips"><span class="nav-icon">✦</span><span>Dicas</span></a>
+            </nav>
+
+            <div class="sidebar-section-label" id="sidebar-teacher-section-label">Professor</div>
+            <nav class="sidebar-nav">
+                <a href="#" id="nav-users" class="nav-link hidden" data-tab="users"><span class="nav-icon">＋</span><span>Cadastro de Aluno</span></a>
+                <a href="#" id="nav-teacher-profile" class="nav-link hidden" data-tab="profile-management"><span class="nav-icon">◉</span><span>Perfil do Aluno</span><span id="teacher-reward-badge" class="pending-badge hidden">0</span></a>
+                <a href="#" id="nav-teacher-calendar" class="nav-link hidden" data-tab="teacher-calendar"><span class="nav-icon">□</span><span>Calendário de Aulas</span></a>
+            </nav>
+
+            <div class="sidebar-section-label" id="sidebar-student-section-label">Aluno</div>
+            <nav class="sidebar-nav">
+                <a href="#" id="nav-student-profile" class="nav-link hidden" data-tab="my-profile"><span class="nav-icon">◯</span><span>Meu Perfil</span></a>
+            </nav>
+
+            <div class="sidebar-spacer"></div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-nav">
+                    <a href="#" id="sidebar-logout-link"><span class="nav-icon">↪</span><span>Sair</span></a>
                 </div>
             </div>
-        </div>
-    </header>
-    
-    <div class="container">
+        </aside>
+
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+        <main class="app-main">
+            <header class="app-header">
+                <div class="app-header-inner">
+                    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                        <button id="mobile-menu-btn" class="mobile-menu-btn" type="button" aria-label="Abrir menu">☰</button>
+                        <div class="header-context">
+                            <h1 id="page-title">Tarefas</h1>
+                            <p id="page-subtitle">Organize suas atividades e acompanhe o progresso.</p>
+                        </div>
+                    </div>
+
+                    <div class="header-actions">
+                        <button id="header-primary-action" class="btn btn-primary header-primary-action" type="button">＋ Nova tarefa</button>
+                        <select id="language-switcher" class="form-control header-language">
+                            <option value="br">PT</option>
+                            <option value="en">EN</option>
+                        </select>
+                        <div class="profile-chip">
+                            <div class="profile-avatar-small" id="profile-avatar-small">AE</div>
+                            <div class="profile-chip-text">
+                                <div class="profile-chip-name" id="user-email">usuário@exemplo.com</div>
+                                <div class="profile-chip-role" id="user-role-label">Aluno</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="app-content">
+                <div class="container">
         <!-- Tela de Login -->
         <div id="login-screen" class="login-container">
             <h2 class="login-title">AE - Art and English</h2>
@@ -1486,6 +1918,7 @@
         
         <!-- Conteúdo Principal (após login) -->
         <div id="main-content" class="hidden">
+            <div class="page-grid">
             <!-- Aba de Tarefas -->
             <div id="tasks-tab" class="tab-container active">
                 <!-- Painel do Professor -->
@@ -1717,6 +2150,7 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
            <!-- Aba de Cadastro de Aluno -->
         <div id="users-tab" class="tab-container">
@@ -1895,8 +2329,10 @@
                 </div>
             </div>
         </div>
+                </div>
+            </div>
+        </main>
     </div>
-</div>
 
     <!-- Modal para resposta de tarefa -->
     <div id="response-modal" class="modal">
@@ -1934,6 +2370,16 @@
         const db = firebaseReady ? firebase.firestore() : null;
         const storage = firebaseReady ? firebase.storage() : null;
         
+
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+        const headerPrimaryAction = document.getElementById('header-primary-action');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const sidebarLogoutLink = document.getElementById('sidebar-logout-link');
+        const sidebarTeacherSection = document.getElementById('sidebar-teacher-section-label');
+        const sidebarStudentSection = document.getElementById('sidebar-student-section-label');
+
         // Referências aos elementos da interface
         const loginScreen = document.getElementById('login-screen');
         const mainContent = document.getElementById('main-content');
@@ -1997,7 +2443,8 @@
                 ['a[data-tab="my-profile"]', 'nav.myProfile'],
                 ['a[data-tab="profile-management"]', 'nav.studentProfile'],
                 ['a[data-tab="teacher-calendar"]', 'nav.teacherCalendar'],
-                ['#logout-btn', 'actions.logout'],
+                ['#sidebar-logout-link', 'actions.logout'],
+
                 ['.login-title', 'brand.name'],
                 ['.role-option[data-role="student"] h3', 'roles.student.title'],
                 ['.role-option[data-role="student"] p', 'roles.student.description'],
@@ -2210,6 +2657,35 @@
             }
         }
 
+
+        function updateAppHeader(tabId) {
+            const labels = {
+                tasks: ['Tarefas', 'Acompanhe atividades, pendências e evolução.'],
+                tips: ['Dicas', 'Conteúdos rápidos para apoiar seu aprendizado.'],
+                users: ['Cadastro de Aluno', 'Gerencie alunos e seus dados.'],
+                'my-profile': ['Meu Perfil', 'Consulte seu progresso e informações.'],
+                'profile-management': ['Perfil do Aluno', 'Gerencie acompanhamento, frequência e evolução.'],
+                'teacher-calendar': ['Calendário de Aulas', 'Organize aulas, reposições e chamada.']
+            };
+            const [title, subtitle] = labels[tabId] || labels.tasks;
+            if (pageTitle) pageTitle.textContent = title;
+            if (pageSubtitle) pageSubtitle.textContent = subtitle;
+            if (headerPrimaryAction) {
+                headerPrimaryAction.style.display = (tabId === 'tasks' && userRole === 'teacher') ? 'inline-flex' : 'none';
+            }
+        }
+
+        function updateRoleUI() {
+            const teacher = userRole === 'teacher';
+            if (sidebarTeacherSection) sidebarTeacherSection.style.display = teacher ? 'block' : 'none';
+            if (sidebarStudentSection) sidebarStudentSection.style.display = teacher ? 'none' : 'block';
+            const roleLabel = document.getElementById('user-role-label');
+            if (roleLabel) roleLabel.textContent = teacher ? 'Professor' : 'Aluno';
+            const avatar = document.getElementById('profile-avatar-small');
+            const email = currentUser?.email || '';
+            if (avatar) avatar.textContent = email ? email.charAt(0).toUpperCase() : 'AE';
+        }
+
         function formatPrice(value) {
             return new Intl.NumberFormat(currentLocale, {
                 style: 'currency',
@@ -2254,6 +2730,7 @@
                         loadTeacherProfiles();
                         loadTeacherRewardRequests();
                         setActiveTab('users');
+                        updateRoleUI();
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
                         document.getElementById('nav-teacher-profile').classList.add('hidden');
@@ -2261,6 +2738,7 @@
                         document.getElementById('nav-student-profile').classList.remove('hidden');
                         loadMyProfile();
                         setActiveTab('tasks');
+                        updateRoleUI();
                     }
 
                     // Mostrar o painel correto conforme o tipo de usuário
@@ -2283,7 +2761,12 @@
             });
             
             // Event Listeners
-            logoutBtn.addEventListener('click', signOut);
+            if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+            if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+            if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', e => { e.preventDefault(); signOut(); });
+            if (headerPrimaryAction) headerPrimaryAction.addEventListener('click', () => toggleTaskCreator());
+
+            if (logoutBtn) logoutBtn.addEventListener('click', signOut);
             loginBtn.addEventListener('click', signIn);
             closeModalBtn.addEventListener('click', () => responseModal.style.display = 'none');
             
@@ -2312,6 +2795,8 @@
                     // Atualiza a navegação
                     navLinks.forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
+                    if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
+                    updateAppHeader(tabId);
                     
                     // Mostra a aba selecionada
                     tabContainers.forEach(tab => tab.classList.remove('active'));
