@@ -126,5 +126,6 @@
   "users.subject.english": "English",
   "users.subject.arts": "Arts",
   "users.subject.englishArts": "English and Arts",
-  "profile.selectStudent": "Select a student"
+  "profile.selectStudent": "Select a student",
+  "journey.title": "My Journey"
 }
