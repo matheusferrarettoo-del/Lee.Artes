@@ -1816,6 +1816,45 @@
                 padding: 15px;
             }
         }
+
+        /* ===== Overrides finais do novo shell ===== */
+        body { background: var(--app-bg); color: var(--text-main); }
+        .app-header {
+            padding: 0;
+            background: rgba(255,255,255,.94);
+            box-shadow: none;
+            color: var(--text-main);
+        }
+        .app-header .app-header-inner { padding-top: 0; padding-bottom: 0; }
+        .app-content .container { max-width: none; margin: 0; padding: 0; }
+        .app-content .card {
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(45, 28, 66, .045);
+        }
+        .app-content .card-header {
+            background: #fff;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .app-content .card-footer {
+            background: var(--surface-soft);
+            border-top: 1px solid var(--border-soft);
+        }
+        .app-content .btn { border-radius: 10px; box-shadow: none; }
+        .app-content .btn-primary { background: var(--primary); color: #fff; }
+        .app-content .btn-primary:hover { background: var(--secondary); transform: none; box-shadow: none; }
+        .app-sidebar nav ul { margin: 0; padding: 0; }
+        .app-sidebar .nav-link { color: var(--sidebar-muted); }
+        .app-sidebar .nav-link:hover,
+        .app-sidebar .nav-link.active { color: #fff; }
+        @media (max-width: 900px) {
+            .app-header .header-primary-action { display: inline-flex; }
+        }
+        @media (max-width: 640px) {
+            .app-header .header-actions { gap: 4px; }
+        }
+
     </style>
 </head>
 <body>
