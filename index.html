@@ -2611,6 +2611,55 @@
         .tips-recommendation-list{display:grid;gap:8px}.tip-item{display:grid;grid-template-columns:108px minmax(0,1fr) 130px;gap:14px;align-items:center;padding:9px;border:1px solid #e9e2ee;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgba(45,28,66,.025)}.tip-item-media{min-height:86px;font-size:32px}.tip-item-content h3{margin:5px 0 3px;color:#342044;font-size:13px}.tip-item-content>p{margin:0;color:#766b7e;font-size:9px;line-height:1.4}.tip-item-topline{display:flex;justify-content:space-between;gap:8px}.tip-item-date{color:#978c9e;font-size:8px}.tip-item-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.tip-item-tags span{padding:4px 7px;border-radius:999px;background:#f4f6fa;color:#667080;font-size:8px}.tip-item-actions{display:flex;flex-direction:column;gap:6px}.tips-favorite-btn{border:1px solid #eadfee;background:#fff;color:#8b6c99;border-radius:8px;padding:7px;font-size:8px;cursor:pointer}.tips-favorite-btn.favorited{color:#d94675;border-color:#f1c6d7;background:#fff6f9}.tips-empty-state{padding:55px 20px;text-align:center;border:1px dashed #ddd0e6;border-radius:16px;background:#fff}.tips-empty-state span{font-size:35px}.tips-empty-state strong{display:block;margin-top:8px;color:#3d284b}.tips-empty-state p{color:#8a7d91;font-size:11px}
         .tips-teacher-panel{max-width:980px;margin:0 auto 24px;padding:22px 24px;border:1px solid #e6dcec;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(45,28,66,.045)}.tips-teacher-heading{display:flex;justify-content:space-between;gap:15px;margin-bottom:18px}.tips-teacher-eyebrow{color:#8a4bb6;font-size:9px;font-weight:900;letter-spacing:.11em}.tips-teacher-heading h3{margin:5px 0 4px;color:#321c43;font-size:20px}.tips-teacher-heading p{margin:0;color:#81758a;font-size:10px}.tips-teacher-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#f4eafa;font-size:21px}.tips-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.tips-field label{display:block;margin-bottom:5px;color:#5c4b68;font-size:9px;font-weight:800}.tips-field .form-control{width:100%;border-radius:9px;min-height:38px;font-size:10px}.tips-field-wide{grid-column:span 2}.tips-field-full{grid-column:1/-1}.tips-form-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding-top:14px;border-top:1px solid #f0eaf3}.tips-notification-option{display:flex;align-items:center;gap:7px;color:#665a6d;font-size:10px}.tips-notification-option input{accent-color:#7227a8}.tips-send-btn{min-width:190px}
         @media(max-width:900px){.tips-layout{padding:18px 14px 30px}.tips-stats{grid-template-columns:repeat(2,1fr)}.tips-featured{grid-template-columns:1fr}.tip-item{grid-template-columns:80px minmax(0,1fr)}.tip-item-actions{grid-column:2;flex-direction:row}.tips-form-grid{grid-template-columns:1fr 1fr}} @media(max-width:560px){.tips-topbar{padding:18px}.tips-heading{font-size:21px}.tip-item{grid-template-columns:1fr}.tip-item-media{min-height:110px}.tip-item-actions{grid-column:auto}.tips-form-grid{grid-template-columns:1fr}.tips-field-wide,.tips-field-full{grid-column:auto}.tips-form-footer{flex-direction:column;align-items:stretch}.tips-send-btn{width:100%}}
+        /* ===== Minha Jornada do aluno ===== */
+        .journey-card-header { color:#2d1740 !important; font-weight:900; }
+        .journey-card-body { padding:0 !important; }
+        .student-journey { max-width:1160px; margin:0 auto; padding:26px 28px 38px; }
+        .journey-hero {
+            display:flex; align-items:center; justify-content:space-between; gap:18px; padding:24px 26px;
+            border:1px solid #eadff1; border-radius:20px;
+            background:linear-gradient(135deg,#fff 0%,#faf3ff 100%);
+            box-shadow:0 8px 26px rgba(55,30,75,.045);
+        }
+        .journey-hero-main { display:flex; align-items:center; gap:16px; }
+        .journey-avatar { width:76px; height:76px; flex:0 0 76px; display:grid; place-items:center; overflow:hidden; border-radius:22px; background:#eedff8; color:#6f2aa0; font-size:36px; }
+        .journey-avatar img { width:100%; height:100%; object-fit:cover; }
+        .journey-eyebrow,.journey-kicker { color:#9252bc; font-size:9px; font-weight:900; letter-spacing:.12em; }
+        .journey-hero h2 { margin:5px 0 3px; color:#29183a; font-size:28px; letter-spacing:-.035em; }
+        .journey-hero p { margin:0; color:#7b6e84; font-size:11px; }
+        .journey-hero-badge { display:flex; align-items:center; gap:9px; padding:10px 14px; border-radius:12px; background:#f4eafa; }
+        .journey-hero-badge span { font-size:20px; }.journey-hero-badge strong{display:block;color:#4a3157;font-size:10px}.journey-hero-badge small{color:#8c7b95;font-size:10px}
+        .journey-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:16px; }
+        .journey-card { padding:20px; border:1px solid #e9e2ee; border-radius:18px; background:#fff; box-shadow:0 5px 20px rgba(45,28,66,.035); }
+        .journey-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .journey-card h3 { margin:5px 0 0; color:#33203f; font-size:18px; }
+        .journey-card-icon { width:36px; height:36px; display:grid; place-items:center; border-radius:10px; background:#f5ecfa; font-size:18px; }
+        .journey-main-grid > .journey-card { min-height:220px; }
+        .journey-level-card { background:linear-gradient(180deg,#fff,#fbf6fd); }
+        .journey-level-card .journey-card-head { align-items:flex-end; }
+        .journey-level-card .journey-card-head h3 { font-size:42px; line-height:1; color:#7126a5; letter-spacing:-.05em; }
+        .journey-level-percent { font-weight:900; color:#6d2b99; font-size:18px; }
+        .journey-level-card p { margin:16px 0 8px; color:#796d82; font-size:11px; }
+        .journey-progress,.journey-mascot-bar { height:9px; overflow:hidden; border-radius:999px; background:#eee7f2; }
+        .journey-progress span,.journey-mascot-bar span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8031bb,#bd72de); }
+        .journey-level-track { display:flex; justify-content:space-between; margin-top:12px; color:#a093a9; font-size:9px; font-weight:800; }
+        .journey-level-track span.active { color:#7226a4; }
+        .journey-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:24px; }
+        .journey-stat-grid div { padding:12px; border-radius:12px; background:#faf8fb; text-align:center; }
+        .journey-stat-grid span { display:block; font-size:18px; }.journey-stat-grid strong{display:block;margin-top:4px;color:#3a2448;font-size:22px}.journey-stat-grid small{display:block;margin-top:3px;color:#8a7d91;font-size:8px}
+        .journey-points-note { margin-top:13px; color:#7d7185; font-size:9px; }
+        .journey-goal-card { display:flex; align-items:center; gap:16px; margin-top:16px; padding:21px 22px; background:linear-gradient(110deg,#f8f0fc,#fff); }
+        .journey-goal-icon { width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:15px;background:#efe2f8;font-size:25px; }
+        .journey-goal-copy { flex:1; }.journey-goal-copy h3{margin:6px 0 3px;color:#382047;font-size:20px}.journey-goal-copy p{margin:0;color:#85798d;font-size:10px}
+        .journey-goal-actions { display:flex; gap:7px; flex-wrap:wrap; }.journey-goal-actions .btn{font-size:9px;padding:9px 12px}
+        .journey-secondary-grid { margin-top:16px; }
+        .journey-info-list { margin-top:12px; }
+        .journey-info-list div { display:flex; justify-content:space-between; gap:15px; padding:9px 0; border-bottom:1px solid #f0eaf3; font-size:10px; }.journey-info-list span{color:#82768c}.journey-info-list strong{color:#392348}
+        .journey-mascot-points { display:flex; align-items:baseline; gap:6px; margin-top:20px; }.journey-mascot-points strong{font-size:34px;color:#7126a5}.journey-mascot-points span{font-size:10px;color:#8a7e91}.journey-mascot-card p{font-size:9px;color:#83778c}
+        .journey-mascot-bar { margin-top:12px; }.journey-mascot-actions{margin-top:12px}.journey-status{color:#7b6e85;font-size:9px}.journey-status.pending{color:#95620a}
+        @media(max-width:800px){.student-journey{padding:18px 14px 30px}.journey-grid{grid-template-columns:1fr}.journey-hero{align-items:flex-start}.journey-goal-card{align-items:flex-start;flex-wrap:wrap}.journey-goal-actions{width:100%}.journey-goal-actions .btn{flex:1}}
+        @media(max-width:520px){.journey-hero{padding:19px}.journey-avatar{width:60px;height:60px;flex-basis:60px}.journey-hero h2{font-size:23px}.journey-hero-badge{display:none}.journey-stat-grid{grid-template-columns:1fr}.journey-card{padding:17px}}
+
         /* Calendário do aluno: somente leitura */
         #student-calendar-tab .calendar-readonly-list {
             display: grid;
@@ -3333,7 +3382,7 @@
 
             <div class="sidebar-section-label" id="sidebar-student-section-label">Aluno</div>
             <nav class="sidebar-nav">
-                <a href="#" id="nav-student-profile" class="nav-link hidden" data-tab="my-profile"><span class="nav-icon">◯</span><span>Meu Perfil</span></a>
+                <a href="#" id="nav-student-profile" class="nav-link hidden" data-tab="my-profile"><span class="nav-icon">◯</span><span>Minha Jornada</span></a>
                 <a href="#" id="nav-student-calendar" class="nav-link hidden" data-tab="student-calendar"><span class="nav-icon">□</span><span>Meu Calendário</span></a>
             </nav>
 
@@ -3905,8 +3954,8 @@
 
         <div id="my-profile-tab" class="tab-container">
             <div class="card">
-                <div class="card-header">Meu Perfil</div>
-                <div class="card-body" id="my-profile-content">
+                <div class="card-header journey-card-header">Minha Jornada</div>
+                <div class="card-body journey-card-body" id="my-profile-content">
                     <p>Carregando perfil...</p>
                 </div>
             </div>
@@ -4199,7 +4248,7 @@
                 ['label[for="new-student-notes"]', 'users.notes'],
                 ['#register-student-btn', 'users.registerStudent'],
                 ['#users-tab .card:nth-of-type(2) .card-header', 'users.registeredStudents'],
-                ['#my-profile-tab .card-header', 'profile.myProfile'],
+                ['#my-profile-tab .card-header', 'journey.title'],
                 ['#profile-management-tab .card-header', 'profile.studentProfileRegistration'],
                 ['label[for="profile-student-id"]', 'roles.student.title'],
                 ['label[for="profile-contact"]', 'profile.contactInfo'],
@@ -4377,7 +4426,7 @@
                 tasks: ['Tarefas', 'Acompanhe atividades, pendências e evolução.'],
                 tips: ['Dicas', 'Conteúdos rápidos para apoiar seu aprendizado.'],
                 users: ['Cadastro de Aluno', 'Gerencie alunos e seus dados.'],
-                'my-profile': ['Meu Perfil', 'Consulte seu progresso e informações.'],
+                'my-profile': ['Minha Jornada', 'Acompanhe seu nível, evolução, metas e conquistas.'],
                 'profile-management': ['Perfil do Aluno', 'Gerencie acompanhamento, frequência e evolução.'],
                 'teacher-calendar': ['Calendário de Aulas', 'Organize aulas, reposições e chamada.'],
                 'student-calendar': ['Meu Calendário', 'Consulte suas aulas e reposições.']
@@ -4438,6 +4487,13 @@
         }
         
         // Função para inicializar a aplicação
+        function applyJourneyLabels() {
+            const navJourney = document.querySelector('#nav-student-profile span:last-child');
+            const journeyHeader = document.querySelector('#my-profile-tab .card-header');
+            if (navJourney && userRole === 'student') navJourney.textContent = 'Minha Jornada';
+            if (journeyHeader && userRole === 'student') journeyHeader.textContent = 'Minha Jornada';
+        }
+
         function initApp() {
             if (!firebaseReady || !auth || !db) {
                 showAlert(
@@ -4495,7 +4551,8 @@
                         loadStudentHome();
                         updateRoleUI();
                         enforceSidebarByRole();
-                        updateAppHeader('tasks');
+                        applyJourneyLabels();
+                        updateAppHeader('my-profile');
                     }
 
                     // Mostrar o painel correto conforme o tipo de usuário
@@ -5746,133 +5803,102 @@
                 const pendingDate = pendingRequest?.requestedAt?.toDate ? pendingRequest.requestedAt.toDate().toLocaleDateString(currentLocale) : '';
                 const completedDate = latestCompletedRequest?.completedAt?.toDate ? latestCompletedRequest.completedAt.toDate().toLocaleDateString(currentLocale) : '';
 
+                const nextLevelPercent = Math.max(0, Math.min(100, Number(progress) || 0));
+                const memberSinceDate = memberSince || (userData.createdAt?.toDate ? userData.createdAt.toDate() : null);
+                const memberSinceLabel = memberSinceDate
+                    ? memberSinceDate.toLocaleDateString(currentLocale || 'pt-BR', { month:'long', year:'numeric' })
+                    : 'data não informada';
+                const journeyGoal = profileGoal || ('Chegar ao ' + nextLevel);
+                const pointsToNextRescue = Math.max(0, 500 - (totalPoints % 500 || 0));
+                const levelNames = ['A1','A2','B1','B2','C1','C2'];
+
                 container.innerHTML = `
-                    <div class="student-profile-layout">
-                        <div class="profile-main">
-                            <div class="profile-hero">
-                                <div class="profile-avatar">${profileAvatarMarkup}</div>
-                                <div class="profile-hero-content">
+                    <div class="student-journey">
+                        <section class="journey-hero">
+                            <div class="journey-hero-main">
+                                <div class="journey-avatar">${profileAvatarMarkup}</div>
+                                <div>
+                                    <span class="journey-eyebrow">MINHA JORNADA</span>
                                     <h2>${escapeHtml(studentName)}</h2>
-                                    <p>Bem-vindo(a)! Continue avançando no inglês e na arte.</p>
-                                    <div class="profile-level-chip">Nível atual: ${escapeHtml(currentLevel)}</div>
-                                    <div class="profile-progress-track">
-                                        <div class="profile-progress-fill" style="width:${progress}%"></div>
-                                    </div>
-                                    <small>Próximo nível: ${escapeHtml(nextLevel)}</small>
+                                    <p>Aluno(a) desde ${escapeHtml(memberSinceLabel)}</p>
                                 </div>
                             </div>
+                            <div class="journey-hero-badge">
+                                <span>🎯</span>
+                                <div><strong>Próximo nível</strong><small>${escapeHtml(nextLevel)}</small></div>
+                            </div>
+                        </section>
 
-                            <div class="profile-panel" style="margin-top:16px;">
-                                <div class="profile-panel-header">Resumo do Perfil</div>
-                                <div class="profile-grid">
-                                    <div class="profile-tile full">
-                                        <h4>🎯 Objetivo</h4>
-                                        <p class="preserved-text">${preserveText(profileGoal || 'Não informado')}</p>
+                        <section class="journey-grid journey-main-grid">
+                            <article class="journey-card journey-level-card">
+                                <div class="journey-card-head">
+                                    <div>
+                                        <span class="journey-kicker">MEU NÍVEL</span>
+                                        <h3>${escapeHtml(currentLevel)}</h3>
                                     </div>
-                                    <div class="profile-tile">
-                                        <h4>📒 Dados pessoais</h4>
-                                        <p class="preserved-text">${preserveText(profilePersonalInfo || 'Não informado')}</p>
-                                    </div>
-                                    <div class="profile-tile">
-                                        <h4>📞 Informações de contato</h4>
-                                        <p class="preserved-text">${preserveText(profileContactInfo || 'Não informado')}</p>
-                                    </div>
-                                    <div class="profile-tile">
-                                        <h4>🗂️ Pasta da estudante</h4>
-                                        <p>${profileFolderLink ? `<a href="${escapeHtml(profileFolderLink)}" target="_blank" rel="noopener noreferrer">Abrir pasta</a>` : 'Não informado'}</p>
-                                    </div>
-                                    <div class="profile-tile">
-                                        <h4>🇬🇧 Nível de inglês</h4>
-                                        <p class="preserved-text">${preserveText(profile.englishLevel || 'Não informado')}</p>
-                                    </div>
-                                    <div class="profile-tile">
-                                        <h4>📈 Evolução</h4>
-                                        <p class="preserved-text">${preserveText(profile.evolution || 'Não informado')}</p>
-                                    </div>
-                                    <div class="profile-tile full">
-                                        <h4>💜 Constância</h4>
-                                        <p class="preserved-text">${preserveText(profile.consistency || 'Não informado')}</p>
-                                    </div>
+                                    <div class="journey-level-percent">${nextLevelPercent}%</div>
                                 </div>
-                            </div>
+                                <p>Você está avançando para <strong>${escapeHtml(nextLevel)}</strong>.</p>
+                                <div class="journey-progress"><span style="width:${nextLevelPercent}%"></span></div>
+                                <div class="journey-level-track">
+                                    ${levelNames.map(levelName => `<span class="${levelName === currentLevel ? 'active' : ''}">${levelName}</span>`).join('')}
+                                </div>
+                            </article>
 
-                            <div class="reward-card">
-                                <h4>🐾 Sistema Mascote Evolutivo</h4>
-                                <p>Presença em aula: +100 pontos | Tarefa concluída: +10 pontos | 500 pontos = 1 resgate.</p>
-                                <div class="reward-metrics">
-                                    <div class="reward-metric"><div class="reward-metric-label">Pontos totais</div><div class="reward-metric-value">${totalPoints}</div></div>
-                                    <div class="reward-metric"><div class="reward-metric-label">Resgates totais</div><div class="reward-metric-value">${rewardMetrics.rescuesTotal}</div></div>
-                                    <div class="reward-metric"><div class="reward-metric-label">Resgates usados</div><div class="reward-metric-value">${rewardMetrics.rescuesUsed}</div></div>
-                                    <div class="reward-metric"><div class="reward-metric-label">Disponíveis</div><div class="reward-metric-value">${rewardMetrics.rescuesAvailable}</div></div>
+                            <article class="journey-card journey-evolution-card">
+                                <div class="journey-card-head">
+                                    <div>
+                                        <span class="journey-kicker">MINHA EVOLUÇÃO</span>
+                                        <h3>O que você já conquistou</h3>
+                                    </div>
+                                    <span class="journey-card-icon">📈</span>
                                 </div>
-                                ${pendingRequest ? `
-                                    <div class="reward-request-item">
-                                        <strong>✅ Evolução resgatada!</strong><br>
-                                        <span class="status-pill pending">Aguardando o professor concluir</span>
-                                        <p style="margin-top:8px;">Data do resgate: ${pendingDate || 'Agora'}</p>
-                                        ${pendingRequest.chosenPath ? `<p>Caminho escolhido: <strong>${escapeHtml(pendingRequest.chosenPath)}</strong></p>` : ''}
-                                    </div>
-                                ` : ''}
-                                ${latestCompletedRequest ? `
-                                    <div class="reward-request-item">
-                                        <strong>✅ Evolução concluída</strong><br>
-                                        <span class="status-pill done">Concluído</span>
-                                        <p style="margin-top:8px;">Data de conclusão: ${completedDate || 'Não informada'}</p>
-                                        ${chosenPath ? `<p>Caminho: <strong>${escapeHtml(chosenPath)}</strong></p>` : ''}
-                                        ${mascotCurrentImage ? `<p><img src="${escapeHtml(mascotCurrentImage)}" alt="Mascote evoluído" style="max-width:140px;border-radius:10px;border:1px solid #ddd;"></p><p><a href="${escapeHtml(mascotCurrentImage)}" target="_blank" rel="noopener noreferrer">Abrir imagem da evolução</a></p>` : ''}
-                                    </div>
-                                ` : ''}
-                                ${canRedeemNow ? `
-                                    <div class="form-group" style="margin-bottom:10px;max-width:280px;">
-                                        <label for="reward-path-select">Caminho da evolução (opcional)</label>
-                                        <select id="reward-path-select" class="form-control">
-                                            <option value="">Sem caminho definido</option>
-                                            <option value="Fogo">Fogo</option>
-                                            <option value="Água">Água</option>
-                                            <option value="Ar">Ar</option>
-                                            <option value="Terra">Terra</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-accent" onclick="redeemMascotEvolution('${profileSnapshot.docs[0].id}')">Resgatar evolução</button>
-                                ` : `<p style="margin-top:8px;color:#6f5a98;">${pendingRequest ? 'Você já possui um pedido pendente. Aguarde a conclusão da professora.' : 'Acumule mais pontos para liberar novos resgates.'}</p>`}
-                            </div>
-                        </div>
+                                <div class="journey-stat-grid">
+                                    <div><span>📚</span><strong>${completedTasks}</strong><small>tarefas concluídas</small></div>
+                                    <div><span>🔥</span><strong>${attendancePresentDays}</strong><small>aulas com presença</small></div>
+                                    <div><span>⭐</span><strong>${totalPoints}</strong><small>pontos conquistados</small></div>
+                                </div>
+                                <div class="journey-points-note">${pointsToNextRescue === 500 ? 'Mais um ciclo de 500 pontos liberado.' : 'Faltam ' + pointsToNextRescue + ' pontos para o próximo resgate do mascote.'}</div>
+                            </article>
+                        </section>
 
-                        <div class="profile-side">
-                            <div class="profile-panel">
-                                <div class="profile-panel-header">Estatísticas do Aluno</div>
-                                <div class="profile-stats">
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Dias estudando</div><div class="profile-stat-value">${studyDays}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Presenças</div><div class="profile-stat-value">${attendancePresentDays}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Faltas</div><div class="profile-stat-value">${attendanceAbsences}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Tarefas recebidas</div><div class="profile-stat-value">${totalTasks}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Tarefas concluídas</div><div class="profile-stat-value">${completedTasks}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Pontos do mascote</div><div class="profile-stat-value">${totalPoints}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Meta semanal (${weeklyGoal})</div><div class="profile-stat-value">${completedTasks}/${weeklyGoal}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Aulas no calendário</div><div class="profile-stat-value">${scheduledLessons}</div></div>
-                                    <div class="profile-stat-row"><div class="profile-stat-label">Reposições no calendário</div><div class="profile-stat-value">${scheduledMakeups}</div></div>
-                                </div>
-                                <div style="padding: 0 16px 16px;">
-                                    <div class="profile-progress-track" style="height:10px;background:#e8ddf8;"><div class="profile-progress-fill" style="width:${weeklyProgress}%"></div></div>
-                                </div>
-                                <div class="profile-level-bar">
-                                    <div class="profile-level-point"><span>A1</span></div>
-                                    <div class="profile-level-point"><span>A2</span></div>
-                                    <div class="profile-level-point ${currentLevel === 'B1' ? 'active' : ''}"><span>B1</span></div>
-                                    <div class="profile-level-point"><span>B2</span></div>
-                                </div>
-                                <div class="profile-calendar-wrapper">
-                                    <h4 style="color:#4b2f82;margin-bottom:10px;">Calendário de aulas e reposições</h4>
-                                    ${buildClassCalendarMarkup(classCalendar)}
-                                </div>
-                                <div class="profile-cta">
-                                    <button class="btn btn-primary" onclick="setActiveTab('tips')">Ver Dicas</button>
-                                    <button class="btn btn-outline" onclick="setActiveTab('tasks')">Ir para Tarefas</button>
-                                </div>
+                        <section class="journey-card journey-goal-card">
+                            <div class="journey-goal-icon">🚀</div>
+                            <div class="journey-goal-copy">
+                                <span class="journey-kicker">MINHA META</span>
+                                <h3>${escapeHtml(journeyGoal)}</h3>
+                                <p>Continue com constância. Cada aula e cada tarefa aproximam você do próximo nível.</p>
                             </div>
-                        </div>
+                            <div class="journey-goal-actions">
+                                <button class="btn btn-primary" onclick="setActiveTab('tasks')">Ver minhas tarefas</button>
+                                <button class="btn btn-outline" onclick="setActiveTab('student-calendar')">Ver minhas aulas</button>
+                            </div>
+                        </section>
+
+                        <section class="journey-grid journey-secondary-grid">
+                            <article class="journey-card journey-info-card">
+                                <div class="journey-card-head"><div><span class="journey-kicker">RESUMO</span><h3>Minha rotina</h3></div><span class="journey-card-icon">🗓️</span></div>
+                                <div class="journey-info-list">
+                                    <div><span>Tempo estudando</span><strong>${studyDays} dias</strong></div>
+                                    <div><span>Tarefas recebidas</span><strong>${totalTasks}</strong></div>
+                                    <div><span>Faltas</span><strong>${attendanceAbsences}</strong></div>
+                                    <div><span>Aulas no calendário</span><strong>${scheduledLessons}</strong></div>
+                                </div>
+                            </article>
+
+                            <article class="journey-card journey-mascot-card">
+                                <div class="journey-card-head"><div><span class="journey-kicker">MEU MASCOTE</span><h3>${latestCompletedRequest ? 'Evolução desbloqueada 🎉' : 'Continue conquistando pontos'}</h3></div><span class="journey-card-icon">🐾</span></div>
+                                <div class="journey-mascot-points"><strong>${totalPoints}</strong><span>XP</span></div>
+                                <p>Presença em aula +100 • tarefa concluída +10</p>
+                                <div class="journey-mascot-bar"><span style="width:${Math.min(100, totalPoints % 500 === 0 && totalPoints > 0 ? 100 : (totalPoints % 500) / 5)}%"></span></div>
+                                <div class="journey-mascot-actions">
+                                    ${pendingRequest ? '<span class="journey-status pending">⏳ Evolução aguardando a professora</span>' : canRedeemNow ? '<button class="btn btn-accent" onclick="redeemMascotEvolution(\'' + profileSnapshot.docs[0].id + '\')">Resgatar evolução</button>' : '<span class="journey-status">Continue acumulando XP para desbloquear a próxima evolução.</span>'}
+                                </div>
+                            </article>
+                        </section>
                     </div>
                 `;
+
             } catch (error) {
                 console.error('Erro ao carregar perfil do aluno:', error);
                 container.innerHTML = '<p>Erro ao carregar seu perfil.</p>';
