@@ -2600,6 +2600,17 @@
         .student-home-tip p { margin:3px 0 0; color:#83778b; font-size:10px; }
         @media(max-width:900px){ .student-home-grid{grid-template-columns:1fr;} .student-home{padding:20px 16px 32px;} }
         @media(max-width:520px){ .student-home-welcome{padding:20px;} .student-home-avatar{width:54px;height:54px;flex-basis:54px;font-size:27px;} .student-home-welcome h2{font-size:24px;} }
+        /* ===== Redesign Dicas & Recomendações ===== */
+        #tips-tab>.card{background:transparent;border:0;box-shadow:none} #tips-tab>.card>.card-body{padding:0}
+        .tips-layout{max-width:1180px;margin:auto;padding:24px 28px 38px}.tips-topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px;border:1px solid #e9dff0;border-radius:18px;background:linear-gradient(135deg,#fff,#faf3ff);box-shadow:0 8px 24px rgba(66,38,87,.045)}
+        .tips-page-eyebrow{font-size:9px;font-weight:900;letter-spacing:.12em;color:#9154bd}.tips-heading{margin:5px 0 3px;color:#28173b;font-size:25px;letter-spacing:-.035em}.tips-subheading{margin:0;color:#786b82;font-size:11px}.tips-topbar-icon{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#f1e6f8;font-size:24px}
+        .tips-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.tips-stats div{padding:12px 14px;border:1px solid #eee6f2;border-radius:12px;background:#fff}.tips-stats strong{display:block;color:#642596;font-size:18px}.tips-stats span{color:#897d91;font-size:9px}
+        .tips-filters{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 14px}.tips-filter-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid #e6ddec;background:#fff;color:#655a6d;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:800;cursor:pointer}.tips-filter-btn.active{color:#fff;background:#7227a8;border-color:#7227a8}
+        .tips-featured{display:grid;grid-template-columns:145px 1fr;gap:18px;padding:14px;margin-bottom:10px;border:1px solid #e6ddec;border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(45,28,66,.035)}.tips-featured-media,.tip-item-media{display:grid;place-items:center;overflow:hidden;border-radius:12px;background:linear-gradient(135deg,#f2e6fa,#e4d5f3);color:#7027a5}.tips-featured-media{min-height:130px;font-size:48px}.tips-featured-media.music,.tip-item-media.music{background:linear-gradient(135deg,#e9f2ff,#d4e8ff)}.tips-featured-media.movie,.tip-item-media.movie{background:linear-gradient(135deg,#e7f6ff,#cfeeff)}.tips-featured-media.reading,.tip-item-media.reading{background:linear-gradient(135deg,#fff4d9,#ffe9b0)}
+        .tips-type-pill,.tips-small-pill{display:inline-flex;gap:4px;padding:4px 7px;border-radius:999px;background:#f4e9fa;color:#7027a5;font-size:8px;font-weight:900}.tips-featured-content h3{margin:8px 0 5px;color:#321c43;font-size:18px}.tips-featured-content>p{margin:0;color:#6e6377;font-size:10px;line-height:1.5}.tips-meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:#8b8091;font-size:8px}.tips-featured-actions{display:flex;align-items:center;gap:8px;margin-top:12px}.tips-open-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:8px;background:#7227a8;color:#fff!important;text-decoration:none;font-size:9px;font-weight:800}.tips-open-btn.compact{width:100%}.tips-no-link{color:#938899;font-size:9px}.tips-no-link.compact{display:block;text-align:center;padding:7px}.tips-delete-btn{border:0;background:#fff0f0;color:#c73d55;border-radius:8px;padding:8px 10px;font-size:9px;cursor:pointer}
+        .tips-recommendation-list{display:grid;gap:8px}.tip-item{display:grid;grid-template-columns:108px minmax(0,1fr) 130px;gap:14px;align-items:center;padding:9px;border:1px solid #e9e2ee;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgba(45,28,66,.025)}.tip-item-media{min-height:86px;font-size:32px}.tip-item-content h3{margin:5px 0 3px;color:#342044;font-size:13px}.tip-item-content>p{margin:0;color:#766b7e;font-size:9px;line-height:1.4}.tip-item-topline{display:flex;justify-content:space-between;gap:8px}.tip-item-date{color:#978c9e;font-size:8px}.tip-item-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.tip-item-tags span{padding:4px 7px;border-radius:999px;background:#f4f6fa;color:#667080;font-size:8px}.tip-item-actions{display:flex;flex-direction:column;gap:6px}.tips-favorite-btn{border:1px solid #eadfee;background:#fff;color:#8b6c99;border-radius:8px;padding:7px;font-size:8px;cursor:pointer}.tips-favorite-btn.favorited{color:#d94675;border-color:#f1c6d7;background:#fff6f9}.tips-empty-state{padding:55px 20px;text-align:center;border:1px dashed #ddd0e6;border-radius:16px;background:#fff}.tips-empty-state span{font-size:35px}.tips-empty-state strong{display:block;margin-top:8px;color:#3d284b}.tips-empty-state p{color:#8a7d91;font-size:11px}
+        .tips-teacher-panel{max-width:980px;margin:0 auto 24px;padding:22px 24px;border:1px solid #e6dcec;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(45,28,66,.045)}.tips-teacher-heading{display:flex;justify-content:space-between;gap:15px;margin-bottom:18px}.tips-teacher-eyebrow{color:#8a4bb6;font-size:9px;font-weight:900;letter-spacing:.11em}.tips-teacher-heading h3{margin:5px 0 4px;color:#321c43;font-size:20px}.tips-teacher-heading p{margin:0;color:#81758a;font-size:10px}.tips-teacher-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#f4eafa;font-size:21px}.tips-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.tips-field label{display:block;margin-bottom:5px;color:#5c4b68;font-size:9px;font-weight:800}.tips-field .form-control{width:100%;border-radius:9px;min-height:38px;font-size:10px}.tips-field-wide{grid-column:span 2}.tips-field-full{grid-column:1/-1}.tips-form-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding-top:14px;border-top:1px solid #f0eaf3}.tips-notification-option{display:flex;align-items:center;gap:7px;color:#665a6d;font-size:10px}.tips-notification-option input{accent-color:#7227a8}.tips-send-btn{min-width:190px}
+        @media(max-width:900px){.tips-layout{padding:18px 14px 30px}.tips-stats{grid-template-columns:repeat(2,1fr)}.tips-featured{grid-template-columns:1fr}.tip-item{grid-template-columns:80px minmax(0,1fr)}.tip-item-actions{grid-column:2;flex-direction:row}.tips-form-grid{grid-template-columns:1fr 1fr}} @media(max-width:560px){.tips-topbar{padding:18px}.tips-heading{font-size:21px}.tip-item{grid-template-columns:1fr}.tip-item-media{min-height:110px}.tip-item-actions{grid-column:auto}.tips-form-grid{grid-template-columns:1fr}.tips-field-wide,.tips-field-full{grid-column:auto}.tips-form-footer{flex-direction:column;align-items:stretch}.tips-send-btn{width:100%}}
         /* Calendário do aluno: somente leitura */
         #student-calendar-tab .calendar-readonly-list {
             display: grid;
@@ -3742,9 +3753,14 @@
                         <div class="tips-layout">
                             <div class="tips-topbar">
                                 <div>
+                                    <span class="tips-page-eyebrow">APRENDER • EXPLORAR • EVOLUIR</span>
                                     <h2 class="tips-heading">Dicas &amp; Recomendações</h2>
-                                    <p class="tips-subheading">Conteúdos práticos para acelerar seu inglês.</p>
+                                    <p class="tips-subheading">Recomendações especiais da sua professora para complementar seu aprendizado de Inglês e Artes.</p>
                                 </div>
+                                <div class="tips-topbar-icon">💡</div>
+                            </div>
+                            <div class="tips-stats" id="tips-dynamic-stats">
+                                <div><strong>0</strong><span>recomendações</span></div><div><strong>0</strong><span>músicas</span></div><div><strong>0</strong><span>filmes</span></div><div><strong>0</strong><span>leituras</span></div>
                             </div>
                             <div id="tips-filters" class="tips-filters">
                                 <!-- Filtros serão carregados aqui -->
@@ -3756,47 +3772,31 @@
                     </div>
                 </div>
                 
-                <!-- Painel do Professor para adicionar dicas -->
+                <!-- Painel do Professor para adicionar recomendação -->
                 <div id="teacher-tips" class="hidden">
-                    <div class="card">
-                        <div class="card-header">Adicionar Nova Dica</div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="tip-title">Título</label>
-                                <input type="text" id="tip-title" class="form-control" placeholder="Título da dica">
+                    <div class="tips-teacher-panel">
+                        <div class="tips-teacher-heading">
+                            <div>
+                                <span class="tips-teacher-eyebrow">NOVA RECOMENDAÇÃO</span>
+                                <h3>Compartilhe algo especial com seu aluno</h3>
+                                <p>Escolha o aluno, a disciplina e o tipo de conteúdo.</p>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="tip-type">Tipo</label>
-                                <select id="tip-type" class="form-control">
-                                    <option value="reading">Leitura</option>
-                                    <option value="movie">Filme</option>
-                                    <option value="music">Música</option>
-                                    <option value="other">Outro</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="tip-content">Descrição/Recomendação</label>
-                                <textarea id="tip-content" class="form-control" placeholder="Descreva sua recomendação..."></textarea>
-                            </div>
-                            
-                            <!-- Destinatários -->
-                            <div class="form-group">
-                                <label>Selecionar Alunos Destinatários</label>
-                                <div class="recipients-list" id="tip-recipients">
-                                    <!-- Lista de alunos com checkboxes será carregada aqui -->
-                                    <p>Carregando alunos...</p>
-                                </div>
-                            </div>
+                            <span class="tips-teacher-icon">💜</span>
                         </div>
-                        <div class="card-footer">
-                            <button id="add-tip-btn" class="btn btn-accent">Adicionar Dica</button>
+                        <div class="tips-form-grid">
+                            <div class="tips-field"><label for="tip-student-select">Aluno</label><select id="tip-student-select" class="form-control"><option value="">Selecione o aluno</option></select></div>
+                            <div class="tips-field"><label for="tip-subject">Disciplina</label><select id="tip-subject" class="form-control"><option value="Inglês">🇬🇧 Inglês</option><option value="Artes">🎨 Artes</option></select></div>
+                            <div class="tips-field"><label for="tip-type">Tipo</label><select id="tip-type" class="form-control"><option value="music">🎵 Música</option><option value="movie">🎬 Filme</option><option value="reading">📖 Leitura</option><option value="other">💡 Outro</option></select></div>
+                            <div class="tips-field tips-field-wide"><label for="tip-title">Título</label><input type="text" id="tip-title" class="form-control" placeholder="Ex.: Count on Me"></div>
+                            <div class="tips-field tips-field-wide"><label for="tip-link">Link</label><input type="url" id="tip-link" class="form-control" placeholder="https://..."></div>
+                            <div class="tips-field tips-field-full"><label for="tip-content">Mensagem para o aluno</label><textarea id="tip-content" class="form-control" rows="4" placeholder="Escreva por que você escolheu esta recomendação..."></textarea></div>
+                        </div>
+                        <div class="tips-form-footer">
+                            <label class="tips-notification-option"><input type="checkbox" id="tip-notify-student" checked><span>Enviar notificação ao aluno</span></label>
+                            <button id="add-tip-btn" class="btn btn-primary tips-send-btn" type="button">Enviar recomendação <span>→</span></button>
                         </div>
                     </div>
                 </div>
-            </div>
-            
             <!-- Aba de Dúvidas -->
             <div id="help-tab" class="tab-container">
                 <!-- Para o Professor: Lista de todas as dúvidas -->
@@ -4386,7 +4386,8 @@
             if (pageTitle) pageTitle.textContent = title;
             if (pageSubtitle) pageSubtitle.textContent = subtitle;
             if (headerPrimaryAction) {
-                headerPrimaryAction.style.display = (tabId === 'tasks' && userRole === 'teacher') ? 'inline-flex' : 'none';
+                headerPrimaryAction.style.display = ((tabId === 'tasks' || tabId === 'tips') && userRole === 'teacher') ? 'inline-flex' : 'none';
+                headerPrimaryAction.textContent = tabId === 'tips' ? '＋ Nova recomendação' : '＋ Nova tarefa';
             }
         }
 
@@ -4527,20 +4528,16 @@
             if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
             if (sidebarLogoutLink) sidebarLogoutLink.addEventListener('click', e => { e.preventDefault(); signOut(); });
             enforceSidebarByRole();
-            if (headerPrimaryAction) headerPrimaryAction.addEventListener('click', () => toggleTaskCreator());
-
-            if (logoutBtn) logoutBtn.addEventListener('click', signOut);
-            loginBtn.addEventListener('click', signIn);
-            const toggleLoginPassword = document.getElementById('toggle-login-password');
-            if (toggleLoginPassword) {
-                toggleLoginPassword.addEventListener('click', () => {
-                    const input = document.getElementById('login-password');
-                    if (!input) return;
-                    const visible = input.type === 'text';
-                    input.type = visible ? 'password' : 'text';
-                    toggleLoginPassword.textContent = visible ? '◉' : '○';
-                    toggleLoginPassword.setAttribute('aria-label', visible ? 'Mostrar senha' : 'Ocultar senha');
-                });
+            if (headerPrimaryAction) headerPrimaryAction.addEventListener('click', () => {
+                const activeTab = document.querySelector('.nav-link.active')?.dataset.tab;
+                if (userRole === 'teacher' && activeTab === 'tips') {
+                    document.getElementById('teacher-tips')?.classList.remove('hidden');
+                    document.getElementById('teacher-tips')?.scrollIntoView({behavior:'smooth',block:'start'});
+                    populateTipStudentSelect();
+                } else {
+                    toggleTaskCreator(true);
+                }
+            });
             }
 
             const forgotPasswordBtn = document.getElementById('forgot-password-btn');
@@ -4620,6 +4617,11 @@
 
                     if (tabId === 'student-home' && userRole === 'student') {
                         loadStudentHome();
+                    }
+
+                    if (tabId === 'tips' && userRole === 'teacher') {
+                        document.getElementById('teacher-tips')?.classList.remove('hidden');
+                        populateTipStudentSelect();
                     }
 
                     if (tabId === 'tasks' && userRole === 'teacher') {
@@ -6378,75 +6380,75 @@
         }
         
         // Função para adicionar uma nova dica
-        function addTip() {
-            const title = document.getElementById('tip-title').value;
-            const type = document.getElementById('tip-type').value;
-            const content = document.getElementById('tip-content').value;
-            
-            if (!title || !content) {
-                alert('Por favor, preencha título e conteúdo');
-                return;
+        async function populateTipStudentSelect() {
+            const select = document.getElementById('tip-student-select');
+            if (!select) return;
+            try {
+                const snapshot = await db.collection('users').where('role', '==', 'student').get();
+                const students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a,b) => String(a.name || a.email || '').localeCompare(String(b.name || b.email || ''), currentLocale || 'pt-BR'));
+                select.innerHTML = '<option value="">Selecione o aluno</option>' +
+                    students.map(student => '<option value="' + escapeHtml(student.email || '') + '">' +
+                        escapeHtml(student.name || student.email || 'Aluno') +
+                        (student.email ? ' · ' + escapeHtml(student.email) : '') + '</option>').join('');
+            } catch (error) {
+                console.error('Erro ao carregar alunos:', error);
             }
-            
-            // Obter destinatários selecionados
-            const recipients = [];
-            document.querySelectorAll('#tip-recipients input[type="checkbox"]:checked').forEach(checkbox => {
-                recipients.push(checkbox.value);
-            });
-            
-            if (recipients.length === 0) {
-                alert('Selecione pelo menos um aluno destinatário');
-                return;
-            }
-            
+        }
+
+        async function addTip() {
+            const title = document.getElementById('tip-title')?.value.trim();
+            const type = document.getElementById('tip-type')?.value || 'other';
+            const content = document.getElementById('tip-content')?.value.trim();
+            const link = document.getElementById('tip-link')?.value.trim() || '';
+            const subject = document.getElementById('tip-subject')?.value || 'Inglês';
+            const selectedStudent = document.getElementById('tip-student-select')?.value || '';
+            const notifyStudent = Boolean(document.getElementById('tip-notify-student')?.checked);
+
+            if (!title || !content) return alert('Preencha o título e a mensagem para o aluno.');
+            if (!selectedStudent) return alert('Selecione um aluno destinatário.');
+
             const tipData = {
-                title,
-                type,
-                content,
-                recipients,
+                title, type, content, link, subject,
+                recipients: [selectedStudent],
+                notifyStudent,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 createdBy: currentUser.uid,
                 createdByName: currentUser.email
             };
-            
-            db.collection('tips').add(tipData)
-     .then(docRef => {
-                    // Salva uma cópia para cada aluno selecionado
-                    const savePromises = recipients.map(email => {
-                        return db.collection('users')
-                            .where('email', '==', email)
-                            .get()
-                            .then(qs => {
-                                const userPromises = [];
-                                qs.forEach(userDoc => {
-                                    userPromises.push(
-                                        db.collection('users')
-                                            .doc(userDoc.id)
-                                            .collection('tips')
-                                            .doc(docRef.id)
-                                            .set(tipData)
-                                    );
-                                });
-                                return Promise.all(userPromises);
-                            });
-                    });
 
-                    Promise.all(savePromises).then(() => {
-                        alert('Dica adicionada com sucesso!');
-                        // Limpa o formulário
-                        document.getElementById('tip-title').value = '';
-                        document.getElementById('tip-content').value = '';
+            try {
+                const docRef = await db.collection('tips').add(tipData);
+                const qs = await db.collection('users').where('email', '==', selectedStudent).get();
 
-                        // Recarrega as dicas
-                        loadTips();
-                    });
-                })
-                .catch(error => {
-                    console.error('Erro ao adicionar dica:', error);
-                    alert('Erro ao adicionar dica. Tente novamente.');
-                });
+                await Promise.all(qs.docs.map(userDoc =>
+                    db.collection('users').doc(userDoc.id).collection('tips').doc(docRef.id).set({...tipData, sourceTipId: docRef.id})
+                ));
+
+                if (notifyStudent) {
+                    await Promise.all(qs.docs.map(userDoc =>
+                        db.collection('users').doc(userDoc.id).collection('notifications').add({
+                            type: 'recommendation',
+                            title: 'Nova recomendação da professora',
+                            message: title,
+                            tipId: docRef.id,
+                            read: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                    ));
+                }
+
+                ['tip-title','tip-link','tip-content'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+                document.getElementById('tip-student-select').value='';
+                document.getElementById('tip-notify-student').checked=true;
+                alert('Recomendação enviada com sucesso!');
+                loadTips();
+            } catch (error) {
+                console.error('Erro ao enviar recomendação:', error);
+                alert('Erro ao enviar recomendação. Tente novamente.');
+            }
         }
-        
+
         // Função para enviar uma dúvida
         function sendQuestion() {
             const title = document.getElementById('question-title').value;
@@ -7277,6 +7279,7 @@
 
                 renderTipsFilters();
                 renderTipsList();
+                if (userRole === 'teacher') populateTipStudentSelect();
             }).catch(error => {
                 console.error('Erro ao carregar dicas:', error);
             });
@@ -7287,11 +7290,11 @@
             if (!filtersContainer) return;
 
             const filterOptions = [
-                { value: 'all', label: 'Todas', icon: '💬' },
-                { value: 'reading', label: 'Gramática', icon: '📘' },
-                { value: 'music', label: 'Listening', icon: '🎧' },
-                { value: 'movie', label: 'Speaking', icon: '🗣️' },
-                { value: 'other', label: 'Motivação', icon: '💡' }
+                { value: 'all', label: 'Todas', icon: '⭐' },
+                { value: 'music', label: 'Músicas', icon: '🎵' },
+                { value: 'movie', label: 'Filmes', icon: '🎬' },
+                { value: 'reading', label: 'Leituras', icon: '📖' },
+                { value: 'other', label: 'Outros', icon: '💡' }
             ];
 
             filtersContainer.innerHTML = '';
@@ -7313,30 +7316,24 @@
         function renderTipsList() {
             const container = document.getElementById('tips-list');
             if (!container) return;
-
             const filteredTips = tipsCache.filter(tip => selectedTipFilter === 'all' || tip.type === selectedTipFilter);
-
             container.innerHTML = '';
-            if (filteredTips.length === 0) {
-                container.innerHTML = '<p style="padding:20px; text-align:center">Nenhuma dica encontrada para este filtro.</p>';
+            if (!filteredTips.length) {
+                container.innerHTML = '<div class="tips-empty-state"><span>💡</span><strong>Nenhuma recomendação por aqui.</strong><p>Quando sua professora enviar um novo conteúdo, ele aparecerá nesta área.</p></div>';
                 return;
             }
-
             const [featuredTip, ...otherTips] = filteredTips;
-
-            const featuredElement = createFeaturedTipElement(featuredTip, featuredTip.id);
-            container.appendChild(featuredElement);
-
-            if (otherTips.length > 0) {
+            container.appendChild(createFeaturedTipElement(featuredTip, featuredTip.id));
+            if (otherTips.length) {
                 const grid = document.createElement('div');
-                grid.className = 'tips-grid';
-
-                otherTips.forEach(tip => {
-                    const tipElement = createTipElement(tip, tip.id);
-                    grid.appendChild(tipElement);
-                });
-
+                grid.className = 'tips-recommendation-list';
+                otherTips.forEach(tip => grid.appendChild(createTipElement(tip, tip.id)));
                 container.appendChild(grid);
+            }
+            const stats=document.getElementById('tips-dynamic-stats');
+            if(stats){
+                const counts=[tipsCache.length,tipsCache.filter(t=>t.type==='music').length,tipsCache.filter(t=>t.type==='movie').length,tipsCache.filter(t=>t.type==='reading').length];
+                stats.innerHTML=counts.map((n,i)=>'<div><strong>'+n+'</strong><span>'+['recomendações','músicas','filmes','leituras'][i]+'</span></div>').join('');
             }
         }
 
@@ -7347,42 +7344,50 @@
             return '💡';
         }
 
+        function getTipActionLabel(type) {
+            if (type === 'music') return 'Ouvir conteúdo';
+            if (type === 'movie') return 'Ver no streaming';
+            if (type === 'reading') return 'Ler online';
+            return 'Abrir recomendação';
+        }
+
         function createFeaturedTipElement(tip, tipId) {
-            const featured = document.createElement('div');
-            featured.className = 'tips-featured';
-            const icon = getTipIcon(tip.type);
-            featured.innerHTML = `
-                <div class="tips-featured-label">${icon} Dica em destaque da semana</div>
-                <div class="tips-featured-content">
-                    <h3>${tip.title}</h3>
-                    <p class="preserved-text">${preserveText(tip.content)}</p>
-                    <div class="tips-featured-meta">
-                        <span>📅 ${formatDate(tip.createdAt)}</span>
-                        <span>👩‍🏫 ${tip.createdByName || 'Professora'}</span>
-                    </div>
-                    ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
-                </div>
-            `;
+            const featured=document.createElement('article');
+            featured.className='tips-featured';
+            const icon=getTipIcon(tip.type);
+            featured.innerHTML='<div class="tips-featured-media '+(tip.type||'other')+'"><span>'+icon+'</span></div>' +
+                '<div class="tips-featured-content"><span class="tips-type-pill">'+icon+' Recomendação especial</span>' +
+                '<h3>'+escapeHtml(tip.title||'Recomendação')+'</h3>' +
+                '<p class="preserved-text">'+preserveText(tip.content||'')+'</p>' +
+                '<div class="tips-meta-row"><span>📚 '+escapeHtml(tip.subject||'Inglês')+'</span><span>📅 '+formatDate(tip.createdAt)+'</span><span>👩‍🏫 '+escapeHtml(tip.createdByName||'Professora')+'</span></div>' +
+                '<div class="tips-featured-actions">'+
+                (tip.link && isValidHttpUrl(tip.link) ? '<a class="tips-open-btn" href="'+escapeHtml(tip.link)+'" target="_blank" rel="noopener">'+getTipActionLabel(tip.type)+' →</a>' : '<span class="tips-no-link">Conteúdo recomendado pela professora</span>')+
+                (userRole==='teacher' ? '<button class="tips-delete-btn" onclick="deleteTip(\''+tipId+'\', '+JSON.stringify(tip.recipients||[])+')">Excluir</button>' : '')+
+                '</div></div>';
             return featured;
         }
 
         function createTipElement(tip, tipId) {
-            const tipElement = document.createElement('div');
-            tipElement.className = 'tip-item';
-
-            const icon = getTipIcon(tip.type);
-
-            tipElement.innerHTML = `
-                <div class="tip-item-header">
-                    <div class="tip-icon">${icon}</div>
-                    <h3>${tip.title}</h3>
-                </div>
-                <p class="preserved-text">${preserveText(tip.content)}</p>
-                <p class="task-meta">Postado por: ${tip.createdByName || 'Professora'} em ${formatDate(tip.createdAt)}</p>
-                ${userRole === 'teacher' ? `<div class="task-actions"><button class="btn btn-danger" onclick="deleteTip('${tipId}', ${JSON.stringify(tip.recipients || [])})">Excluir Dica</button></div>` : ''}
-            `;
-
-            return tipElement;
+            const item=document.createElement('article');
+            item.className='tip-item';
+            const icon=getTipIcon(tip.type);
+            const key='ae_tip_favorite_'+(currentUser?.uid||'guest')+'_'+tipId;
+            item.innerHTML='<div class="tip-item-media '+(tip.type||'other')+'"><span>'+icon+'</span></div>'+
+                '<div class="tip-item-content"><div class="tip-item-topline"><span class="tips-small-pill">'+escapeHtml(tip.subject||'Inglês')+'</span><span class="tip-item-date">📅 '+formatDate(tip.createdAt)+'</span></div>'+
+                '<h3>'+escapeHtml(tip.title||'Recomendação')+'</h3><p class="preserved-text">'+preserveText(tip.content||'')+'</p>'+
+                '<div class="tip-item-tags"><span>'+icon+' '+escapeHtml(tip.type==='music'?'Listening':tip.type==='movie'?'Interpretação':tip.type==='reading'?'Leitura':'Motivação')+'</span><span>✨ Recomendado para você</span></div></div>'+
+                '<div class="tip-item-actions">'+
+                (tip.link && isValidHttpUrl(tip.link) ? '<a class="tips-open-btn compact" href="'+escapeHtml(tip.link)+'" target="_blank" rel="noopener">'+getTipActionLabel(tip.type)+'</a>' : '<span class="tips-no-link compact">Sem link</span>')+
+                (userRole==='student' ? '<button type="button" class="tips-favorite-btn">♡ Favoritar</button>' : '<button type="button" class="tips-delete-btn">Excluir</button>')+
+                '</div>';
+            if(userRole==='student'){
+                const btn=item.querySelector('.tips-favorite-btn');
+                const sync=()=>{const fav=localStorage.getItem(key)==='1';btn.textContent=fav?'♥ Favorito':'♡ Favoritar';btn.classList.toggle('favorited',fav);};
+                sync(); btn.addEventListener('click',()=>{localStorage.setItem(key,localStorage.getItem(key)==='1'?'0':'1');sync();});
+            } else {
+                item.querySelector('.tips-delete-btn').addEventListener('click',()=>deleteTip(tipId,tip.recipients||[]));
+            }
+            return item;
         }
 
         function deleteTip(tipId, recipients = []) {
