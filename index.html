@@ -6427,6 +6427,9 @@
                     const createTaskBtn = document.getElementById('create-task-btn');
                     if (createTaskBtn) createTaskBtn.textContent = 'Salvar Alterações';
 
+                    // Ao editar, abra automaticamente o formulário de tarefas.
+                    toggleTaskCreator(true);
+
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 })
                 .catch(error => {
