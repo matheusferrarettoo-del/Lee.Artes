@@ -6976,6 +6976,116 @@
             }).join('');
         }
 
+        async function openTeacherCorrection(taskId, studentEmail = '') {
+            try {
+                const taskDoc = await db.collection('tasks').doc(taskId).get();
+                if (!taskDoc.exists) {
+                    alert('Tarefa não encontrada.');
+                    return;
+                }
+
+                const task = taskDoc.data() || {};
+                let response = null;
+
+                if (studentEmail) {
+                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).get();
+                    snapshot.forEach(doc => {
+                        if (response) return;
+                        const data = doc.data() || {};
+                        const identities = [
+                            data.studentEmail, data.email, data.studentId, data.studentName, data.userEmail
+                        ].map(normalizeTaskIdentity).filter(Boolean);
+                        if (identities.includes(normalizeTaskIdentity(studentEmail))) {
+                            response = { id: doc.id, ...data };
+                        }
+                    });
+                } else {
+                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).limit(1).get();
+                    if (!snapshot.empty) response = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+                }
+
+                const container = document.getElementById('modal-task-content');
+                const title = document.getElementById('modal-task-title');
+                if (!container || !title) return;
+
+                title.textContent = (response ? 'Corrigir e concluir — ' : 'Concluir tarefa — ') + (task.title || 'Tarefa');
+
+                const currentGrade = Number(response?.grade ?? response?.score ?? 0);
+                const currentFeedback = response?.teacherFeedback || response?.feedback || '';
+
+                container.innerHTML = '<div class="teacher-correction-form">' +
+                    '<p class="preserved-text">' + preserveText(task.description || '') + '</p>' +
+                    (response
+                        ? '<div class="task-response teacher-correction-response"><span class="task-response-label">Resposta do aluno</span><p class="preserved-text">' +
+                            preserveText(response.response || 'Sem conteúdo') +
+                            '</p>' +
+                            (response.submittedAt ? '<div class="task-response-meta">Enviada em: ' + formatDate(response.submittedAt) + '</div>' : '') +
+                          '</div>'
+                        : '<div class="about-highlight">O aluno ainda não enviou uma resposta. Você pode marcar a tarefa como concluída manualmente.</div>') +
+                    '<div class="form-group"><label for="teacher-correction-grade">Nota / Pontos (0 a 100)</label>' +
+                        '<input id="teacher-correction-grade" class="form-control" type="number" min="0" max="100" step="1" value="' + escapeHtml(currentGrade) + '">' +
+                    '</div>' +
+                    '<div class="form-group"><label for="teacher-correction-feedback">Feedback do professor</label>' +
+                        '<textarea id="teacher-correction-feedback" class="form-control" rows="4" placeholder="Escreva um comentário para o aluno...">' + escapeHtml(currentFeedback) + '</textarea>' +
+                    '</div>' +
+                    '<div class="task-actions"><button class="btn btn-accent" type="button" id="teacher-correction-save-btn">✓ Corrigir e Concluir</button></div>' +
+                '</div>';
+
+                document.getElementById('teacher-correction-save-btn')?.addEventListener('click', () => saveTeacherCorrection(taskId, response));
+                responseModal.style.display = 'flex';
+            } catch (error) {
+                console.error('Erro ao abrir correção da tarefa:', error);
+                alert('Não foi possível abrir a correção da tarefa.');
+            }
+        }
+
+        async function saveTeacherCorrection(taskId, existingResponse = null) {
+            const grade = Math.max(0, Math.min(100, Number(document.getElementById('teacher-correction-grade')?.value || 0)));
+            const feedback = String(document.getElementById('teacher-correction-feedback')?.value || '').trim();
+
+            try {
+                let responseRef = existingResponse?.id ? db.collection('responses').doc(existingResponse.id) : null;
+
+                if (!responseRef) {
+                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).limit(1).get();
+                    if (!snapshot.empty) responseRef = snapshot.docs[0].ref;
+                }
+
+                const payload = {
+                    grade,
+                    score: grade,
+                    teacherFeedback: feedback,
+                    feedback,
+                    corrected: true,
+                    completed: true,
+                    correctedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    correctedBy: currentUser.uid,
+                    correctedByName: currentUser.email || ''
+                };
+
+                if (responseRef) {
+                    await responseRef.update(payload);
+                } else {
+                    await db.collection('responses').add({
+                        ...payload,
+                        taskId,
+                        studentId: '',
+                        studentEmail: '',
+                        studentName: '',
+                        response: '',
+                        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                responseModal.style.display = 'none';
+                alert('Tarefa corrigida e concluída com sucesso!');
+                await loadTasks();
+            } catch (error) {
+                console.error('Erro ao corrigir tarefa:', error);
+                alert('Erro ao corrigir e concluir a tarefa. Tente novamente.');
+            }
+        }
+
         function getTaskStatusLabel(status) {
             if (status === 'completed') return 'Concluída';
             if (status === 'overdue') return 'Atrasada';
