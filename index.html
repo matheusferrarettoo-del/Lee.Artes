@@ -2218,13 +2218,6 @@
             .task-filter-tabs { overflow:auto; flex-wrap:nowrap; padding-bottom:3px; }
         }
 
-        .teacher-task-row-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; }
-        .teacher-task-action-btn { width:30px; height:30px; border:1px solid var(--border-soft); background:#fff; color:#6d6376; border-radius:8px; cursor:pointer; font-size:14px; font-weight:800; }
-        .teacher-task-action-btn:hover { background:#f7f2fa; color:var(--text-main); }
-        .teacher-task-action-btn.grade { color:#278043; border-color:#cce7d5; background:#f4fbf6; }
-        .teacher-task-action-btn.grade:hover { background:#e9f7ed; }
-        .teacher-correction-form .task-response { margin:14px 0 18px; }
-
         .task-actions-popover {
             min-width: 150px;
             padding: 6px;
@@ -6942,54 +6935,33 @@
                     description.length > 110
                         ? description.slice(0, 110) + '…'
                         : description;
-                
-return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">' +
-    '<div class="teacher-task-status ' + row.status + '">' +
-        '<span class="status-dot"></span>' +
-        icon + ' ' + statusLabel +
-    '</div>' +
 
-    '<div class="teacher-task-main">' +
-        '<strong>' + title + '</strong>' +
-        (shortDescription ? '<small>' + shortDescription + '</small>' : '') +
-    '</div>' +
+                return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">' +
+                    '<div class="teacher-task-status ' + row.status + '">' +
+                        '<span class="status-dot"></span>' +
+                        icon + ' ' + statusLabel +
+                    '</div>' +
+                    '<div class="teacher-task-main">' +
+                        '<strong>' + title + '</strong>' +
+                        (shortDescription ? '<small>' + shortDescription + '</small>' : '') +
+                    '</div>' +
+                    '<div class="teacher-task-cell" title="' + escapeHtml(row.studentEmail || '') + '">' +
+                        escapeHtml(row.student || '—') +
+                    '</div>' +
+                    '<div class="teacher-task-cell">' +
+                        escapeHtml(row.subject || '—') +
+                    '</div>' +
+                    '<div class="teacher-task-cell meta-date">' +
+                        escapeHtml(formatTaskListDate(row.date)) +
+                    '</div>' +
+                    '<button class="teacher-task-menu" type="button" title="Ações" aria-label="Ações" ' +
+                        'onclick="openTaskActionsMenu(event, \''
+                        + escapeHtml(row.id) +
+                        '\')">⋯</button>' +
+                '</div>';
+            }).join('');
+        }
 
-    '<div class="teacher-task-cell" title="' + escapeHtml(row.studentEmail || '') + '">' +
-        escapeHtml(row.student || '—') +
-    '</div>' +
-
-    '<div class="teacher-task-cell">' +
-        escapeHtml(row.subject || '—') +
-    '</div>' +
-
-    '<div class="teacher-task-cell meta-date">' +
-        escapeHtml(formatTaskListDate(row.date)) +
-    '</div>' +
-
-    '<div class="teacher-task-row-actions">' +
-
-        '<button class="teacher-task-action-btn edit" ' +
-            'type="button" ' +
-            'title="Editar tarefa" ' +
-            'aria-label="Editar tarefa" ' +
-            'onclick="editTask(\'' + escapeHtml(row.id) + '\')">' +
-            '✎' +
-        '</button>' +
-
-        '<button class="teacher-task-action-btn grade" ' +
-            'type="button" ' +
-            'title="Corrigir e concluir" ' +
-            'aria-label="Corrigir e concluir" ' +
-            'onclick="openTeacherCorrection(\'' +
-                escapeHtml(row.id) +
-                '\', \'' +
-                escapeHtml(row.studentEmail || '') +
-                '\')">' +
-            '✓' +
-        '</button>' +
-
-    '</div>' +
-'</div>';
         function openTaskActionsMenu(event, taskId) {
             event.stopPropagation();
 
@@ -7150,116 +7122,6 @@ return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">
             `;
 
             return taskElement;
-        }
-
-        async function openTeacherCorrection(taskId, studentEmail = '') {
-            try {
-                const taskDoc = await db.collection('tasks').doc(taskId).get();
-                if (!taskDoc.exists) {
-                    alert('Tarefa não encontrada.');
-                    return;
-                }
-
-                const task = taskDoc.data() || {};
-                let response = null;
-
-                if (studentEmail) {
-                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).get();
-                    snapshot.forEach(doc => {
-                        if (response) return;
-                        const data = doc.data() || {};
-                        const identities = [
-                            data.studentEmail, data.email, data.studentId, data.studentName, data.userEmail
-                        ].map(normalizeTaskIdentity).filter(Boolean);
-                        if (identities.includes(normalizeTaskIdentity(studentEmail))) {
-                            response = { id: doc.id, ...data };
-                        }
-                    });
-                } else {
-                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).limit(1).get();
-                    if (!snapshot.empty) response = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-                }
-
-                const container = document.getElementById('modal-task-content');
-                const title = document.getElementById('modal-task-title');
-                if (!container || !title) return;
-
-                title.textContent = (response ? 'Corrigir e concluir — ' : 'Concluir tarefa — ') + (task.title || 'Tarefa');
-
-                const currentGrade = Number(response?.grade ?? response?.score ?? 0);
-                const currentFeedback = response?.teacherFeedback || response?.feedback || '';
-
-                container.innerHTML = '<div class="teacher-correction-form">' +
-                    '<p class="preserved-text">' + preserveText(task.description || '') + '</p>' +
-                    (response
-                        ? '<div class="task-response teacher-correction-response"><span class="task-response-label">Resposta do aluno</span><p class="preserved-text">' +
-                            preserveText(response.response || 'Sem conteúdo') +
-                            '</p>' +
-                            (response.submittedAt ? '<div class="task-response-meta">Enviada em: ' + formatDate(response.submittedAt) + '</div>' : '') +
-                          '</div>'
-                        : '<div class="about-highlight">O aluno ainda não enviou uma resposta. Você pode marcar a tarefa como concluída manualmente.</div>') +
-                    '<div class="form-group"><label for="teacher-correction-grade">Nota / Pontos (0 a 100)</label>' +
-                        '<input id="teacher-correction-grade" class="form-control" type="number" min="0" max="100" step="1" value="' + escapeHtml(currentGrade) + '">' +
-                    '</div>' +
-                    '<div class="form-group"><label for="teacher-correction-feedback">Feedback do professor</label>' +
-                        '<textarea id="teacher-correction-feedback" class="form-control" rows="4" placeholder="Escreva um comentário para o aluno...">' + escapeHtml(currentFeedback) + '</textarea>' +
-                    '</div>' +
-                    '<div class="task-actions"><button class="btn btn-accent" type="button" id="teacher-correction-save-btn">✓ Corrigir e Concluir</button></div>' +
-                '</div>';
-
-                document.getElementById('teacher-correction-save-btn')?.addEventListener('click', () => saveTeacherCorrection(taskId, response));
-                responseModal.style.display = 'flex';
-            } catch (error) {
-                console.error('Erro ao abrir correção da tarefa:', error);
-                alert('Não foi possível abrir a correção da tarefa.');
-            }
-        }
-
-        async function saveTeacherCorrection(taskId, existingResponse = null) {
-            const grade = Math.max(0, Math.min(100, Number(document.getElementById('teacher-correction-grade')?.value || 0)));
-            const feedback = String(document.getElementById('teacher-correction-feedback')?.value || '').trim();
-
-            try {
-                let responseRef = existingResponse?.id ? db.collection('responses').doc(existingResponse.id) : null;
-
-                if (!responseRef) {
-                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).limit(1).get();
-                    if (!snapshot.empty) responseRef = snapshot.docs[0].ref;
-                }
-
-                const payload = {
-                    grade,
-                    score: grade,
-                    teacherFeedback: feedback,
-                    feedback,
-                    corrected: true,
-                    completed: true,
-                    correctedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    correctedBy: currentUser.uid,
-                    correctedByName: currentUser.email || ''
-                };
-
-                if (responseRef) {
-                    await responseRef.update(payload);
-                } else {
-                    await db.collection('responses').add({
-                        ...payload,
-                        taskId,
-                        studentId: '',
-                        studentEmail: '',
-                        studentName: '',
-                        response: '',
-                        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-
-                responseModal.style.display = 'none';
-                alert('Tarefa corrigida e concluída com sucesso!');
-                await loadTasks();
-            } catch (error) {
-                console.error('Erro ao corrigir tarefa:', error);
-                alert('Erro ao corrigir e concluir a tarefa. Tente novamente.');
-            }
         }
 
         function deleteTask(taskId, recipients = []) {
