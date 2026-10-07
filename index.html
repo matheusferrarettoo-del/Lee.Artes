@@ -6964,11 +6964,11 @@
                         escapeHtml(formatTaskListDate(row.date)) +
                     '</div>' +
                     '<div class="teacher-task-row-actions">' +
-                        '<button class="teacher-task-action-btn edit" type="button" title="Editar tarefa" aria-label="Editar tarefa" onclick="editTask(\\'' + escapeHtml(row.id) + '\\')">✎</button>' +
-                        '<button class="teacher-task-action-btn grade" type="button" title="Corrigir e concluir" aria-label="Corrigir e concluir" onclick="openTeacherCorrection(\\'' + escapeHtml(row.id) + '\\', \\''
+                        '<button class="teacher-task-action-btn edit" type="button" title="Editar tarefa" aria-label="Editar tarefa" onclick="editTask(\'' + escapeHtml(row.id) + '\')">✎</button>' +
+                        '<button class="teacher-task-action-btn grade" type="button" title="Corrigir e concluir" aria-label="Corrigir e concluir" onclick="openTeacherCorrection(\'' + escapeHtml(row.id) + '\', \''
                         + escapeHtml(row.studentEmail || '') +
-                        '\\')">✓</button>' +
-                        '<button class="teacher-task-action-btn delete" type="button" title="Excluir tarefa" aria-label="Excluir tarefa" onclick="deleteTask(\\'' + escapeHtml(row.id) + '\\', ' +
+                        '\')">✓</button>' +
+                        '<button class="teacher-task-action-btn delete" type="button" title="Excluir tarefa" aria-label="Excluir tarefa" onclick="deleteTask(\'' + escapeHtml(row.id) + '\', ' +
                         JSON.stringify(row.task?.recipients || []) +
                         ')">🗑</button>' +
                     '</div>' +
