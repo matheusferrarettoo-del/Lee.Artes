@@ -3366,7 +3366,16 @@
             body.not-authenticated #login-screen .role-selector { grid-template-columns:1fr; }
         }
 
-    </style>
+            .teacher-task-row-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; }
+        .teacher-task-action-btn { width:30px; height:30px; border:1px solid var(--border-soft); background:#fff; color:#6d6376; border-radius:8px; cursor:pointer; font-size:14px; font-weight:800; }
+        .teacher-task-action-btn:hover { background:#f7f2fa; color:var(--text-main); }
+        .teacher-task-action-btn.grade { color:#278043; border-color:#cce7d5; background:#f4fbf6; }
+        .teacher-task-action-btn.grade:hover { background:#e9f7ed; }
+        .teacher-task-action-btn.delete { color:#c43f49; border-color:#f0c9ce; background:#fff7f8; }
+        .teacher-task-action-btn.delete:hover { background:#ffedef; }
+        .teacher-correction-form .task-response { margin:14px 0 18px; }
+
+</style>
 </head>
 <body class="not-authenticated">
     <div class="app-shell">
@@ -6954,60 +6963,17 @@
                     '<div class="teacher-task-cell meta-date">' +
                         escapeHtml(formatTaskListDate(row.date)) +
                     '</div>' +
-                    '<button class="teacher-task-menu" type="button" title="Ações" aria-label="Ações" ' +
-                        'onclick="openTaskActionsMenu(event, \''
-                        + escapeHtml(row.id) +
-                        '\')">⋯</button>' +
+                    '<div class="teacher-task-row-actions">' +
+                        '<button class="teacher-task-action-btn edit" type="button" title="Editar tarefa" aria-label="Editar tarefa" onclick="editTask(\\'' + escapeHtml(row.id) + '\\')">✎</button>' +
+                        '<button class="teacher-task-action-btn grade" type="button" title="Corrigir e concluir" aria-label="Corrigir e concluir" onclick="openTeacherCorrection(\\'' + escapeHtml(row.id) + '\\', \\''
+                        + escapeHtml(row.studentEmail || '') +
+                        '\\')">✓</button>' +
+                        '<button class="teacher-task-action-btn delete" type="button" title="Excluir tarefa" aria-label="Excluir tarefa" onclick="deleteTask(\\'' + escapeHtml(row.id) + '\\', ' +
+                        JSON.stringify(row.task?.recipients || []) +
+                        ')">🗑</button>' +
+                    '</div>' +
                 '</div>';
             }).join('');
-        }
-
-        function openTaskActionsMenu(event, taskId) {
-            event.stopPropagation();
-
-            const row = teacherTaskRows.find(item => item.id === taskId);
-            if (!row) return;
-
-            document.querySelectorAll('.task-actions-popover').forEach(element => element.remove());
-
-            const menu = document.createElement('div');
-            menu.className = 'task-actions-popover';
-
-            const editButton = document.createElement('button');
-            editButton.type = 'button';
-            editButton.textContent = '✎ Editar';
-            editButton.addEventListener('click', () => {
-                menu.remove();
-                editTask(row.id);
-            });
-
-            const deleteButton = document.createElement('button');
-            deleteButton.type = 'button';
-            deleteButton.textContent = 'Excluir';
-            deleteButton.style.color = '#c43f49';
-            deleteButton.addEventListener('click', () => {
-                menu.remove();
-                deleteTask(row.id, row.task?.recipients || []);
-            });
-
-            menu.appendChild(editButton);
-            menu.appendChild(deleteButton);
-
-            menu.style.position = 'fixed';
-            menu.style.left = Math.max(8, Math.min(window.innerWidth - 170, event.clientX)) + 'px';
-            menu.style.top = Math.max(8, Math.min(window.innerHeight - 90, event.clientY)) + 'px';
-            menu.style.zIndex = '2000';
-
-            document.body.appendChild(menu);
-
-            const close = clickEvent => {
-                if (!menu.contains(clickEvent.target)) {
-                    menu.remove();
-                    document.removeEventListener('click', close);
-                }
-            };
-
-            setTimeout(() => document.addEventListener('click', close), 0);
         }
 
         function getTaskStatusLabel(status) {
