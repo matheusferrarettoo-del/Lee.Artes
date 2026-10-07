@@ -6942,9 +6942,7 @@
                     description.length > 110
                         ? description.slice(0, 110) + '…'
                         : description;
-
-               nas aspas/escapes do onclick do botão "Corrigir e concluir". Do jeito que está, esse trecho pode quebrar a string JavaScript dependendo de como o código está inserido.
-Eu deixaria assim, de forma mais segura e legível:
+                
 return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">' +
     '<div class="teacher-task-status ' + row.status + '">' +
         '<span class="status-dot"></span>' +
