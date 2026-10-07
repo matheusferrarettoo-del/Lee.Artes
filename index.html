@@ -6974,7 +6974,7 @@ return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">
             'type="button" ' +
             'title="Editar tarefa" ' +
             'aria-label="Editar tarefa" ' +
-            'onclick="editTask(\\\'' + escapeHtml(row.id) + '\\\')">' +
+            'onclick="editTask(\'' + escapeHtml(row.id) + '\')">' +
             '✎' +
         '</button>' +
 
@@ -6982,11 +6982,11 @@ return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">
             'type="button" ' +
             'title="Corrigir e concluir" ' +
             'aria-label="Corrigir e concluir" ' +
-            'onclick="openTeacherCorrection(\\\'' +
+            'onclick="openTeacherCorrection(\'' +
                 escapeHtml(row.id) +
-                '\\\', \\\'' +
+                '\', \'' +
                 escapeHtml(row.studentEmail || '') +
-                '\\\')">' +
+                '\')">' +
             '✓' +
         '</button>' +
 
