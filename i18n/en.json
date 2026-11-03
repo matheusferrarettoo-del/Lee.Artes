@@ -20,6 +20,7 @@
   "forms.passwordPlaceholder": "Your password",
   "auth.userNotFound": "User not found.",
   "auth.wrongPassword": "Wrong password.",
+  "auth.invalidCredential": "Incorrect email or password.",
   "auth.invalidEmail": "Invalid email.",
   "auth.tooManyRequests": "Too many login attempts. Please try again in a few minutes.",
   "auth.networkFailed": "Connection failed. Check your internet and try again.",
