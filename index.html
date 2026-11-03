@@ -3375,6 +3375,86 @@
         .teacher-task-action-btn.delete:hover { background:#ffedef; }
         .teacher-correction-form .task-response { margin:14px 0 18px; }
 
+        /* ===== Ajustes de layout (revisão geral) ===== */
+
+        /* Botões: "Excluir"/"Falta" menos agressivos e "Salvar" sem cara de desabilitado */
+        .btn-danger {
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+        .btn-danger:hover { background: #ffe4e6; color: #9f1239; }
+        .btn-accent {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-accent:hover { background: #4a148c; color: #fff; }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* Formulários longos em duas colunas no desktop */
+        @media (min-width: 900px) {
+            #users-tab > .card:first-child > .card-body,
+            #profile-management-tab > .card:first-child > .card-body {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                column-gap: 24px;
+            }
+            #users-tab > .card:first-child .form-group:has(textarea),
+            #profile-management-tab > .card:first-child .form-group:has(textarea),
+            #profile-management-tab > .card:first-child .form-group:has(#profile-student-id),
+            #profile-management-tab > .card:first-child .form-group:has(.calendar-form-row) {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Painel "Nova recomendação" alinhado com o resto da página */
+        #teacher-tips { margin-top: 20px; }
+        #teacher-tips .tips-teacher-panel { max-width: none; margin: 0; }
+
+        /* Chamada do calendário em cartões lado a lado */
+        #teacher-calendar-lessons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+        }
+        #teacher-calendar-lessons > .student-item {
+            border: 1px solid var(--border-soft, #ece8f3);
+            border-radius: 14px;
+            padding: 16px;
+            background: var(--surface-soft, #fbfaff);
+        }
+        #teacher-calendar-lessons > p { grid-column: 1 / -1; }
+        #teacher-calendar-lessons .attendance-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+        /* Cartões de tarefa do aluno */
+        .task-item .task-date { font-size: 13px; color: var(--text-muted, #746c82); }
+        .task-item .task-meta { gap: 14px; justify-content: flex-start; flex-wrap: wrap; }
+        .task-item-completed { border-left: 4px solid #22c55e; }
+        .task-item-overdue { border-left: 4px solid #ef4444; }
+        .task-status.overdue { background: #fee2e2; color: #b91c1c; }
+        .task-feedback {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        .task-feedback.pending { background: #fffbeb; border-color: #fde68a; color: #92400e; font-size: 14px; }
+        .task-grade { font-size: 15px; margin: 4px 0; }
+        .task-reference-audio { margin: 10px 0; }
+        .task-reference-audio audio, .task-response audio { width: 100%; margin-top: 6px; }
+        .task-options ul { margin: 6px 0 0 20px; }
+
+        /* Badge de dúvidas no menu */
+        .sidebar-nav a .pending-badge { margin-left: auto; }
+        .pending-badge.hidden { display: none !important; }
+
+        @media (max-width: 640px) {
+            /* No celular o botão "Nova tarefa" já aparece no topo da lista */
+            .header-primary-action { display: none !important; }
+            .task-filter-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+            .task-filter-tab { flex: 0 0 auto; }
+        }
 </style>
 </head>
 <body class="not-authenticated">
@@ -3390,6 +3470,7 @@
                 <a href="#" id="nav-student-home" class="nav-link hidden" data-tab="student-home"><span class="nav-icon">⌂</span><span>Início</span></a>
                 <a href="#" class="nav-link active" data-tab="tasks"><span class="nav-icon">✓</span><span>Tarefas</span></a>
                 <a href="#" class="nav-link" data-tab="tips"><span class="nav-icon">✦</span><span>Dicas</span></a>
+                <a href="#" id="nav-help" class="nav-link" data-tab="help"><span class="nav-icon">?</span><span>Dúvidas</span><span id="questions-badge" class="pending-badge hidden">0</span></a>
             </nav>
 
             <div class="sidebar-section-label" id="sidebar-teacher-section-label">Professor</div>
@@ -3668,7 +3749,6 @@
                                 <h2>Visão geral da turma</h2>
                                 <p>Veja rapidamente o que precisa da sua atenção.</p>
                             </div>
-                            <button id="toggle-task-creator-btn" class="btn btn-primary" type="button" aria-expanded="false">＋ Nova tarefa</button>
                         </div>
                         <div class="card-body">
                             <div class="teacher-dashboard-grid">
@@ -3695,6 +3775,11 @@
                             <div class="form-group">
                                 <label for="task-description">Descrição</label>
                                 <textarea id="task-description" class="form-control" placeholder="Descreva a tarefa..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="task-due-date">Data de entrega (opcional)</label>
+                                <input type="date" id="task-due-date" class="form-control">
                             </div>
                             
                             <div class="form-group">
@@ -3791,7 +3876,7 @@
                                 <!-- Tarefas serão carregadas aqui -->
                             </div>
                         </div>
-                    </div>                    </div>
+                    </div>
                 </div>
                 
                 <!-- Painel do Aluno -->
@@ -3865,6 +3950,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             <!-- Aba de Dúvidas -->
             <div id="help-tab" class="tab-container">
                 <!-- Para o Professor: Lista de todas as dúvidas -->
@@ -3905,8 +3991,6 @@
                     </div>
                 </div>
             </div>
-            </div>
-        </div>
            <!-- Aba de Cadastro de Aluno -->
         <div id="users-tab" class="tab-container">
             <div class="card">
@@ -4096,6 +4180,8 @@
                 </div>
             </div>
         </div>
+            </div><!-- /page-grid -->
+        </div><!-- /main-content -->
                 </div>
             </div>
         </main>
@@ -4181,7 +4267,25 @@
         let currentLanguage = 'br';
         let currentLocale = 'pt-BR';
         let currentCurrency = 'BRL';
-        let i18nDict = {};
+        // Textos mínimos usados pelo JS caso o arquivo de tradução não carregue
+        // (por exemplo, ao abrir o index.html direto do computador, sem servidor).
+        const I18N_FALLBACK = {
+            'meta.title': 'AE - Art and English',
+            'actions.login': 'Entrar',
+            'actions.signingIn': 'Entrando...',
+            'auth.genericLoginError': 'Erro ao fazer login.',
+            'auth.invalidEmail': 'Email inválido.',
+            'auth.invalidCredential': 'Email ou senha incorretos.',
+            'auth.networkFailed': 'Falha de conexão. Verifique sua internet e tente novamente.',
+            'auth.tooManyRequests': 'Muitas tentativas de login. Tente novamente em alguns minutos.',
+            'auth.userNotFound': 'Usuário não encontrado.',
+            'auth.wrongPassword': 'Senha incorreta.',
+            'messages.dateUnavailable': 'Data não informada',
+            'messages.fillAllFields': 'Por favor, preencha todos os campos',
+            'messages.firebaseScriptsError': 'Não foi possível carregar os scripts necessários para login. Desative extensões do navegador e tente novamente.',
+            'messages.wrongRole': 'Tipo de usuário incorreto.'
+        };
+        let i18nDict = { ...I18N_FALLBACK };
 
         const LANGUAGE_CONFIG = {
             br: { locale: 'pt-BR', currency: 'BRL', file: 'i18n/pt-BR.json', prefix: 'br' },
@@ -4207,15 +4311,14 @@
             document.title = t('meta.title');
 
             const translationMap = [
-                ['.logo i', 'brand.name'],
-                ['a[data-tab="tasks"]', 'nav.tasks'],
-                ['a[data-tab="tips"]', 'nav.tips'],
-                ['a[data-tab="users"]', 'nav.users'],
-                ['a[data-tab="my-profile"]', 'journey.title'],
-                ['a[data-tab="profile-management"]', 'nav.studentProfile'],
-                ['a[data-tab="teacher-calendar"]', 'nav.teacherCalendar'],
-                ['#sidebar-logout-link', 'actions.logout'],
-                ['#nav-student-calendar', 'nav.teacherCalendar'],
+                // Só o texto (último <span>) é traduzido, para não apagar os ícones do menu
+                ['a[data-tab="tasks"] span:last-child', 'nav.tasks'],
+                ['a[data-tab="tips"] span:last-child', 'nav.tips'],
+                ['a[data-tab="users"] span:last-child', 'nav.users'],
+                ['a[data-tab="my-profile"] span:last-child', 'journey.title'],
+                ['a[data-tab="profile-management"] span:nth-child(2)', 'nav.studentProfile'],
+                ['a[data-tab="teacher-calendar"] span:last-child', 'nav.teacherCalendar'],
+                ['#sidebar-logout-link span:last-child', 'actions.logout'],
 
                 ['.login-title', 'brand.name'],
                 ['.role-option[data-role="student"] h3', 'roles.student.title'],
@@ -4224,7 +4327,7 @@
                 ['.role-option[data-role="teacher"] p', 'roles.teacher.description'],
                 ['label[for="login-email"]', 'forms.email'],
                 ['label[for="login-password"]', 'forms.password'],
-                ['#login-btn', 'actions.login'],
+                ['#login-btn span:first-child', 'actions.login'],
                 ['#teacher-tasks .card-header', 'tasks.createNewTask'],
                 ['label[for="task-title"]', 'tasks.taskTitle'],
                 ['label[for="task-description"]', 'forms.description'],
@@ -4243,12 +4346,8 @@
                 ['#teacher-tasks .tasks-title', 'tasks.yourTasks'],
                 ['#student-tasks .tasks-title', 'tasks.yourTasks'],
                 ['.tips-heading', 'tips.heading'],
-                ['.tips-subheading', 'tips.subheading'],
-                ['#teacher-tips .card-header', 'tips.addNewTip'],
                 ['label[for="tip-title"]', 'forms.title'],
                 ['label[for="tip-type"]', 'forms.type'],
-                ['label[for="tip-content"]', 'tips.descriptionRecommendation'],
-                ['#add-tip-btn', 'tips.addTip'],
                 ['#teacher-questions .card-header', 'help.studentQuestions'],
                 ['#student-questions .card-header', 'help.sendNewQuestion'],
                 ['label[for="question-title"]', 'help.subject'],
@@ -4317,8 +4416,6 @@
                 ['#task-description', 'tasks.taskDescriptionPlaceholder'],
                 ['#teacher-task-search', 'tasks.searchTask'],
                 ['#student-task-search', 'tasks.searchTask'],
-                ['#tip-title', 'tips.tipTitlePlaceholder'],
-                ['#tip-content', 'tips.tipDescriptionPlaceholder'],
                 ['#question-title', 'help.questionSummaryPlaceholder'],
                 ['#question-content', 'help.questionDetailsPlaceholder'],
                 ['#new-student-name', 'users.studentNamePlaceholder'],
@@ -4414,9 +4511,15 @@
             currentLocale = config.locale;
             currentCurrency = config.currency;
 
-            const response = await fetch(config.file);
-            i18nDict = await response.json();
-            applyI18n();
+            try {
+                const response = await fetch(config.file);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                i18nDict = { ...I18N_FALLBACK, ...(await response.json()) };
+                applyI18n();
+            } catch (error) {
+                // Sem o arquivo de tradução o app continua em português (textos do HTML)
+                console.warn('Traduções não carregadas, usando textos padrão:', error);
+            }
 
             const switcher = document.getElementById('language-switcher');
             if (switcher) {
@@ -4444,6 +4547,9 @@
                 'student-home': ['Início', 'Tudo o que você precisa para sua jornada de aprendizado.'],
                 tasks: ['Tarefas', 'Acompanhe atividades, pendências e evolução.'],
                 tips: ['Dicas', 'Conteúdos rápidos para apoiar seu aprendizado.'],
+                help: userRole === 'teacher'
+                    ? ['Dúvidas', 'Responda as dúvidas enviadas pelos alunos.']
+                    : ['Dúvidas', 'Envie suas dúvidas para a professora e acompanhe as respostas.'],
                 users: ['Cadastro de Aluno', 'Gerencie alunos e seus dados.'],
                 'my-profile': ['Minha Jornada', 'Acompanhe seu nível, evolução, metas e conquistas.'],
                 'profile-management': ['Perfil do Aluno', 'Gerencie acompanhamento, frequência e evolução.'],
@@ -4561,28 +4667,23 @@
                         document.getElementById('nav-teacher-profile').classList.remove('hidden');
                         document.getElementById('nav-teacher-calendar').classList.remove('hidden');
                         document.getElementById('nav-student-profile').classList.add('hidden');
-                    if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
                         if (navStudentCalendar) navStudentCalendar.classList.add('hidden');
                         loadStudents();
-                        loadTeacherProfiles();
                         loadTeacherRewardRequests();
-                        setActiveTab('users');
                         updateRoleUI();
                         enforceSidebarByRole();
-                        updateAppHeader('users');
+                        // O professor começa pela visão geral da turma (Tarefas)
+                        setActiveTab('tasks');
                     } else {
                         document.getElementById('nav-users').classList.add('hidden');
                         document.getElementById('nav-teacher-profile').classList.add('hidden');
                         document.getElementById('nav-teacher-calendar').classList.add('hidden');
                         document.getElementById('nav-student-profile').classList.remove('hidden');
                         if (navStudentCalendar) navStudentCalendar.classList.remove('hidden');
-                        loadMyProfile();
-                        setActiveTab('student-home');
-                        loadStudentHome();
                         updateRoleUI();
                         enforceSidebarByRole();
                         applyJourneyLabels();
-                        updateAppHeader('my-profile');
+                        setActiveTab('student-home');
                     }
 
                     // Mostrar o painel correto conforme o tipo de usuário
@@ -4619,32 +4720,7 @@
                         (userRole !== 'student' && ['student-calendar', 'student-home'].includes(tabId))) {
                         return;
                     }
-
-                    navLinks.forEach(item => item.classList.remove('active'));
-                    link.classList.add('active');
-                    tabContainers.forEach(tab => tab.classList.remove('active'));
-
-                    const targetTab = document.getElementById(tabId + '-tab');
-                    if (targetTab) targetTab.classList.add('active');
-                    if (document.body.classList.contains('sidebar-open')) {
-                        document.body.classList.remove('sidebar-open');
-                    }
-
-                    updateAppHeader(tabId);
-
-                    if (tabId === 'my-profile' && userRole === 'student') loadMyProfile();
-                    if (tabId === 'profile-management' && userRole === 'teacher') {
-                        loadTeacherProfiles();
-                        loadTeacherRewardRequests();
-                    }
-                    if (tabId === 'teacher-calendar' && userRole === 'teacher') loadTeacherLessonCalendar();
-                    if (tabId === 'student-calendar' && userRole === 'student') loadStudentLessonCalendar();
-                    if (tabId === 'student-home' && userRole === 'student') loadStudentHome();
-                    if (tabId === 'tips' && userRole === 'teacher') {
-                        document.getElementById('teacher-tips')?.classList.remove('hidden');
-                        populateTipStudentSelect();
-                    }
-                    if (tabId === 'tasks' && userRole === 'teacher') loadTeacherDashboard();
+                    setActiveTab(tabId);
                 });
             });
 
@@ -4848,8 +4924,8 @@
                             const taskRecipientItem = document.createElement('div');
                             taskRecipientItem.className = 'recipient-item';
                             taskRecipientItem.innerHTML = `
-                                <input type="checkbox" id="task-${doc.id}" value="${student.email}">
-                                <label for="task-${doc.id}">${student.name || student.email} (${student.email})</label>
+                                <input type="checkbox" id="task-${doc.id}" value="${escapeHtml(student.email || '')}">
+                                <label for="task-${doc.id}">${escapeHtml(student.name || student.email || '')} (${escapeHtml(student.email || '')})</label>
                             `;
                             taskRecipientsContainer.appendChild(taskRecipientItem);
                         }
@@ -4858,8 +4934,8 @@
                             const tipRecipientItem = document.createElement('div');
                             tipRecipientItem.className = 'recipient-item';
                             tipRecipientItem.innerHTML = `
-                                <input type="checkbox" id="tip-${doc.id}" value="${student.email}">
-                                <label for="tip-${doc.id}">${student.name || student.email} (${student.email})</label>
+                                <input type="checkbox" id="tip-${doc.id}" value="${escapeHtml(student.email || '')}">
+                                <label for="tip-${doc.id}">${escapeHtml(student.name || student.email || '')} (${escapeHtml(student.email || '')})</label>
                             `;
                             tipRecipientsContainer.appendChild(tipRecipientItem);
                         }
@@ -4888,8 +4964,8 @@
                                     <div class="student-meta">Imagem de perfil: ${student.profileImageUrl ? `<a href="${escapeHtml(student.profileImageUrl)}" target="_blank" rel="noopener noreferrer">Ver imagem</a>` : 'Não definida'}</div>
                                 </div>
                                 <div>
-                                    <button class="btn btn-outline" onclick="editStudentProfileImage('${doc.id}', ${JSON.stringify(student.profileImageUrl || '')})">Editar imagem</button>
-                                    <button class="btn btn-outline" onclick="editStudent('${doc.id}', '${student.email}')">Editar Email</button>
+                                    <button class="btn btn-outline" onclick="editStudentProfileImage('${doc.id}', ${escapeHtml(JSON.stringify(student.profileImageUrl || ''))})">Editar imagem</button>
+                                    <button class="btn btn-outline" onclick="editStudent('${doc.id}', ${escapeHtml(JSON.stringify(student.email || ''))})">Editar Email</button>
                                     <button class="btn btn-danger" style="margin-left:5px" onclick="deleteStudent('${doc.id}')">Excluir</button>
                                 </div>
                             `;
@@ -4958,7 +5034,7 @@
         }
 
         function editStudent(uid, currentEmail) {
-            const newEmail = prompt('Novo email do aluno:', currentEmail);
+            const newEmail = prompt('Novo email do aluno (atenção: isto altera apenas o cadastro; o email de LOGIN continua o antigo até ser trocado no Firebase Console):', currentEmail);
             if (!newEmail || newEmail === currentEmail) return;
 
             db.collection('users').doc(uid).update({ email: newEmail })
@@ -4997,7 +5073,7 @@
         }
 
         function deleteStudent(uid) {
-            if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
+            if (!confirm('Tem certeza que deseja excluir este aluno? O cadastro sairá do sistema, mas a conta de login só é removida pelo Firebase Console.')) return;
 
             db.collection('users').doc(uid).delete()
                 .then(() => {
@@ -5543,10 +5619,18 @@
             if (targetTab) targetTab.classList.add('active');
             if (document.body.classList.contains('sidebar-open')) document.body.classList.remove('sidebar-open');
             updateAppHeader(tabId);
+            window.scrollTo({ top: 0 });
+            if (tabId === 'my-profile' && userRole === 'student') loadMyProfile();
             if (tabId === 'student-calendar' && userRole === 'student') loadStudentLessonCalendar();
             if (tabId === 'student-home' && userRole === 'student') loadStudentHome();
             if (tabId === 'teacher-calendar' && userRole === 'teacher') loadTeacherLessonCalendar();
+            if (tabId === 'profile-management' && userRole === 'teacher') {
+                loadTeacherProfiles();
+                loadTeacherRewardRequests();
+            }
+            if (tabId === 'tips' && userRole === 'teacher') populateTipStudentSelect();
             if (tabId === 'tasks' && userRole === 'teacher') loadTeacherDashboard();
+            if (tabId === 'help') loadQuestions();
         }
 
         function formatLocalDate(dateText) {
@@ -5618,9 +5702,10 @@
         function parseLevelAndProgress(levelText = '') {
             const normalized = String(levelText || '').toUpperCase();
             const levelMatch = normalized.match(/A1|A2|B1|B2|C1|C2/);
-            const currentLevel = levelMatch ? levelMatch[0] : 'B1';
+            // Sem nível cadastrado, não inventa dados: começa em A1 com 0%
+            const currentLevel = levelMatch ? levelMatch[0] : 'A1';
             const progressMatch = normalized.match(/(\d{1,3})\s*%/);
-            const progress = progressMatch ? Math.min(100, Number(progressMatch[1])) : 70;
+            const progress = progressMatch ? Math.min(100, Number(progressMatch[1])) : 0;
             return { currentLevel, progress };
         }
 
@@ -5839,7 +5924,7 @@
                     ? memberSinceDate.toLocaleDateString(currentLocale || 'pt-BR', { month:'long', year:'numeric' })
                     : 'data não informada';
                 const journeyGoal = profileGoal || ('Chegar ao ' + nextLevel);
-                const pointsToNextRescue = Math.max(0, 500 - (totalPoints % 500 || 0));
+                const pointsToNextRescue = 500 - (totalPoints % 500);
                 const levelNames = ['A1','A2','B1','B2','C1','C2'];
 
                 container.innerHTML = `
@@ -5888,7 +5973,7 @@
                                     <div><span>🔥</span><strong>${attendancePresentDays}</strong><small>aulas com presença</small></div>
                                     <div><span>⭐</span><strong>${totalPoints}</strong><small>pontos conquistados</small></div>
                                 </div>
-                                <div class="journey-points-note">${pointsToNextRescue === 500 ? 'Mais um ciclo de 500 pontos liberado.' : 'Faltam ' + pointsToNextRescue + ' pontos para o próximo resgate do mascote.'}</div>
+                                <div class="journey-points-note">${rewardMetrics.rescuesAvailable > 0 ? 'Você tem uma evolução do mascote disponível para resgatar! 🎉' : 'Faltam ' + pointsToNextRescue + ' pontos para o próximo resgate do mascote.'}</div>
                             </article>
                         </section>
 
@@ -5920,7 +6005,7 @@
                                 <div class="journey-card-head"><div><span class="journey-kicker">MEU MASCOTE</span><h3>${latestCompletedRequest ? 'Evolução desbloqueada 🎉' : 'Continue conquistando pontos'}</h3></div><span class="journey-card-icon">🐾</span></div>
                                 <div class="journey-mascot-points"><strong>${totalPoints}</strong><span>XP</span></div>
                                 <p>Presença em aula +100 • tarefa concluída +10</p>
-                                <div class="journey-mascot-bar"><span style="width:${Math.min(100, totalPoints % 500 === 0 && totalPoints > 0 ? 100 : (totalPoints % 500) / 5)}%"></span></div>
+                                <div class="journey-mascot-bar"><span style="width:${rewardMetrics.rescuesAvailable > 0 ? 100 : (totalPoints % 500) / 5}%"></span></div>
                                 <div class="journey-mascot-actions">
                                     ${pendingRequest ? '<span class="journey-status pending">⏳ Evolução aguardando a professora</span>' : canRedeemNow ? '<button class="btn btn-accent" onclick="redeemMascotEvolution(\'' + profileSnapshot.docs[0].id + '\')">Resgatar evolução</button>' : '<span class="journey-status">Continue acumulando XP para desbloquear a próxima evolução.</span>'}
                                 </div>
@@ -6110,6 +6195,9 @@
                     return t('auth.userNotFound');
                 case 'auth/wrong-password':
                     return t('auth.wrongPassword');
+                case 'auth/invalid-credential':
+                case 'auth/invalid-login-credentials':
+                    return t('auth.invalidCredential');
                 case 'auth/invalid-email':
                     return t('auth.invalidEmail');
                 case 'auth/too-many-requests':
@@ -6147,6 +6235,7 @@
                 return;
             }
 
+            const loginBtnOriginalHtml = loginBtn.innerHTML;
             loginBtn.innerHTML = `<div class="loader"></div> ${t('actions.signingIn')}`;
             loginBtn.disabled = true;
 
@@ -6164,15 +6253,16 @@
 
                 if (selectedRole && selectedRole !== userRole) {
                     await auth.signOut();
-                    showAlert(t('messages.wrongRole'), 'error');
+                    const roleName = userRole === 'teacher' ? 'Professor' : 'Aluno';
+                    showAlert(`${t('messages.wrongRole')} Esta conta é de ${roleName}: selecione "${roleName}" e entre novamente.`, 'error');
                 }
 
-                loginBtn.innerHTML = t('actions.login');
+                loginBtn.innerHTML = loginBtnOriginalHtml;
                 loginBtn.disabled = false;
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
                 showAlert(mapAuthError(error), 'error');
-                loginBtn.innerHTML = t('actions.login');
+                loginBtn.innerHTML = loginBtnOriginalHtml;
                 loginBtn.disabled = false;
             }
         }
@@ -6188,17 +6278,6 @@
                 });
         }
         
-        // Controla aba ativa
-        function setActiveTab(tabId) {
-            navLinks.forEach(link => {
-                link.classList.toggle('active', link.dataset.tab === tabId);
-            });
-
-            tabContainers.forEach(tab => tab.classList.remove('active'));
-            const selectedTab = document.getElementById(`${tabId}-tab`);
-            if (selectedTab) selectedTab.classList.add('active');
-        }
-
         // Função para mostrar alertas
         function showAlert(message, type) {
             loginAlert.textContent = message;
@@ -6247,8 +6326,9 @@
         }
 
         function collectTaskFormData() {
-            const title = document.getElementById('task-title').value;
-            const description = document.getElementById('task-description').value;
+            const title = document.getElementById('task-title').value.trim();
+            const description = document.getElementById('task-description').value.trim();
+            const dueDate = document.getElementById('task-due-date')?.value || '';
             const type = document.querySelector('input[name="task-type"]:checked').value;
             
             if (!title || !description) {
@@ -6271,14 +6351,17 @@
                 title,
                 description,
                 type,
-                recipients
+                recipients,
+                // Fim do dia escolhido, no fuso local
+                dueDate: dueDate ? new Date(dueDate + 'T23:59:59').toISOString() : null
             };
             
             // Adiciona opções para tarefas de múltipla escolha
             if (type === 'multiple') {
                 const options = [];
                 document.querySelectorAll('.option-input').forEach(input => {
-                    if (input.value) options.push(input.value);
+                    const value = input.value.trim();
+                    if (value) options.push(value);
                 });
                 
                 if (options.length < 2) {
@@ -6289,13 +6372,6 @@
                 taskData.options = options;
             }
             
-            // Adiciona referência de áudio se existir
-            const audioFile = document.getElementById('audio-file').files[0];
-            if (type === 'audio' && audioFile) {
-                // Aqui você faria o upload para o Firebase Storage
-                // E adicionaria a URL ao taskData
-            }
-
             return taskData;
         }
 
@@ -6303,6 +6379,7 @@
             editingTaskId = null;
             document.getElementById('task-title').value = '';
             document.getElementById('task-description').value = '';
+            document.getElementById('task-due-date').value = '';
             document.getElementById('audio-file').value = '';
             document.getElementById('audio-preview').style.display = 'none';
             document.getElementById('type-text').checked = true;
@@ -6346,9 +6423,40 @@
         }
 
         // Função para criar/atualizar tarefa
-        function createTask() {
+        function toLocalDateInput(isoString) {
+            const d = new Date(isoString);
+            if (Number.isNaN(d.getTime())) return '';
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        // Envia um arquivo de áudio para o Firebase Storage e devolve a URL pública
+        async function uploadAudioFile(file, folder) {
+            if (!storage) throw new Error('Firebase Storage indisponível');
+            if (file.size > 20 * 1024 * 1024) throw new Error('Arquivo de áudio maior que 20 MB');
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const ref = storage.ref().child(`${folder}/${currentUser.uid}/${Date.now()}-${safeName}`);
+            await ref.put(file, { contentType: file.type || 'audio/mpeg' });
+            return ref.getDownloadURL();
+        }
+
+        async function createTask() {
             const taskData = collectTaskFormData();
             if (!taskData) return;
+
+            const createBtn = document.getElementById('create-task-btn');
+            const audioFile = document.getElementById('audio-file')?.files[0];
+            if (taskData.type === 'audio' && audioFile) {
+                try {
+                    if (createBtn) { createBtn.disabled = true; createBtn.textContent = 'Enviando áudio...'; }
+                    taskData.audioUrl = await uploadAudioFile(audioFile, 'task-audio');
+                } catch (error) {
+                    console.error('Erro ao enviar áudio de referência:', error);
+                    alert('Não foi possível enviar o áudio de referência. Verifique o arquivo e as regras do Firebase Storage.');
+                    if (createBtn) { createBtn.disabled = false; createBtn.textContent = editingTaskId ? 'Salvar Alterações' : 'Criar Tarefa'; }
+                    return;
+                }
+            }
+            if (createBtn) createBtn.disabled = false;
 
             const finalTaskData = {
                 ...taskData,
@@ -6398,6 +6506,8 @@
                     editingTaskId = taskId;
                     document.getElementById('task-title').value = task.title || '';
                     document.getElementById('task-description').value = task.description || '';
+                    const due = getTaskDueDate(task);
+                    document.getElementById('task-due-date').value = due ? toLocalDateInput(due) : '';
 
                     const selectedType = task.type || 'text';
                     const typeRadio = document.querySelector(`input[name="task-type"][value="${selectedType}"]`);
@@ -6413,7 +6523,7 @@
                         optionItem.className = 'option-item';
                         optionItem.style = 'display:flex;margin-bottom:8px';
                         optionItem.innerHTML = `
-                            <input type="text" class="form-control option-input" placeholder="Opção ${index + 1}" value="${option}">
+                            <input type="text" class="form-control option-input" placeholder="Opção ${index + 1}" value="${escapeHtml(option)}">
                             <button class="btn btn-outline" style="margin-left:10px" onclick="removeOption(this)">Remover</button>
                         `;
                         optionsList.appendChild(optionItem);
@@ -6510,8 +6620,8 @@
 
         // Função para enviar uma dúvida
         function sendQuestion() {
-            const title = document.getElementById('question-title').value;
-            const content = document.getElementById('question-content').value;
+            const title = document.getElementById('question-title').value.trim();
+            const content = document.getElementById('question-content').value.trim();
             
             if (!title || !content) {
                 alert('Por favor, preencha título e conteúdo da dúvida');
@@ -6596,7 +6706,8 @@
 
                 const taskEntries = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const responsesByTaskAndStudent = await fetchResponsesByTaskAndStudent(taskEntries.map(task => task.id));
-                const responses = Object.values(responsesByTaskAndStudent);
+                // O mapa guarda a mesma resposta sob várias chaves (email, id, nome): remove duplicadas
+                const responses = Array.from(new Set(Object.values(responsesByTaskAndStudent)));
                 const pendingTasks = taskEntries.reduce((total, task) => {
                     return total + (task.recipients || []).filter(email =>
                         !findResponseForTaskRecipient(responsesByTaskAndStudent, task.id, email, { email })
@@ -6766,28 +6877,33 @@
                     .where('studentId', '==', currentUser.uid)
                     .get();
 
-                const answeredTaskIds = new Set();
+                const responsesByTask = {};
                 responsesSnapshot.forEach(doc => {
                     const response = doc.data() || {};
-                    if (response.taskId) answeredTaskIds.add(response.taskId);
+                    if (response.taskId) responsesByTask[response.taskId] = { id: doc.id, ...response };
                 });
 
                 let total = 0;
                 let completed = 0;
+                let overdue = 0;
 
                 querySnapshot.forEach(doc => {
                     total += 1;
                     const task = doc.data() || {};
-                    const status = answeredTaskIds.has(doc.id) ? 'completed' : 'pending';
+                    const response = responsesByTask[doc.id] || null;
+                    const dueDate = getTaskDueDate(task);
+                    const isOverdue = !response && dueDate && new Date(dueDate).getTime() < Date.now();
+                    const status = response ? 'completed' : (isOverdue ? 'overdue' : 'pending');
                     if (status === 'completed') completed += 1;
-                    container.appendChild(createTaskElement(task, doc.id, status));
+                    if (status === 'overdue') overdue += 1;
+                    container.appendChild(createTaskElement(task, doc.id, status, response));
                 });
 
                 updateTaskSummary({
                     total,
                     completed,
                     pending: total - completed,
-                    overdue: 0
+                    overdue
                 });
 
                 setupTaskSearch();
@@ -6933,10 +7049,6 @@
                     row.status === 'overdue' ? 'Atrasada' :
                     'Pendente';
 
-                const icon =
-                    row.status === 'completed' ? '🟢' :
-                    row.status === 'overdue' ? '🔴' :
-                    '🟡';
 
                 const title = escapeHtml(row.task?.title || 'Sem título');
                 const description = escapeHtml(
@@ -6951,7 +7063,7 @@
                 return '<div class="teacher-task-row" data-task-id="' + escapeHtml(row.id) + '">' +
                     '<div class="teacher-task-status ' + row.status + '">' +
                         '<span class="status-dot"></span>' +
-                        icon + ' ' + statusLabel +
+                        statusLabel +
                     '</div>' +
                     '<div class="teacher-task-main">' +
                         '<strong>' + title + '</strong>' +
@@ -6972,7 +7084,7 @@
                         + escapeHtml(row.studentEmail || '') +
                         '\')">✓</button>' +
                         '<button class="teacher-task-action-btn delete" type="button" title="Excluir tarefa" aria-label="Excluir tarefa" onclick="deleteTask(\'' + escapeHtml(row.id) + '\', ' +
-                        JSON.stringify(row.task?.recipients || []) +
+                        escapeHtml(JSON.stringify(row.task?.recipients || [])) +
                         ')">🗑</button>' +
                     '</div>' +
                 '</div>';
@@ -7021,7 +7133,7 @@
                     (response
                         ? '<div class="task-response teacher-correction-response"><span class="task-response-label">Resposta do aluno</span><p class="preserved-text">' +
                             preserveText(response.response || 'Sem conteúdo') +
-                            '</p>' +
+                            '</p>' + buildResponseMediaHtml(response) +
                             (response.submittedAt ? '<div class="task-response-meta">Enviada em: ' + formatDate(response.submittedAt) + '</div>' : '') +
                           '</div>'
                         : '<div class="about-highlight">O aluno ainda não enviou uma resposta. Você pode marcar a tarefa como concluída manualmente.</div>') +
@@ -7034,7 +7146,7 @@
                     '<div class="task-actions"><button class="btn btn-accent" type="button" id="teacher-correction-save-btn">✓ Corrigir e Concluir</button></div>' +
                 '</div>';
 
-                document.getElementById('teacher-correction-save-btn')?.addEventListener('click', () => saveTeacherCorrection(taskId, response));
+                document.getElementById('teacher-correction-save-btn')?.addEventListener('click', () => saveTeacherCorrection(taskId, response, studentEmail));
                 responseModal.style.display = 'flex';
             } catch (error) {
                 console.error('Erro ao abrir correção da tarefa:', error);
@@ -7042,17 +7154,14 @@
             }
         }
 
-        async function saveTeacherCorrection(taskId, existingResponse = null) {
+        async function saveTeacherCorrection(taskId, existingResponse = null, studentEmail = '') {
             const grade = Math.max(0, Math.min(100, Number(document.getElementById('teacher-correction-grade')?.value || 0)));
             const feedback = String(document.getElementById('teacher-correction-feedback')?.value || '').trim();
 
             try {
-                let responseRef = existingResponse?.id ? db.collection('responses').doc(existingResponse.id) : null;
-
-                if (!responseRef) {
-                    const snapshot = await db.collection('responses').where('taskId', '==', taskId).limit(1).get();
-                    if (!snapshot.empty) responseRef = snapshot.docs[0].ref;
-                }
+                // Só atualiza a resposta DESTE aluno. Antes, sem resposta, era corrigida a
+                // primeira resposta de qualquer aluno da mesma tarefa.
+                const responseRef = existingResponse?.id ? db.collection('responses').doc(existingResponse.id) : null;
 
                 const payload = {
                     grade,
@@ -7069,13 +7178,19 @@
                 if (responseRef) {
                     await responseRef.update(payload);
                 } else {
+                    if (!studentEmail) {
+                        alert('Não foi possível identificar o aluno desta tarefa.');
+                        return;
+                    }
+                    const studentSnapshot = await db.collection('users').where('email', '==', studentEmail).limit(1).get();
+                    const studentId = studentSnapshot.empty ? '' : studentSnapshot.docs[0].id;
                     await db.collection('responses').add({
                         ...payload,
                         taskId,
-                        studentId: '',
-                        studentEmail: '',
-                        studentName: '',
-                        response: '',
+                        studentId,
+                        studentEmail,
+                        studentName: studentEmail,
+                        response: 'Concluída manualmente pela professora',
                         submittedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -7155,49 +7270,82 @@
             return responsesMap;
         }
 
+        function getTaskTypeLabel(type) {
+            if (type === 'audio') return '🎤 Áudio';
+            if (type === 'multiple') return '☑ Múltipla escolha';
+            return '✍ Texto';
+        }
+
+        function formatShortDate(value) {
+            if (!value) return '';
+            const date = typeof value.toDate === 'function' ? value.toDate() : new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleDateString(currentLocale, { day: '2-digit', month: 'short' });
+        }
+
+        function buildResponseMediaHtml(response) {
+            if (!response) return '';
+            const audio = response.audioUrl && isValidHttpUrl(response.audioUrl)
+                ? `<audio class="audio-player" controls src="${escapeHtml(response.audioUrl)}"></audio>`
+                : '';
+            return audio;
+        }
+
         function createTaskElement(task, taskId, status = 'pending', response = null) {
             const taskElement = document.createElement('div');
-            taskElement.className = 'task-item';
+            taskElement.className = 'task-item task-item-' + status;
 
             let optionsHtml = '';
-            if (task.type === 'multiple' && task.options) {
-                optionsHtml = '<div><strong>Opções:</strong><ul>';
-                task.options.forEach(option => {
-                    optionsHtml += `<li>${option}</li>`;
-                });
-                optionsHtml += '</ul></div>';
+            if (task.type === 'multiple' && Array.isArray(task.options)) {
+                optionsHtml = '<div class="task-options"><strong>Opções:</strong><ul>' +
+                    task.options.map(option => `<li>${escapeHtml(option)}</li>`).join('') +
+                    '</ul></div>';
             }
 
             let responseHtml = '';
-            if (userRole === 'teacher' && response) {
+            if (response) {
+                const hasGrade = response.corrected && response.grade !== undefined && response.grade !== null;
+                const feedback = response.teacherFeedback || response.feedback || '';
                 responseHtml = `
                     <div class="task-response">
-                        <span class="task-response-label">Resposta do aluno</span>
+                        <span class="task-response-label">${userRole === 'student' ? 'Sua resposta' : 'Resposta do aluno'}</span>
                         <p class="preserved-text">${preserveText(response.response || 'Sem conteúdo')}</p>
+                        ${buildResponseMediaHtml(response)}
                         <div class="task-response-meta">Enviada em: ${formatDate(response.submittedAt)}</div>
                     </div>
+                    ${hasGrade || feedback ? `
+                    <div class="task-feedback">
+                        <span class="task-response-label">Correção da professora</span>
+                        ${hasGrade ? `<div class="task-grade">Nota: <strong>${escapeHtml(response.grade)}</strong>/100</div>` : ''}
+                        ${feedback ? `<p class="preserved-text">${preserveText(feedback)}</p>` : ''}
+                    </div>` : (userRole === 'student' ? '<div class="task-feedback pending">⏳ Aguardando correção da professora.</div>' : '')}
                 `;
             }
+
+            const referenceAudio = task.audioUrl && isValidHttpUrl(task.audioUrl)
+                ? `<div class="task-reference-audio"><span class="task-response-label">Áudio de referência</span><audio class="audio-player" controls src="${escapeHtml(task.audioUrl)}"></audio></div>`
+                : '';
+            const dueDate = getTaskDueDate(task);
+            const dueHtml = dueDate ? `<span>⏰ Entrega: ${escapeHtml(formatShortDate(dueDate))}</span>` : '';
 
             taskElement.innerHTML = `
                 <div class="task-header">
                     <span class="task-status ${status}">${getTaskStatusLabel(status)}</span>
-                    <span>📅 ${formatDate(task.createdAt)}</span>
+                    <span class="task-date">📅 ${escapeHtml(formatShortDate(task.createdAt))}</span>
                 </div>
-                <div class="task-title">${task.title}</div>
+                <div class="task-title">${escapeHtml(task.title || 'Tarefa')}</div>
                 <div class="task-meta">
-                    <span>Professor: ${task.createdByName || 'Professor'}</span>
-                    <span>Tipo: ${task.type || 'texto'}</span>
+                    <span>${getTaskTypeLabel(task.type)}</span>
+                    ${dueHtml}
                 </div>
                 <p class="preserved-text">${preserveText(task.description)}</p>
+                ${referenceAudio}
                 ${optionsHtml}
                 ${responseHtml}
+                ${userRole === 'student' && !response ? `
                 <div class="task-actions">
-                    ${userRole === 'student'
-                        ? `<button class="btn btn-primary" onclick="openResponseModal('${taskId}', '${task.type}')">${status === 'completed' ? 'Responder Novamente' : 'Responder'}</button>`
-                        : `<button class="btn btn-outline" onclick="editTask('${taskId}')">Corrigir Tarefa</button>
-                           <button class="btn btn-danger" onclick='deleteTask("${taskId}", ${JSON.stringify(task.recipients || [])})'>Excluir Tarefa</button>`}
-                </div>
+                    <button class="btn btn-primary" onclick="openResponseModal('${escapeHtml(taskId)}', '${escapeHtml(task.type || 'text')}')">Responder</button>
+                </div>` : ''}
             `;
 
             return taskElement;
@@ -7265,23 +7413,23 @@
                 } else if (type === 'audio') {
                     formHtml = `
                         <div class="form-group">
-                            <label>Gravar ou enviar áudio</label>
+                            <label>Enviar áudio</label>
                             <div class="file-upload" id="response-audio-upload">
                                 <i>🎤</i>
-                                <span>Clique para gravar ou enviar áudio</span>
+                                <span>Clique para escolher o arquivo de áudio</span>
                                 <input type="file" id="response-audio-file" accept="audio/*" style="display:none">
                             </div>
                             <audio id="response-audio-preview" class="audio-player" controls style="display:none; margin-top:15px"></audio>
                         </div>
-                        <button class="btn btn-accent" onclick="submitAudioResponse()">Enviar Resposta</button>
+                        <button class="btn btn-accent" onclick="submitAudioResponse(this)">Enviar Resposta</button>
                     `;
                 } else if (type === 'multiple') {
                     let optionsHtml = '';
-                    task.options.forEach((option, index) => {
+                    (task.options || []).forEach((option, index) => {
                         optionsHtml += `
                             <div class="radio-item">
-                                <input type="radio" id="option-${index}" name="response-option" value="${option}">
-                                <label for="option-${index}">${option}</label>
+                                <input type="radio" id="option-${index}" name="response-option" value="${escapeHtml(option)}">
+                                <label for="option-${index}">${escapeHtml(option)}</label>
                             </div>
                         `;
                     });
@@ -7297,8 +7445,12 @@
                     `;
                 }
                 
+                const referenceAudio = task.audioUrl && isValidHttpUrl(task.audioUrl)
+                    ? `<div class="task-reference-audio"><span class="task-response-label">Áudio de referência</span><audio class="audio-player" controls src="${escapeHtml(task.audioUrl)}"></audio></div>`
+                    : '';
                 modalContent.innerHTML = `
                     <p class="preserved-text">${preserveText(task.description)}</p>
+                    ${referenceAudio}
                     <div style="margin-top:20px">
                         ${formHtml}
                     </div>
@@ -7334,10 +7486,22 @@
             saveResponse(response);
         }
         
-        function submitAudioResponse() {
-            // Implementar upload de áudio
-            alert('Resposta de áudio enviada!');
-            saveResponse('Áudio enviado');
+        async function submitAudioResponse(button) {
+            const file = document.getElementById('response-audio-file')?.files[0];
+            if (!file) {
+                alert('Selecione um arquivo de áudio antes de enviar.');
+                return;
+            }
+            try {
+                if (button) { button.disabled = true; button.textContent = 'Enviando áudio...'; }
+                const audioUrl = await uploadAudioFile(file, 'response-audio');
+                await saveResponse('Resposta em áudio', { audioUrl });
+            } catch (error) {
+                console.error('Erro ao enviar áudio:', error);
+                alert('Não foi possível enviar o áudio. Tente novamente.');
+            } finally {
+                if (button) { button.disabled = false; button.textContent = 'Enviar Resposta'; }
+            }
         }
         
         function submitMultipleChoiceResponse() {
@@ -7350,7 +7514,7 @@
             saveResponse(selectedOption.value);
         }
         
-        async function saveResponse(response) {
+        async function saveResponse(response, extra = {}) {
             try {
                 const existing = await db.collection('responses')
                     .where('taskId', '==', currentTaskId)
@@ -7368,7 +7532,9 @@
                     taskId: currentTaskId,
                     studentId: currentUser.uid,
                     studentName: currentUser.email,
+                    studentEmail: currentUser.email,
                     response: response,
+                    ...extra,
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -7488,7 +7654,7 @@
                 '<div class="tips-meta-row"><span>📚 '+escapeHtml(tip.subject||'Inglês')+'</span><span>📅 '+formatDate(tip.createdAt)+'</span><span>👩‍🏫 '+escapeHtml(tip.createdByName||'Professora')+'</span></div>' +
                 '<div class="tips-featured-actions">'+
                 (tip.link && isValidHttpUrl(tip.link) ? '<a class="tips-open-btn" href="'+escapeHtml(tip.link)+'" target="_blank" rel="noopener">'+getTipActionLabel(tip.type)+' →</a>' : '<span class="tips-no-link">Conteúdo recomendado pela professora</span>')+
-                (userRole==='teacher' ? '<button class="tips-delete-btn" onclick="deleteTip(\''+tipId+'\', '+JSON.stringify(tip.recipients||[])+')">Excluir</button>' : '')+
+                (userRole==='teacher' ? '<button class="tips-delete-btn" onclick="deleteTip(\''+tipId+'\', '+escapeHtml(JSON.stringify(tip.recipients||[]))+')">Excluir</button>' : '')+
                 '</div></div>';
             return featured;
         }
@@ -7561,7 +7727,13 @@
                     .then(querySnapshot => {
                         const container = document.getElementById('questions-list');
                         container.innerHTML = '';
-                        
+                        const unanswered = querySnapshot.docs.filter(d => !d.data().answered).length;
+                        const badge = document.getElementById('questions-badge');
+                        if (badge) {
+                            badge.textContent = String(unanswered);
+                            badge.classList.toggle('hidden', unanswered === 0);
+                        }
+
                         if (querySnapshot.empty) {
                             container.innerHTML = '<p style="padding:20px; text-align:center">Nenhuma dúvida encontrada.</p>';
                             return;
@@ -7572,6 +7744,11 @@
                             const questionElement = createQuestionElementForTeacher(question, doc.id);
                             container.appendChild(questionElement);
                         });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar dúvidas:', error);
+                        const container = document.getElementById('questions-list');
+                        if (container) container.innerHTML = '<p style="padding:20px; text-align:center">Não foi possível carregar as dúvidas.</p>';
                     });
             } else {
                 // Aluno vê suas próprias dúvidas
@@ -7593,6 +7770,11 @@
                             const questionElement = createQuestionElementForStudent(question);
                             container.appendChild(questionElement);
                         });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar dúvidas:', error);
+                        const container = document.getElementById('student-questions-list');
+                        if (container) container.innerHTML = '<p style="padding:20px; text-align:center">Não foi possível carregar suas dúvidas.</p>';
                     });
             }
         }
@@ -7606,7 +7788,7 @@
                 answerHtml = `
                     <div class="answer-card">
                         <strong>Resposta:</strong> <span class="preserved-text">${preserveText(question.answer)}</span>
-                        <div class="task-meta">Respondido por: ${question.answeredBy} em ${formatDate(question.answeredAt)}</div>
+                        <div class="task-meta">Respondido por: ${escapeHtml(question.answeredBy || 'Professor')} em ${formatDate(question.answeredAt)}</div>
                     </div>
                 `;
             } else {
@@ -7620,8 +7802,8 @@
             }
             
             questionElement.innerHTML = `
-                <div class="help-question">${question.title}</div>
-                <div class="task-meta">Aluno: ${question.studentName} - ${formatDate(question.createdAt)}</div>
+                <div class="help-question">${escapeHtml(question.title || '')}</div>
+                <div class="task-meta">Aluno: ${escapeHtml(question.studentName || '')} - ${formatDate(question.createdAt)}</div>
                 <p class="preserved-text">${preserveText(question.content)}</p>
                 ${answerHtml}
             `;
@@ -7646,7 +7828,7 @@
             }
             
             questionElement.innerHTML = `
-                <div class="help-question">${question.title}</div>
+                <div class="help-question">${escapeHtml(question.title || '')}</div>
                 <div class="task-meta">Enviado em: ${formatDate(question.createdAt)}</div>
                 <p class="preserved-text">${preserveText(question.content)}</p>
                 ${answerHtml}
